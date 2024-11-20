@@ -1,13 +1,13 @@
-import { UseFormRegister, FieldError } from "react-hook-form";
+import { UseFormRegister, FieldError } from "react-hook-form"
 
 interface FormFieldProps {
-  label: string;
-  id: string;
-  register: ReturnType<UseFormRegister<any>>;
-  error?: FieldError;
-  type?: "text" | "number" | "select";
-  options?: { value: string | number; label: string }[];
-  step?: string; // Adicionando a propriedade 'step' para inputs numéricos
+  label: string
+  id: string
+  register: ReturnType<UseFormRegister<any>>
+  error?: FieldError
+  type?: "text" | "number" | "select"
+  options?: { value: string | number; label: string }[]
+  step?: string
 }
 
 const FormField: React.FC<FormFieldProps> = ({
@@ -52,7 +52,7 @@ const FormField: React.FC<FormFieldProps> = ({
         <span className="text-red-500 text-sm">{error.message}</span>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default FormField;
+export default FormField

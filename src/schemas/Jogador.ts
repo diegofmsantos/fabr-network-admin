@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod'
 
 export const EstatisticasSchema = z.object({
   passe: z.object({
@@ -55,13 +55,14 @@ export const EstatisticasSchema = z.object({
     punts: z.number().optional(),
     jardas_de_punt: z.number().optional(),
   }).optional(),
-});
+})
 
 export const JogadorSchema = z.object({
   id: z.number().optional(),
   nome: z.string().optional(),
   time: z.string().optional(),
   timeId: z.number().optional(),
+  timeFormador: z.string().optional(),
   posicao: z.string().optional(),
   setor: z.enum(["Ataque", "Defesa", "Special"]).optional(),
   experiencia: z.number().optional(),
@@ -75,4 +76,4 @@ export const JogadorSchema = z.object({
   nacionalidade: z.string().optional(),
   camisa: z.string().optional(),
   estatisticas: EstatisticasSchema.optional(),
-});
+})

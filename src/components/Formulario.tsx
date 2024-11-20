@@ -4,16 +4,17 @@ import { useForm, SubmitHandler, FieldError } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useEffect, useState } from "react"
-import { Time } from "../../types/time"
+import { Time } from "../types/time"
 import { TimeSchema } from "@/schemas/Time"
 import { JogadorSchema } from "@/schemas/Jogador"
 import { api, getTimes } from "@/api/api"
 import FormField from "@/components/FormField"
+import get from "lodash/get"
 
 type TimeFormData = z.infer<typeof TimeSchema>
 type JogadorFormData = z.infer<typeof JogadorSchema>
 
-export default function TimeAndJogadorForm() {
+export default function Formulario() {
     const {
         register,
         handleSubmit,
@@ -28,42 +29,75 @@ export default function TimeAndJogadorForm() {
         formState: { errors: jogadorErrors },
     } = useForm<JogadorFormData>({
         resolver: zodResolver(JogadorSchema),
+        defaultValues: {
+            estatisticas: {
+                passe: {},
+                corrida: {},
+                recepcao: {},
+                retorno: {},
+                defesa: {},
+                kicker: {},
+                punter: {},
+            },
+        },
     })
 
     const [times, setTimes] = useState<Time[]>([])
     const [loading, setLoading] = useState(true)
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     // Fetch dos times quando o componente é montado
     useEffect(() => {
         const fetchTimes = async () => {
             try {
-                const data = await getTimes();
+                const data = await getTimes()
                 setTimes(data)
             } catch (error) {
                 console.error("Erro ao buscar os times:", error)
             } finally {
-                setLoading(false);
+                setLoading(false)
             }
         }
-
         fetchTimes()
     }, [])
 
+    const removeEmptyFields = (obj: any) => {
+        return Object.fromEntries(
+            Object.entries(obj).filter(([_, value]) => value !== undefined && value !== "")
+        )
+    }
+
     const onSubmitTime: SubmitHandler<TimeFormData> = async (data) => {
         try {
-            await api.post("/time", data);
-            console.log("Time inserido com sucesso");
+            await api.post("/time", data)
         } catch (error) {
-            console.error("Erro ao inserir o time", error);
+            console.error("Erro ao adicionar time:", error)
         }
     }
 
     const onSubmitJogador: SubmitHandler<JogadorFormData> = async (data) => {
+        setIsSubmitting(true)
+
         try {
-            await api.post("/jogador", data);
-            console.log("Jogador inserido com sucesso");
+            // Filtrar estatísticas não preenchidas
+            const estatisticasFiltradas = Object.fromEntries(
+                Object.entries(data.estatisticas || {}).map(([group, stats]) => [
+                    group,
+                    removeEmptyFields(stats || {}),
+                ])
+            )
+
+            const jogadorData = {
+                ...data,
+                estatisticas: estatisticasFiltradas,
+            }
+
+            await api.post("/jogador", jogadorData)
+
         } catch (error) {
-            console.error("Erro ao inserir o jogador", error);
+            console.error("Erro ao adicionar jogador:", error)
+        } finally {
+            setIsSubmitting(false)
         }
     }
 
@@ -86,10 +120,9 @@ export default function TimeAndJogadorForm() {
     ]
 
     // Definindo os campos do Jogador
-    // Definindo os campos do Jogador
     const camposJogador: Array<{ id: keyof JogadorFormData; label: string; type?: string; options?: { value: string; label: string }[] }> = [
         { id: "nome", label: "Nome do Jogador" },
-        { id: "time", label: "Time Formador" },
+        { id: "timeFormador", label: "Time Formador" },
         { id: "posicao", label: "Posição" },
         {
             id: "setor",
@@ -107,8 +140,6 @@ export default function TimeAndJogadorForm() {
         { id: "instagram2", label: "@" },
         { id: "camisa", label: "Camisa" },
     ]
-
-
 
     // Definindo os campos numéricos do Jogador
     const camposNumericosJogador: Array<{ id: keyof JogadorFormData; label: string; type: "number" }> = [
@@ -197,7 +228,6 @@ export default function TimeAndJogadorForm() {
         },
     ]
 
-
     return (
         <div className="p-8 mx-auto">
             <div className="text-4xl font-bold text-center mb-2">Time</div>
@@ -217,7 +247,7 @@ export default function TimeAndJogadorForm() {
                 ))}
 
                 {/* Campos de Títulos */}
-                {(["nacionais", "regionais", "estaduais"] as const).map((titulo) => (
+                {(["nacionais", "conferencias", "estaduais"] as const).map((titulo) => (
                     <FormField
                         key={`titulos.0.${titulo}`}
                         label={`Títulos ${titulo.charAt(0).toUpperCase() + titulo.slice(1)}`}
@@ -248,7 +278,7 @@ export default function TimeAndJogadorForm() {
                             error={jogadorErrors.timeId as FieldError | undefined}
                             type="select"
                             options={times
-                                .filter((time) => time.id !== undefined && time.nome !== undefined) // Filtrar apenas os times com valores definidos
+                                .filter((time) => time.id !== undefined && time.nome !== undefined)
                                 .map((time) => ({ value: time.id as number, label: time.nome as string }))}
                         />
 
@@ -260,7 +290,7 @@ export default function TimeAndJogadorForm() {
                                 id={field.id}
                                 register={registerJogador(field.id)}
                                 error={jogadorErrors[field.id] as FieldError | undefined}
-                                type={field.type === "number" || field.type === "select" ? field.type : "text"} // Ajuste para garantir que o tipo seja válido
+                                type={field.type === "number" || field.type === "select" ? field.type : "text"}
                                 options={field.options}
                             />
                         ))}
@@ -272,11 +302,11 @@ export default function TimeAndJogadorForm() {
                                 label={field.label}
                                 id={field.id}
                                 register={registerJogador(field.id, {
-                                    setValueAs: (v) => (v === "" ? undefined : parseFloat(v)), // Converter valores em float
+                                    setValueAs: (v) => (v === "" ? undefined : parseFloat(v)),
                                 })}
                                 error={jogadorErrors[field.id] as FieldError | undefined}
                                 type="number"
-                                step={field.id === "altura" ? "0.01" : "1"} // Garantir que altura aceite valores float
+                                step={field.id === "altura" ? "0.01" : "1"}
                             />
                         ))}
 
@@ -291,24 +321,31 @@ export default function TimeAndJogadorForm() {
                                     <FormField
                                         key={field.id}
                                         label={field.label}
-                                        id={field.id}
-                                        register={registerJogador(field.id as keyof JogadorFormData, {
-                                            setValueAs: (v) => (v === "" ? undefined : Number(v)),
-                                        })}
-                                        error={jogadorErrors[field.id as keyof JogadorFormData] as FieldError | undefined}
-                                        type={field.type === "string" ? "text" : "number"} // Ajustando para garantir que seja "text" ou "number"
+                                        id={`estatisticas.${grupo.group}.${field.id}`}
+                                        register={registerJogador(
+                                            `estatisticas.${grupo.group}.${field.id}` as keyof JogadorFormData,
+                                            {
+                                                setValueAs: (v) => (v === "" ? undefined : field.type === "string" ? v : Number(v)),
+                                            }
+                                        )}
+                                        error={get(jogadorErrors, `estatisticas.${grupo.group}.${field.id}`) as FieldError | undefined}
+                                        type={field.type === "string" ? "text" : "number"}
                                     />
                                 ))}
                             </div>
                         ))}
-
                     </div>
 
-                    <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded w-60 h-14 text-lg font-bold">
-                        Adicionar Jogador
+                    <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className={`bg-green-500 text-white px-4 py-2 rounded w-60 h-14 text-lg font-bold ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
+                    >
+                        {isSubmitting ? "Enviando..." : "Adicionar Jogador"}
                     </button>
+
                 </form>
             )}
         </div>
-    );
+    )
 }

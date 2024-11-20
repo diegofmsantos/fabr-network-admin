@@ -2,7 +2,7 @@ import { Jogador } from "./jogador"
 
 type Titulos = {
   nacionais?: string
-  regionais?: string
+  conferencias?: string
   estaduais?: string
 }
 
@@ -23,6 +23,5 @@ export type Time = {
   coord_ofen?: string
   coord_defen?: string
   titulos?: Titulos[]
-  brasileirao?: boolean
   jogadores?: Jogador[]
 }
