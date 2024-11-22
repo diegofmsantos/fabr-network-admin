@@ -10,6 +10,7 @@ import { JogadorSchema } from "@/schemas/Jogador"
 import { api, getTimes } from "@/api/api"
 import FormField from "@/components/FormField"
 import get from "lodash/get"
+import { Tabela } from "./Tabela"
 
 type TimeFormData = z.infer<typeof TimeSchema>
 type JogadorFormData = z.infer<typeof JogadorSchema>
@@ -173,7 +174,7 @@ export default function Formulario() {
             ],
         },
         {
-            group: "recepcao",
+            group: "recepção",
             fields: [
                 { id: "recepcoes", label: "Recepções", type: "number" },
                 { id: "alvo", label: "Alvo", type: "number" },
@@ -229,12 +230,12 @@ export default function Formulario() {
     ]
 
     return (
-        <div className="p-8 mx-auto">
+        <div className="p-4 overflow-x-hidden">
             <div className="text-4xl font-bold text-center mb-2">Time</div>
             {/* Formulário de Time */}
             <form
                 onSubmit={handleSubmit(onSubmitTime)}
-                className="mb-8 p-4 flex justify-between flex-wrap gap-6 min-w-[1100px] bg-slate-300"
+                className="mb-8 p-4 bg-slate-200 grid grid-cols-6"
             >
                 {camposTime.map((field) => (
                     <FormField
@@ -257,7 +258,7 @@ export default function Formulario() {
                     />
                 ))}
 
-                <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded m-auto w-60 h-14 text-lg font-bold">
+                <button type="submit" className="bg-blue-500 text-white w-60 h-10 text-lg font-bold mt-5 rounded-md">
                     Adicionar Time
                 </button>
             </form>
@@ -266,8 +267,8 @@ export default function Formulario() {
             {loading ? (
                 <div>Carregando times...</div>
             ) : (
-                <form onSubmit={handleSubmitJogador(onSubmitJogador)} className="p-4 min-w-[800px] bg-slate-300">
-                    <div className="grid grid-cols-4 gap-6">
+                <form onSubmit={handleSubmitJogador(onSubmitJogador)} className="p-4 min-w-[800px] bg-slate-200">
+                    <div className="grid grid-cols-6 mb-8">
                         {/* Campo de Seleção do Time */}
                         <FormField
                             label="Time"
@@ -309,10 +310,9 @@ export default function Formulario() {
                                 step={field.id === "altura" ? "0.01" : "1"}
                             />
                         ))}
-
                     </div>
 
-                    <div className="grid grid-cols-4 gap-6">
+                    <div className="grid grid-cols-7">
                         {/* Estatísticas do Jogador */}
                         {estatisticas.map((grupo) => (
                             <div key={grupo.group} className="">
@@ -339,13 +339,14 @@ export default function Formulario() {
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className={`bg-green-500 text-white px-4 py-2 rounded w-60 h-14 text-lg font-bold ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
+                        className={`bg-green-500 text-white w-60 h-10 text-lg font-bold rounded-md ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
                     >
                         {isSubmitting ? "Enviando..." : "Adicionar Jogador"}
                     </button>
 
                 </form>
             )}
+            <Tabela />
         </div>
     )
 }
