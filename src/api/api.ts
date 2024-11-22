@@ -59,3 +59,14 @@ export const addJogador = async (data: Omit<Jogador, 'id'>): Promise<Jogador> =>
         throw new Error('Falha ao adicionar jogador')
     }
 }
+
+export const atualizarJogador = async (data: Jogador): Promise<Jogador> => {
+    try {
+        const response = await api.put(`/jogador/${data.id}`, data);
+        return response.data;
+    } catch (error) {
+        console.error(`Erro ao atualizar o jogador com ID ${data.id}:`, error);
+        throw new Error('Falha ao atualizar jogador');
+    }
+};
+

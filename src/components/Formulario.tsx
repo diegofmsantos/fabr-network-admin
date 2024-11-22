@@ -10,7 +10,8 @@ import { JogadorSchema } from "@/schemas/Jogador"
 import { api, getTimes } from "@/api/api"
 import FormField from "@/components/FormField"
 import get from "lodash/get"
-import { Tabela } from "./Tabela"
+import ModalTime from "@/components/ModalTime"; 
+import ModalJogador from "@/components/ModalJogador"; 
 
 type TimeFormData = z.infer<typeof TimeSchema>
 type JogadorFormData = z.infer<typeof JogadorSchema>
@@ -46,6 +47,10 @@ export default function Formulario() {
     const [times, setTimes] = useState<Time[]>([])
     const [loading, setLoading] = useState(true)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [selectedTime, setSelectedTime] = useState<Time | null>(null); // Time selecionado
+    const [selectedJogador, setSelectedJogador] = useState<any | null>(null); // Jogador selecionado
+    const [isTimeModalOpen, setIsTimeModalOpen] = useState(false); // Estado do modal de Time
+    const [isJogadorModalOpen, setIsJogadorModalOpen] = useState(false); // Estado do modal de Jogador
 
     // Fetch dos times quando o componente é montado
     useEffect(() => {
@@ -77,7 +82,7 @@ export default function Formulario() {
     }
 
     const onSubmitJogador: SubmitHandler<JogadorFormData> = async (data) => {
-        setIsSubmitting(true)
+        setIsSubmitting(true);
 
         try {
             // Filtrar estatísticas não preenchidas
@@ -86,21 +91,25 @@ export default function Formulario() {
                     group,
                     removeEmptyFields(stats || {}),
                 ])
-            )
+            );
+
+            // Adicionar log para verificar o processamento do grupo 'recepção'
+            console.log('Estatísticas antes do envio:', estatisticasFiltradas);
 
             const jogadorData = {
                 ...data,
                 estatisticas: estatisticasFiltradas,
-            }
+            };
 
-            await api.post("/jogador", jogadorData)
+            await api.post("/jogador", jogadorData);
 
+            console.log("Jogador enviado com sucesso:", jogadorData);
         } catch (error) {
-            console.error("Erro ao adicionar jogador:", error)
+            console.error("Erro ao adicionar jogador:", error);
         } finally {
-            setIsSubmitting(false)
+            setIsSubmitting(false);
         }
-    }
+    };
 
     // Definindo os campos do Time
     const camposTime: Array<{ id: keyof TimeFormData; label: string }> = [
@@ -174,7 +183,7 @@ export default function Formulario() {
             ],
         },
         {
-            group: "recepção",
+            group: "recepcao",
             fields: [
                 { id: "recepcoes", label: "Recepções", type: "number" },
                 { id: "alvo", label: "Alvo", type: "number" },
@@ -346,7 +355,46 @@ export default function Formulario() {
 
                 </form>
             )}
-            <Tabela />
+            <div className="text-4xl font-bold text-center mb-2">Times Cadastrados</div>
+            <div className="grid grid-cols-3 gap-4">
+                {times.map((time) => (
+                    <div
+                        key={time.id}
+                        className="border p-4 rounded-md cursor-pointer"
+                        onClick={() => {
+                            setSelectedTime(time); // Define o time selecionado
+                            setIsTimeModalOpen(true); // Abre o modal do time
+                        }}
+                    >
+                        <h2 className="text-xl font-bold">{time.nome}</h2>
+                        <p>Sigla: {time.sigla}</p>
+                        <p>Cidade: {time.cidade}</p>
+                    </div>
+                ))}
+            </div>
+
+            {/* Modal de Time */}
+            {isTimeModalOpen && selectedTime && (
+                <ModalTime
+                    time={selectedTime}
+                    closeModal={() => setIsTimeModalOpen(false)} // Função para fechar
+                    openJogadorModal={(jogador) => {
+                        setSelectedJogador(jogador);
+                        setIsJogadorModalOpen(true);
+                    }}
+                />
+            )}
+
+
+            {/* Modal de Jogador */}
+            {isJogadorModalOpen && selectedJogador && (
+                <ModalJogador
+                    jogador={selectedJogador}
+                    closeModal={() => setIsJogadorModalOpen(false)}
+                />
+            )}
+
+
         </div>
     )
 }
