@@ -10,8 +10,8 @@ import { JogadorSchema } from "@/schemas/Jogador"
 import { api, getTimes } from "@/api/api"
 import FormField from "@/components/FormField"
 import get from "lodash/get"
-import ModalTime from "@/components/ModalTime"; 
-import ModalJogador from "@/components/ModalJogador"; 
+import ModalTime from "@/components/ModalTime";
+import ModalJogador from "@/components/ModalJogador";
 
 type TimeFormData = z.infer<typeof TimeSchema>
 type JogadorFormData = z.infer<typeof JogadorSchema>
@@ -117,6 +117,7 @@ export default function Formulario() {
         { id: "sigla", label: "Sigla" },
         { id: "cor", label: "Cor" },
         { id: "cidade", label: "Cidade" },
+        { id: "bandeira_estado", label: "Bandeira Estado" },
         { id: "fundacao", label: "Fundação" },
         { id: "instagram", label: "Instagram" },
         { id: "instagram2", label: "@" },
@@ -125,6 +126,7 @@ export default function Formulario() {
         { id: "estadio", label: "Estádio" },
         { id: "presidente", label: "Presidente" },
         { id: "head_coach", label: "Head Coach" },
+        {id: "instagram_coach", label: "Instagram Coach"},
         { id: "coord_ofen", label: "Coordenador Ofensivo" },
         { id: "coord_defen", label: "Coordenador Defensivo" },
     ]
