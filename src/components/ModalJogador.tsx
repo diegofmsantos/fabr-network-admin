@@ -12,6 +12,7 @@ export default function ModalJogador({
 }) {
     const [formData, setFormData] = useState<Jogador>({
         ...jogador,
+        altura: jogador.altura || "",
         estatisticas: {
             passe: jogador.estatisticas?.passe || {
                 passes_completos: 0,
@@ -72,11 +73,23 @@ export default function ModalJogador({
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
+
+        if (name === "altura") {
+            // Permite vírgulas e pontos e converte para número
+            const formattedValue = value.replace(",", ".");
+            setFormData((prev) => ({
+                ...prev,
+                [name]: parseFloat(formattedValue) || "",
+            }));
+            return;
+        }
+
         setFormData((prev) => ({
             ...prev,
             [name]: isNaN(Number(value)) ? value : Number(value),
         }));
     };
+
 
     const handleStatisticChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -99,11 +112,14 @@ export default function ModalJogador({
     };
 
     const handleSave = async () => {
-        try {
-            console.log("Dados enviados para atualização:", formData);
+        const dataToSave = {
+            ...formData,
+            altura: parseFloat(formData.altura as string), // Garante o tipo correto
+        };
 
-            // Certifique-se de que o ID está sendo usado na rota
-            await api.put(`/jogador/${jogador.id}`, formData);
+        try {
+            console.log("Dados enviados para atualização:", dataToSave);
+            await api.put(`/jogador/${jogador.id}`, dataToSave);
             alert("Jogador atualizado com sucesso!");
             closeModal();
         } catch (error) {
@@ -111,10 +127,21 @@ export default function ModalJogador({
         }
     };
 
+
+    const estatisticasOrdem = {
+        passe: ["passes_completos", "passes_tentados", "jardas_de_passe", "td_passados", "interceptacoes_sofridas", "sacks_sofridos", "fumble_de_passador"],
+        corrida: ["corridas", "jardas_corridas", "tds_corridos", "fumble_de_corredor"],
+        recepcao: ["recepcoes", "alvo", "jardas_recebidas", "tds_recebidos", "fumble_de_recebedor"],
+        retorno: ["retornos", "jardas_retornadas", "td_retornados", "fumble_retornador"],
+        defesa: ["tackles_totais", "tackles_for_loss", "sacks_forcado", "fumble_forcado", "interceptacao_forcada", "passe_desviado", "safety", "td_defensivo"],
+        kicker: ["xp_bons", "tentativas_de_xp", "fg_bons", "tentativas_de_fg", "fg_mais_longo", "fg_0_10", "fg_11_20", "fg_21_30", "fg_31_40", "fg_41_50"],
+        punter: ["punts", "jardas_de_punt"],
+    };
+
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white p-6 rounded-md w-2/3 h-screen relative flex flex-col">
-                {/* Botão para fechar o modal */}
                 <button
                     className="absolute top-2 right-2 text-gray-600 hover:text-gray-800"
                     onClick={closeModal}
@@ -124,69 +151,142 @@ export default function ModalJogador({
 
                 <h2 className="text-2xl font-bold mb-4">Editar Jogador</h2>
 
-                {/* Conteúdo com rolagem */}
                 <div className="overflow-y-auto flex-1">
                     <div className="grid grid-cols-2 gap-4 mb-4">
-                        <InputField
-                            name="nome"
-                            value={formData.nome}
-                            onChange={handleChange}
-                            placeholder="Nome do Jogador"
-                        />
-                        <InputField
-                            name="posicao"
-                            value={formData.posicao}
-                            onChange={handleChange}
-                            placeholder="Posição"
-                        />
-                        <InputField
-                            name="numero"
-                            value={formData.numero}
-                            onChange={handleChange}
-                            placeholder="Número"
-                        />
-                        <InputField
-                            name="altura"
-                            value={formData.altura}
-                            onChange={handleChange}
-                            placeholder="Altura (m)"
-                        />
-                        <InputField
-                            name="peso"
-                            value={formData.peso}
-                            onChange={handleChange}
-                            placeholder="Peso (kg)"
-                        />
-                        <InputField
-                            name="idade"
-                            value={formData.idade}
-                            onChange={handleChange}
-                            placeholder="Idade"
-                        />
-                        <InputField
-                            name="nacionalidade"
-                            value={formData.nacionalidade}
-                            onChange={handleChange}
-                            placeholder="Nacionalidade"
-                        />
-                        <InputField
-                            name="cidade"
-                            value={formData.cidade}
-                            onChange={handleChange}
-                            placeholder="Cidade"
-                        />
-                        <InputField
-                            name="instagram"
-                            value={formData.instagram}
-                            onChange={handleChange}
-                            placeholder="Instagram"
-                        />
-                        <InputField
-                            name="instagram2"
-                            value={formData.instagram2}
-                            onChange={handleChange}
-                            placeholder="Instagram 2"
-                        />
+                        <div>
+                            <label className="block text-gray-700 font-medium mb-1">Nome</label>
+                            <InputField
+                                name="nome"
+                                value={formData.nome}
+                                onChange={handleChange}
+                                placeholder="Nome do Jogador"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-gray-700 font-medium mb-1">Time Formador</label>
+                            <InputField
+                                name="timeFormador"
+                                value={formData.timeFormador}
+                                onChange={handleChange}
+                                placeholder="Time Formador"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-gray-700 font-medium mb-1">Posição</label>
+                            <InputField
+                                name="posicao"
+                                value={formData.posicao}
+                                onChange={handleChange}
+                                placeholder="Posição"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-gray-700 font-medium mb-1">Setor</label>
+                            <select
+                                name="setor"
+                                value={formData.setor}
+                                onChange={(e) =>
+                                    setFormData((prev) => ({ ...prev, setor: e.target.value }))
+                                }
+                                className="w-full border rounded-md p-2"
+                            >
+                                <option value="">Selecione uma opção</option>
+                                <option value="Ataque">Ataque</option>
+                                <option value="Defesa">Defesa</option>
+                                <option value="Special">Special</option>
+                            </select>
+
+                        </div>
+                        <div>
+                            <label className="block text-gray-700 font-medium mb-1">Cidade</label>
+                            <InputField
+                                name="cidade"
+                                value={formData.cidade}
+                                onChange={handleChange}
+                                placeholder="Cidade"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-gray-700 font-medium mb-1">Nacionalidade</label>
+                            <InputField
+                                name="nacionalidade"
+                                value={formData.nacionalidade}
+                                onChange={handleChange}
+                                placeholder="Nacionalidade"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-gray-700 font-medium mb-1">Instagram</label>
+                            <InputField
+                                name="instagram"
+                                value={formData.instagram}
+                                onChange={handleChange}
+                                placeholder="Instagram"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-gray-700 font-medium mb-1">@</label>
+                            <InputField
+                                name="instagram2"
+                                value={formData.instagram2}
+                                onChange={handleChange}
+                                placeholder="@"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-gray-700 font-medium mb-1">Camisa</label>
+                            <InputField
+                                name="camisa"
+                                value={formData.camisa}
+                                onChange={handleChange}
+                                placeholder="Camisa"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-gray-700 font-medium mb-1">Experiência</label>
+                            <InputField
+                                name="experiencia"
+                                value={formData.experiencia}
+                                onChange={handleChange}
+                                placeholder="Experiência"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-gray-700 font-medium mb-1">Número</label>
+                            <InputField
+                                name="numero"
+                                value={formData.numero}
+                                onChange={handleChange}
+                                placeholder="Número"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-gray-700 font-medium mb-1">Idade</label>
+                            <InputField
+                                name="idade"
+                                value={formData.idade}
+                                onChange={handleChange}
+                                placeholder="Idade"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-gray-700 font-medium mb-1">Altura</label>
+                            <InputField
+                                name="altura"
+                                value={formData.altura || ""}
+                                onChange={handleChange}
+                                placeholder="Altura (ex: 1.75 ou 1,75)"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-gray-700 font-medium mb-1">Peso</label>
+                            <InputField
+                                name="peso"
+                                value={formData.peso}
+                                onChange={handleChange}
+                                placeholder="Peso"
+                            />
+                        </div>
                     </div>
 
                     <h3 className="text-xl font-bold mb-2">Estatísticas</h3>
@@ -194,21 +294,26 @@ export default function ModalJogador({
                         {Object.entries(formData.estatisticas || {}).map(([group, stats]) => (
                             <div key={group} className="border p-2 rounded-md">
                                 <h4 className="text-lg font-bold mb-2 capitalize">{group}</h4>
-                                {Object.entries(stats || {}).map(([field, value]) => (
-                                    <InputField
-                                        key={field}
-                                        name={`estatisticas.${group}.${field}`}
-                                        value={value}
-                                        onChange={handleStatisticChange}
-                                        placeholder={field}
-                                    />
+                                {estatisticasOrdem[group].map((field) => (
+                                    <div key={field} className="mb-2">
+                                        <label className="block text-gray-700 font-medium mb-1">
+                                            {field.replace("_", " ").toUpperCase()}
+                                        </label>
+                                        <InputField
+                                            name={`estatisticas.${group}.${field}`}
+                                            value={stats[field]}
+                                            onChange={handleStatisticChange}
+                                            placeholder={field}
+                                        />
+                                    </div>
                                 ))}
+
                             </div>
                         ))}
                     </div>
+
                 </div>
 
-                {/* Botões fixos */}
                 <div className="mt-4 flex justify-end gap-2">
                     <button
                         onClick={closeModal}

@@ -111,6 +111,15 @@ export default function Formulario() {
         }
     };
 
+    // Função para atualizar um time no estado
+    const updateTime = (updatedTime: Time) => {
+        setTimes((prevTimes) =>
+            prevTimes.map((time) =>
+                time.id === updatedTime.id ? { ...time, ...updatedTime } : time
+            )
+        );
+    };
+
     // Definindo os campos do Time
     const camposTime: Array<{ id: keyof TimeFormData; label: string }> = [
         { id: "nome", label: "Nome do Time" },
@@ -126,7 +135,7 @@ export default function Formulario() {
         { id: "estadio", label: "Estádio" },
         { id: "presidente", label: "Presidente" },
         { id: "head_coach", label: "Head Coach" },
-        {id: "instagram_coach", label: "Instagram Coach"},
+        { id: "instagram_coach", label: "Instagram Coach" },
         { id: "coord_ofen", label: "Coordenador Ofensivo" },
         { id: "coord_defen", label: "Coordenador Defensivo" },
     ]
@@ -384,6 +393,7 @@ export default function Formulario() {
                         setSelectedJogador(jogador);
                         setIsJogadorModalOpen(true);
                     }}
+                    updateTime={updateTime}
                 />
             )}
 
