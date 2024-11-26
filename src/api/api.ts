@@ -3,7 +3,7 @@ import { Jogador } from '@/types/jogador'
 import axios from 'axios'
 
 export const api = axios.create({
-    baseURL: 'http://localhost:4000/api',
+    baseURL: 'https://fabr-back.onrender.com/api',
 })
 
 // Função para obter os times
