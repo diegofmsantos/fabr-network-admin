@@ -130,7 +130,9 @@ export default function ModalTime({
                                     name={name}
                                     value={
                                         name.startsWith("titulos.")
+                                        // @ts-ignore
                                             ? formData.titulos?.[name.split(".")[1]] || ""
+                                            // @ts-ignore
                                             : formData[name] || ""
                                     }
                                     onChange={handleChange}

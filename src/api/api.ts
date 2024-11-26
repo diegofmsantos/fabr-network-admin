@@ -3,7 +3,7 @@ import { Jogador } from '@/types/jogador'
 import axios from 'axios'
 
 export const api = axios.create({
-    baseURL: 'https://fabr-back.onrender.com/api',
+    baseURL: 'http://localhost:4000/api',
 })
 
 // Função para obter os times
@@ -60,6 +60,7 @@ export const addJogador = async (data: Omit<Jogador, 'id'>): Promise<Jogador> =>
     }
 }
 
+// Função para atualizar um jogador
 export const atualizarJogador = async (data: Jogador): Promise<Jogador> => {
     try {
         const response = await api.put(`/jogador/${data.id}`, data);
@@ -69,4 +70,24 @@ export const atualizarJogador = async (data: Jogador): Promise<Jogador> => {
         throw new Error('Falha ao atualizar jogador');
     }
 };
+
+// Função para deletar um jogador
+export const deletarJogador = async (id: number): Promise<void> => {
+    try {
+        console.log(`Tentando excluir jogador com ID: ${id}`); // Log para debug
+        const response = await api.delete(`/jogador/${id}`);
+
+        // Checar se a resposta foi bem-sucedida
+        if (response.status === 200) {
+            console.log(`Jogador com ID ${id} excluído com sucesso.`);
+        } else {
+            console.error(`Falha ao excluir jogador. Status: ${response.status}`);
+            throw new Error('Falha ao deletar jogador');
+        }
+    } catch (error) {
+        console.error(`Erro ao deletar o jogador com ID ${id}:`, error);
+        throw new Error('Falha ao deletar jogador');
+    }
+};
+
 

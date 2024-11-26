@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { api } from "@/api/api";
-import InputField from "@/components/InputField"; // Reutilizando o componente de input
+import { api, atualizarJogador, deletarJogador } from "@/api/api";
+import InputField from "@/components/InputField";
 import { Estatisticas, Jogador } from "@/types/jogador";
 
 export default function ModalJogador({
@@ -10,123 +10,107 @@ export default function ModalJogador({
     jogador: Jogador;
     closeModal: () => void;
 }) {
-    const [formData, setFormData] = useState<Jogador>({
+    const [formData, setFormData] = useState<Jogador & { altura: string }>({
         ...jogador,
-        altura: jogador.altura || "",
-        estatisticas: {
-            passe: jogador.estatisticas?.passe || {
-                passes_completos: 0,
-                passes_tentados: 0,
-                jardas_de_passe: 0,
-                td_passados: 0,
-                interceptacoes_sofridas: 0,
-                sacks_sofridos: 0,
-                fumble_de_passador: 0,
-            },
-            corrida: jogador.estatisticas?.corrida || {
-                corridas: 0,
-                jardas_corridas: 0,
-                tds_corridos: 0,
-                fumble_de_corredor: 0,
-            },
-            recepcao: jogador.estatisticas?.recepcao || {
-                recepcoes: 0,
-                alvo: 0,
-                jardas_recebidas: 0,
-                tds_recebidos: 0,
-                fumble_de_recebedor: 0,
-            },
-            retorno: jogador.estatisticas?.retorno || {
-                retornos: 0,
-                jardas_retornadas: 0,
-                td_retornados: 0,
-                fumble_retornador: 0,
-            },
-            defesa: jogador.estatisticas?.defesa || {
-                tackles_totais: 0,
-                tackles_for_loss: 0,
-                sacks_forcado: 0,
-                fumble_forcado: 0,
-                interceptacao_forcada: 0,
-                passe_desviado: 0,
-                safety: 0,
-                td_defensivo: 0,
-            },
-            kicker: jogador.estatisticas?.kicker || {
-                xp_bons: 0,
-                tentativas_de_xp: 0,
-                fg_bons: 0,
-                tentativas_de_fg: 0,
-                fg_mais_longo: 0,
-                fg_0_10: "",
-                fg_11_20: "",
-                fg_21_30: "",
-                fg_31_40: "",
-                fg_41_50: "",
-            },
-            punter: jogador.estatisticas?.punter || {
-                punts: 0,
-                jardas_de_punt: 0,
-            },
+        altura: jogador.altura !== undefined ? String(jogador.altura).replace(".", ",") : "",
+        estatisticas: jogador.estatisticas || {
+            passe: { passes_completos: 0, passes_tentados: 0, jardas_de_passe: 0, td_passados: 0, interceptacoes_sofridas: 0, sacks_sofridos: 0, fumble_de_passador: 0 },
+            corrida: { corridas: 0, jardas_corridas: 0, tds_corridos: 0, fumble_de_corredor: 0 },
+            recepcao: { recepcoes: 0, alvo: 0, jardas_recebidas: 0, tds_recebidos: 0, fumble_de_recebedor: 0 },
+            retorno: { retornos: 0, jardas_retornadas: 0, td_retornados: 0, fumble_retornador: 0 },
+            defesa: { tackles_totais: 0, tackles_for_loss: 0, sacks_forcado: 0, fumble_forcado: 0, interceptacao_forcada: 0, passe_desviado: 0, safety: 0, td_defensivo: 0 },
+            kicker: { xp_bons: 0, tentativas_de_xp: 0, fg_bons: 0, tentativas_de_fg: 0, fg_mais_longo: 0, fg_0_10: "0/0", fg_11_20: "0/0", fg_21_30: "0/0", fg_31_40: "0/0", fg_41_50: "0/0" },
+            punter: { punts: 0, jardas_de_punt: 0 },
         },
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
 
-        if (name === "altura") {
-            // Permite vírgulas e pontos e converte para número
-            const formattedValue = value.replace(",", ".");
-            setFormData((prev) => ({
-                ...prev,
-                [name]: parseFloat(formattedValue) || "",
-            }));
-            return;
-        }
-
         setFormData((prev) => ({
             ...prev,
-            [name]: isNaN(Number(value)) ? value : Number(value),
+            [name]: name === "altura" || name === "idade" || name === "peso"
+                ? value.replace(",", ".")
+                : value,
         }));
     };
 
-
     const handleStatisticChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        const [_, groupKey, fieldKey] = name.split(".") as [string, keyof Estatisticas, string];
+        const [groupKey, fieldKey] = name.split(".") as [keyof Estatisticas, string];
 
+        // @ts-ignore
         setFormData((prev) => {
-            const updatedGroup = {
-                ...(prev.estatisticas?.[groupKey] || {}),
-                [fieldKey]: isNaN(Number(value)) ? value : Number(value),
-            };
+            const estatisticas = { ...prev.estatisticas };
+            if (!estatisticas[groupKey]) {
+                // @ts-ignore
+                estatisticas[groupKey] = {}; // Garante que o grupo exista
+            }
+            // @ts-ignore
+            estatisticas[groupKey][fieldKey] =
+                groupKey === "kicker" && fieldKey.startsWith("fg")
+                    ? value // Aceita valores como "1/1"
+                    : value === "" || isNaN(Number(value)) ? 0 : Number(value); // Valores vazios ou inválidos viram 0
 
-            return {
-                ...prev,
-                estatisticas: {
-                    ...prev.estatisticas,
-                    [groupKey]: updatedGroup,
-                },
-            } as Jogador;
+            return { ...prev, estatisticas };
         });
     };
 
     const handleSave = async () => {
-        const dataToSave = {
-            ...formData,
-            altura: parseFloat(formData.altura as string), // Garante o tipo correto
-        };
-
         try {
-            console.log("Dados enviados para atualização:", dataToSave);
-            await api.put(`/jogador/${jogador.id}`, dataToSave);
+            const dataToSave = {
+                ...formData,
+                altura: parseFloat(formData.altura.replace(",", ".")), // Converte altura para número
+                // @ts-ignore
+                peso: parseFloat(formData.peso), // Converte peso para número
+                // @ts-ignore
+                idade: parseInt(formData.idade, 10), // Converte idade para número
+                // @ts-ignore
+                experiencia: parseInt(formData.experiencia, 10), // Converte experiência para número
+                // @ts-ignore
+                numero: parseInt(formData.numero, 10), // Converte número para número
+            };
+
+            // Ajusta estatísticas para evitar valores inválidos
+            const estatisticasCorrigidas = Object.fromEntries(
+                Object.entries(dataToSave.estatisticas || {}).map(([groupKey, fields]) => [
+                    groupKey,
+                    Object.fromEntries(
+                        Object.entries(fields || {}).filter(
+                            ([_, value]) => value !== undefined && value !== ""
+                        )
+                    ),
+                ])
+            );
+
+            // @ts-ignore
+            dataToSave.estatisticas = estatisticasCorrigidas;
+
+            // Utilize a função `atualizarJogador` para fazer a atualização
+            // @ts-ignore
+            await atualizarJogador({ ...dataToSave, id: jogador.id });
             alert("Jogador atualizado com sucesso!");
             closeModal();
         } catch (error) {
             console.error("Erro ao atualizar jogador:", error);
+            alert("Erro ao salvar alterações.");
         }
     };
 
+    const handleDelete = async () => {
+        try {
+            const confirmDelete = confirm("Tem certeza que deseja excluir este jogador?");
+            if (!confirmDelete) return;
+
+            // Usar a função reutilizável para deletar jogador
+            await deletarJogador(jogador.id);
+            alert("Jogador excluído com sucesso!");
+            closeModal();
+        } catch (error) {
+            console.error("Erro ao excluir jogador:", error);
+            alert("Erro ao excluir jogador. Verifique os logs para mais detalhes.");
+        }
+    };
 
     const estatisticasOrdem = {
         passe: ["passes_completos", "passes_tentados", "jardas_de_passe", "td_passados", "interceptacoes_sofridas", "sacks_sofridos", "fumble_de_passador"],
@@ -185,17 +169,12 @@ export default function ModalJogador({
                             <select
                                 name="setor"
                                 value={formData.setor}
-                                onChange={(e) =>
-                                    setFormData((prev) => ({ ...prev, setor: e.target.value }))
-                                }
-                                className="w-full border rounded-md p-2"
-                            >
+                                onChange={(e) => setFormData((prev) => ({ ...prev, setor: e.target.value as "Ataque" | "Defesa" | "Special" }))}>
                                 <option value="">Selecione uma opção</option>
                                 <option value="Ataque">Ataque</option>
                                 <option value="Defesa">Defesa</option>
                                 <option value="Special">Special</option>
                             </select>
-
                         </div>
                         <div>
                             <label className="block text-gray-700 font-medium mb-1">Cidade</label>
@@ -291,27 +270,26 @@ export default function ModalJogador({
 
                     <h3 className="text-xl font-bold mb-2">Estatísticas</h3>
                     <div className="grid grid-cols-3 gap-4">
-                        {Object.entries(formData.estatisticas || {}).map(([group, stats]) => (
+                        {Object.entries(estatisticasOrdem).map(([group, fields]) => (
                             <div key={group} className="border p-2 rounded-md">
                                 <h4 className="text-lg font-bold mb-2 capitalize">{group}</h4>
-                                {estatisticasOrdem[group].map((field) => (
+                                {fields.map((field) => (
                                     <div key={field} className="mb-2">
                                         <label className="block text-gray-700 font-medium mb-1">
                                             {field.replace("_", " ").toUpperCase()}
                                         </label>
                                         <InputField
-                                            name={`estatisticas.${group}.${field}`}
-                                            value={stats[field]}
+                                            name={`${group}.${field}`}
+                                            // @ts-ignore
+                                            value={formData.estatisticas[group as keyof Estatisticas]?.[field] || ""}
                                             onChange={handleStatisticChange}
                                             placeholder={field}
                                         />
                                     </div>
                                 ))}
-
                             </div>
                         ))}
                     </div>
-
                 </div>
 
                 <div className="mt-4 flex justify-end gap-2">
@@ -320,6 +298,12 @@ export default function ModalJogador({
                         className="bg-gray-500 text-white px-4 py-2 rounded-md"
                     >
                         Fechar
+                    </button>
+                    <button
+                        onClick={handleDelete}
+                        className="bg-red-500 text-white px-4 py-2 rounded-md"
+                    >
+                        Excluir
                     </button>
                     <button
                         onClick={handleSave}

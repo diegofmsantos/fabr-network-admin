@@ -66,7 +66,7 @@ export type Jogador = {
     experiencia: number
     numero: number
     idade: number
-    altura: number
+    altura: string
     peso: number
     instagram: string,
     instagram2: string
