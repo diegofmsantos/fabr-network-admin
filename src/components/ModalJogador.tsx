@@ -44,13 +44,14 @@ export default function ModalJogador({
             const estatisticas = { ...prev.estatisticas };
             if (!estatisticas[groupKey]) {
                 // @ts-ignore
-                estatisticas[groupKey] = {}; // Garante que o grupo exista
+                estatisticas[groupKey] = {};
             }
+
             // @ts-ignore
             estatisticas[groupKey][fieldKey] =
                 groupKey === "kicker" && fieldKey.startsWith("fg")
                     ? value // Aceita valores como "1/1"
-                    : value === "" || isNaN(Number(value)) ? 0 : Number(value); // Valores vazios ou inválidos viram 0
+                    : value === "" ? 0 : Number(value); // Valores vazios viram 0
 
             return { ...prev, estatisticas };
         });
@@ -169,7 +170,9 @@ export default function ModalJogador({
                             <select
                                 name="setor"
                                 value={formData.setor}
-                                onChange={(e) => setFormData((prev) => ({ ...prev, setor: e.target.value as "Ataque" | "Defesa" | "Special" }))}>
+                                onChange={(e) => setFormData((prev) => ({ ...prev, setor: e.target.value as "Ataque" | "Defesa" | "Special" }))}
+                                className="border p-1"
+                            >
                                 <option value="">Selecione uma opção</option>
                                 <option value="Ataque">Ataque</option>
                                 <option value="Defesa">Defesa</option>
@@ -281,36 +284,38 @@ export default function ModalJogador({
                                         <InputField
                                             name={`${group}.${field}`}
                                             // @ts-ignore
-                                            value={formData.estatisticas[group as keyof Estatisticas]?.[field] || ""}
+                                            value={formData.estatisticas[group as keyof Estatisticas]?.[field] ?? 0} // Usa 0 como fallback
                                             onChange={handleStatisticChange}
                                             placeholder={field}
                                         />
+
                                     </div>
                                 ))}
                             </div>
                         ))}
                     </div>
                 </div>
-
-                <div className="mt-4 flex justify-end gap-2">
-                    <button
-                        onClick={closeModal}
-                        className="bg-gray-500 text-white px-4 py-2 rounded-md"
-                    >
-                        Fechar
-                    </button>
+                <div className="mt-4 flex justify-between gap-2">
                     <button
                         onClick={handleDelete}
                         className="bg-red-500 text-white px-4 py-2 rounded-md"
                     >
                         Excluir
                     </button>
-                    <button
-                        onClick={handleSave}
-                        className="bg-green-500 text-white px-4 py-2 rounded-md"
-                    >
-                        Salvar
-                    </button>
+                    <div>
+                        <button
+                            onClick={closeModal}
+                            className="bg-gray-500 text-white px-4 py-2 rounded-md mr-2"
+                        >
+                            Fechar
+                        </button>
+                        <button
+                            onClick={handleSave}
+                            className="bg-green-500 text-white px-4 py-2 rounded-md"
+                        >
+                            Salvar
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

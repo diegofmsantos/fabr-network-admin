@@ -12,6 +12,8 @@ import FormField from "@/components/FormField"
 import get from "lodash/get"
 import ModalTime from "@/components/ModalTime";
 import ModalJogador from "@/components/ModalJogador";
+import ModalSucesso from "./ModalSucesso"
+
 
 type TimeFormData = z.infer<typeof TimeSchema>
 type JogadorFormData = z.infer<typeof JogadorSchema>
@@ -21,6 +23,7 @@ export default function Formulario() {
         register,
         handleSubmit,
         formState: { errors },
+        reset
     } = useForm<TimeFormData>({
         resolver: zodResolver(TimeSchema),
     })
@@ -29,6 +32,7 @@ export default function Formulario() {
         register: registerJogador,
         handleSubmit: handleSubmitJogador,
         formState: { errors: jogadorErrors },
+        reset: resetJogador
     } = useForm<JogadorFormData>({
         resolver: zodResolver(JogadorSchema),
         defaultValues: {
@@ -51,6 +55,8 @@ export default function Formulario() {
     const [selectedJogador, setSelectedJogador] = useState<any | null>(null); // Jogador selecionado
     const [isTimeModalOpen, setIsTimeModalOpen] = useState(false); // Estado do modal de Time
     const [isJogadorModalOpen, setIsJogadorModalOpen] = useState(false); // Estado do modal de Jogador
+    const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+    const [successMessage, setSuccessMessage] = useState("");
 
     // Fetch dos times quando o componente é montado
     useEffect(() => {
@@ -76,6 +82,9 @@ export default function Formulario() {
     const onSubmitTime: SubmitHandler<TimeFormData> = async (data) => {
         try {
             await api.post("/time", data)
+            setSuccessMessage("Time adicionado com sucesso!");
+            setIsSuccessModalOpen(true); // Abre o modal de sucesso
+            reset()
         } catch (error) {
             console.error("Erro ao adicionar time:", error)
         }
@@ -93,17 +102,15 @@ export default function Formulario() {
                 ])
             );
 
-            // Adicionar log para verificar o processamento do grupo 'recepção'
-            console.log('Estatísticas antes do envio:', estatisticasFiltradas);
-
             const jogadorData = {
                 ...data,
                 estatisticas: estatisticasFiltradas,
             };
 
             await api.post("/jogador", jogadorData);
-
-            console.log("Jogador enviado com sucesso:", jogadorData);
+            setSuccessMessage("Jogador adicionado com sucesso!");
+            setIsSuccessModalOpen(true); // Abre o modal de sucesso
+            resetJogador()
         } catch (error) {
             console.error("Erro ao adicionar jogador:", error);
         } finally {
@@ -278,9 +285,12 @@ export default function Formulario() {
                     />
                 ))}
 
-                <button type="submit" className="bg-blue-500 text-white w-60 h-10 text-lg font-bold mt-5 rounded-md">
-                    Adicionar Time
-                </button>
+                <div className="col-span-6 flex justify-center mt-5">
+                    <button type="submit" className="bg-blue-500 text-white w-60 h-10 text-lg font-bold rounded-md">
+                        Adicionar Time
+                    </button>
+                </div>
+
             </form>
 
             <div className="text-4xl font-bold text-center mb-2">Jogador</div>
@@ -356,31 +366,47 @@ export default function Formulario() {
                         ))}
                     </div>
 
-                    <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className={`bg-green-500 text-white w-60 h-10 text-lg font-bold rounded-md ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
-                    >
-                        {isSubmitting ? "Enviando..." : "Adicionar Jogador"}
-                    </button>
-
+                    <div className="flex justify-center mt-5">
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className={`bg-green-500 text-white w-60 h-10 text-lg font-bold rounded-md ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
+                        >
+                            {isSubmitting ? "Enviando..." : "Adicionar Jogador"}
+                        </button>
+                    </div>
                 </form>
             )}
-            <div className="text-4xl font-bold text-center mb-2">Times Cadastrados</div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="text-4xl font-bold text-center mt-10">Times Cadastrados</div>
+            <div className="grid grid-cols-3 gap-4 my-6">
                 {times.map((time) => (
                     <div
                         key={time.id}
-                        className="border p-4 rounded-md cursor-pointer"
+                        className={`border p-4 rounded-md cursor-pointer hover:shadow-lg`}
                         onClick={() => {
-                            setSelectedTime(time); // Define o time selecionado
-                            setIsTimeModalOpen(true); // Abre o modal do time
+                            setSelectedTime(time);
+                            setIsTimeModalOpen(true);
+                        }}
+                        style={{
+                            backgroundColor: "transparent",
+                            transition: "background-color 0.3s",
+                            color: "#000"
+                        }}
+                        onMouseEnter={(e) => {
+                            // @ts-ignore
+                            e.currentTarget.style.backgroundColor = time.cor,
+                                e.currentTarget.style.color = '#FFF'
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = "transparent";
+                            e.currentTarget.style.color = '#000'
                         }}
                     >
                         <h2 className="text-xl font-bold">{time.nome}</h2>
                         <p>Sigla: {time.sigla}</p>
                         <p>Cidade: {time.cidade}</p>
                     </div>
+
                 ))}
             </div>
 
@@ -388,7 +414,7 @@ export default function Formulario() {
             {isTimeModalOpen && selectedTime && (
                 <ModalTime
                     time={selectedTime}
-                    closeModal={() => setIsTimeModalOpen(false)} // Função para fechar
+                    closeModal={() => setIsTimeModalOpen(false)}
                     openJogadorModal={(jogador) => {
                         setSelectedJogador(jogador);
                         setIsJogadorModalOpen(true);
@@ -403,6 +429,14 @@ export default function Formulario() {
                 <ModalJogador
                     jogador={selectedJogador}
                     closeModal={() => setIsJogadorModalOpen(false)}
+                />
+            )}
+
+            {/* Modal de Sucesso */}
+            {isSuccessModalOpen && (
+                <ModalSucesso
+                    mensagem={successMessage}
+                    onClose={() => setIsSuccessModalOpen(false)}
                 />
             )}
 
