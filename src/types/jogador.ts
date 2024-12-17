@@ -55,23 +55,38 @@ export type Estatisticas = {
     }
 }
 
-export type Jogador = {
-    id: number
-    nome: string
-    time: string
-    timeId: number
-    timeFormador: string
-    posicao: string
-    setor: "Ataque" | "Defesa" | "Special"
-    experiencia: number
-    numero: number
-    idade: number
-    altura: string
-    peso: number
-    instagram: string,
-    instagram2: string
-    cidade: string
-    nacionalidade: string
-    camisa: string
-    estatisticas?: Estatisticas
-}
+export type Classificacao = {
+    estrelas: number;
+    criterio_valor: number;
+  }
+  
+  export type ClassificacaoPorCategoria = {
+    passe?: Classificacao;
+    corrida?: Classificacao;
+    recepcao?: Classificacao;
+    retorno?: Classificacao;
+    defesa?: Classificacao;
+    kicker?: Classificacao;
+    punter?: Classificacao;
+  }
+  
+  export type Jogador = {
+      id: number
+      nome: string
+      timeId: number
+      timeFormador: string
+      posicao: string
+      setor: "Ataque" | "Defesa" | "Special"
+      experiencia: number
+      numero: number
+      idade: number
+      altura: number
+      peso: number
+      instagram: string
+      instagram2: string
+      cidade: string
+      nacionalidade: string
+      camisa: string
+      estatisticas: Estatisticas
+      classificacoes: ClassificacaoPorCategoria
+  }

@@ -57,12 +57,26 @@ export const EstatisticasSchema = z.object({
   }).optional(),
 })
 
+const ClassificacaoSchema = z.object({
+  estrelas: z.number().optional(),
+  criterio_valor: z.number().optional()
+});
+
+const ClassificacaoPorCategoriaSchema = z.object({
+  passe: ClassificacaoSchema.optional(),
+  corrida: ClassificacaoSchema.optional(),
+  recepcao: ClassificacaoSchema.optional(),
+  retorno: ClassificacaoSchema.optional(),
+  defesa: ClassificacaoSchema.optional(),
+  kicker: ClassificacaoSchema.optional(),
+  punter: ClassificacaoSchema.optional()
+});
+
 export const JogadorSchema = z.object({
   id: z.number().optional(),
   nome: z.string().optional(),
-  time: z.string().optional(),
-  timeId: z.number().optional(),
   timeFormador: z.string().optional(),
+  timeId: z.number().optional(),
   posicao: z.string().optional(),
   setor: z.enum(["Ataque", "Defesa", "Special"]).optional(),
   experiencia: z.number().optional(),
@@ -76,4 +90,5 @@ export const JogadorSchema = z.object({
   nacionalidade: z.string().optional(),
   camisa: z.string().optional(),
   estatisticas: EstatisticasSchema.optional(),
-})
+  classificacoes: ClassificacaoPorCategoriaSchema.optional()
+});

@@ -2,9 +2,9 @@ import { Time } from '@/types/time'
 import { Jogador } from '@/types/jogador'
 import axios from 'axios'
 
-export const api = axios.create({
-    baseURL: 'https://fabr-back.onrender.com/api',
-})
+const api = axios.create({
+    baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  });
 
 // Função para obter os times
 export const getTimes = async (): Promise<Time[]> => {
