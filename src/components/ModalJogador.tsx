@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { api, atualizarJogador, deletarJogador } from "@/api/api";
+import { atualizarJogador, deletarJogador } from "@/api/api";
 import InputField from "@/components/InputField";
 import { Estatisticas, Jogador } from "@/types/jogador";
 
@@ -11,7 +11,7 @@ export default function ModalJogador({
     closeModal: () => void;
 }) {
     const [formData, setFormData] = useState<Jogador & { altura: string }>({
-        ...jogador,
+        ...jogador, // @ts-ignore
         altura: jogador.altura !== undefined ? String(jogador.altura).replace(".", ",") : "",
         estatisticas: jogador.estatisticas || {
             passe: { passes_completos: 0, passes_tentados: 0, jardas_de_passe: 0, td_passados: 0, interceptacoes_sofridas: 0, sacks_sofridos: 0, fumble_de_passador: 0 },
@@ -60,7 +60,7 @@ export default function ModalJogador({
     const handleSave = async () => {
         try {
             const dataToSave = {
-                ...formData,
+                ...formData, // @ts-ignore
                 altura: parseFloat(formData.altura.replace(",", ".")), // Converte altura para número
                 // @ts-ignore
                 peso: parseFloat(formData.peso), // Converte peso para número
