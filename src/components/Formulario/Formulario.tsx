@@ -257,9 +257,9 @@ export default function Formulario() {
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className={`bg-green-500 text-white w-60 h-10 text-lg font-bold rounded-md ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
+                            className="bg-[#63E300] text-black px-6 py-2 rounded-lg font-medium hover:bg-[#50B800] transition-colors"
                         >
-                            {isSubmitting ? "Enviando..." : "Adicionar Jogador"}
+                            Adicionar Jogador
                         </button>
                     </div>
                 </form>
