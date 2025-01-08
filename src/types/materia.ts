@@ -3,6 +3,7 @@ export type Materia = {
     titulo: string
     subtitulo: string
     imagem: string
+    legenda: string
     texto: string
     autor: string
     autorImage: string

@@ -17,7 +17,7 @@ export const Editor = ({ value, onChange }: EditorProps) => {
 
     if (!mounted) {
         return (
-            <textarea 
+            <textarea
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 className="w-full h-64 bg-[#1C1C24] text-white p-2 rounded"
@@ -31,18 +31,18 @@ export const Editor = ({ value, onChange }: EditorProps) => {
             init={{
                 height: 500,
                 menubar: false,
-                skin: 'oxide-dark',
-                content_css: 'dark',
                 plugins: [
                     'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
                     'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
                     'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
                 ],
                 toolbar: 'undo redo | blocks | ' +
-                    'bold italic forecolor | alignleft aligncenter ' +
+                    'bold italic | alignleft aligncenter ' +
                     'alignright alignjustify | bullist numlist outdent indent | ' +
-                    'removeformat | help',
-                content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px; color: white; }'
+                    'link unlink | removeformat | help',
+                content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+                link_context_toolbar: true,
+                default_link_target: '_blank',
             }}
             value={value}
             onEditorChange={onChange}
