@@ -1,6 +1,7 @@
 import { Time } from '@/types/time'
 import { Jogador } from '@/types/jogador'
 import axios from 'axios'
+import { Materia } from '@/types/materia';
 
 export const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -89,5 +90,53 @@ export const deletarJogador = async (id: number): Promise<void> => {
         throw new Error('Falha ao deletar jogador');
     }
 };
+
+// Função para obter todas as notícias
+export const getNoticias = async (): Promise<Materia[]> => {
+    try {
+      const response = await api.get('/materias');
+      return response.data || [];
+    } catch (error) {
+      console.error('Erro ao buscar notícias:', error);
+      throw new Error('Falha ao buscar notícias');
+    }
+  };
+  
+  // Função para criar uma nova notícia
+  export const createNoticia = async (
+    noticia: Omit<Materia, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<Materia> => {
+    try {
+      const response = await api.post('/materias', noticia);
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao criar notícia:', error);
+      throw new Error('Falha ao criar notícia');
+    }
+  };
+  
+  // Função para atualizar uma notícia
+  export const updateNoticia = async (
+    id: number,
+    noticia: Partial<Materia>
+  ): Promise<Materia> => {
+    try {
+      const response = await api.put(`/materias/${id}`, noticia);
+      return response.data;
+    } catch (error) {
+      console.error(`Erro ao atualizar notícia com ID ${id}:`, error);
+      throw new Error('Falha ao atualizar notícia');
+    }
+  };
+  
+  // Função para deletar uma notícia
+  export const deleteNoticia = async (id: number): Promise<void> => {
+    try {
+      await api.delete(`/materia/${id}`);
+    } catch (error) {
+      console.error(`Erro ao deletar notícia com ID ${id}:`, error);
+      throw new Error('Falha ao deletar notícia');
+    }
+  };
 
 
