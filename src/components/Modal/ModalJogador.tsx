@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { atualizarJogador, deletarJogador } from "@/api/api";
-import InputField from "@/components/InputField";
+import InputField from "@/components/Formulario/InputField";
 import { Estatisticas, Jogador } from "@/types/jogador";
 
 export default function ModalJogador({
@@ -125,53 +125,59 @@ export default function ModalJogador({
 
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className="bg-white p-6 rounded-md w-2/3 h-screen relative flex flex-col">
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+            <div className="bg-[#272731] p-6 rounded-lg w-2/3 h-[90vh] relative flex flex-col">
                 <button
-                    className="absolute top-2 right-2 text-gray-600 hover:text-gray-800"
+                    className="absolute top-4 right-4 text-gray-400 hover:text-white"
                     onClick={closeModal}
                 >
                     ✖
                 </button>
 
-                <h2 className="text-2xl font-bold mb-4">Editar Jogador</h2>
+                <h2 className="text-2xl font-bold text-white mb-6">Editar Jogador</h2>
 
-                <div className="overflow-y-auto flex-1">
-                    <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="overflow-y-auto flex-grow">
+                    <div className="grid grid-cols-2 gap-4 mb-6">
                         <div>
-                            <label className="block text-gray-700 font-medium mb-1">Nome</label>
-                            <InputField
+                            <label className="block text-white text-sm font-medium mb-2">Nome</label>
+                            <input
                                 name="nome"
                                 value={formData.nome}
                                 onChange={handleChange}
                                 placeholder="Nome do Jogador"
+                                className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
                             />
                         </div>
+
                         <div>
-                            <label className="block text-gray-700 font-medium mb-1">Time Formador</label>
-                            <InputField
+                            <label className="block text-white text-sm font-medium mb-2">Time Formador</label>
+                            <input
                                 name="timeFormador"
                                 value={formData.timeFormador}
                                 onChange={handleChange}
                                 placeholder="Time Formador"
+                                className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
                             />
                         </div>
+
                         <div>
-                            <label className="block text-gray-700 font-medium mb-1">Posição</label>
-                            <InputField
+                            <label className="block text-white text-sm font-medium mb-2">Posição</label>
+                            <input
                                 name="posicao"
                                 value={formData.posicao}
                                 onChange={handleChange}
                                 placeholder="Posição"
+                                className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
                             />
                         </div>
+
                         <div>
-                            <label className="block text-gray-700 font-medium mb-1">Setor</label>
+                            <label className="block text-white text-sm font-medium mb-2">Setor</label>
                             <select
                                 name="setor"
                                 value={formData.setor}
                                 onChange={(e) => setFormData((prev) => ({ ...prev, setor: e.target.value as "Ataque" | "Defesa" | "Special" }))}
-                                className="border p-1"
+                                className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
                             >
                                 <option value="">Selecione uma opção</option>
                                 <option value="Ataque">Ataque</option>
@@ -179,139 +185,159 @@ export default function ModalJogador({
                                 <option value="Special">Special</option>
                             </select>
                         </div>
+
                         <div>
-                            <label className="block text-gray-700 font-medium mb-1">Cidade</label>
-                            <InputField
+                            <label className="block text-white text-sm font-medium mb-2">Cidade</label>
+                            <input
                                 name="cidade"
                                 value={formData.cidade}
                                 onChange={handleChange}
                                 placeholder="Cidade"
+                                className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
                             />
                         </div>
+
                         <div>
-                            <label className="block text-gray-700 font-medium mb-1">Nacionalidade</label>
-                            <InputField
+                            <label className="block text-white text-sm font-medium mb-2">Nacionalidade</label>
+                            <input
                                 name="nacionalidade"
                                 value={formData.nacionalidade}
                                 onChange={handleChange}
                                 placeholder="Nacionalidade"
+                                className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
                             />
                         </div>
+
                         <div>
-                            <label className="block text-gray-700 font-medium mb-1">Instagram</label>
-                            <InputField
+                            <label className="block text-white text-sm font-medium mb-2">Instagram</label>
+                            <input
                                 name="instagram"
                                 value={formData.instagram}
                                 onChange={handleChange}
                                 placeholder="Instagram"
+                                className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
                             />
                         </div>
+
                         <div>
-                            <label className="block text-gray-700 font-medium mb-1">@</label>
-                            <InputField
+                            <label className="block text-white text-sm font-medium mb-2">@</label>
+                            <input
                                 name="instagram2"
                                 value={formData.instagram2}
                                 onChange={handleChange}
                                 placeholder="@"
+                                className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
                             />
                         </div>
+
                         <div>
-                            <label className="block text-gray-700 font-medium mb-1">Camisa</label>
-                            <InputField
+                            <label className="block text-white text-sm font-medium mb-2">Camisa</label>
+                            <input
                                 name="camisa"
                                 value={formData.camisa}
                                 onChange={handleChange}
                                 placeholder="Camisa"
+                                className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
                             />
                         </div>
+
                         <div>
-                            <label className="block text-gray-700 font-medium mb-1">Experiência</label>
-                            <InputField
+                            <label className="block text-white text-sm font-medium mb-2">Experiência</label>
+                            <input
                                 name="experiencia"
                                 value={formData.experiencia}
                                 onChange={handleChange}
                                 placeholder="Experiência"
+                                className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
                             />
                         </div>
+
                         <div>
-                            <label className="block text-gray-700 font-medium mb-1">Número</label>
-                            <InputField
+                            <label className="block text-white text-sm font-medium mb-2">Número</label>
+                            <input
                                 name="numero"
                                 value={formData.numero}
                                 onChange={handleChange}
                                 placeholder="Número"
+                                className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
                             />
                         </div>
+
                         <div>
-                            <label className="block text-gray-700 font-medium mb-1">Idade</label>
-                            <InputField
+                            <label className="block text-white text-sm font-medium mb-2">Idade</label>
+                            <input
                                 name="idade"
                                 value={formData.idade}
                                 onChange={handleChange}
                                 placeholder="Idade"
+                                className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
                             />
                         </div>
+
                         <div>
-                            <label className="block text-gray-700 font-medium mb-1">Altura</label>
-                            <InputField
+                            <label className="block text-white text-sm font-medium mb-2">Altura</label>
+                            <input
                                 name="altura"
-                                value={formData.altura || ""}
+                                value={formData.altura}
                                 onChange={handleChange}
                                 placeholder="Altura (ex: 1.75 ou 1,75)"
+                                className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
                             />
                         </div>
+
                         <div>
-                            <label className="block text-gray-700 font-medium mb-1">Peso</label>
-                            <InputField
+                            <label className="block text-white text-sm font-medium mb-2">Peso</label>
+                            <input
                                 name="peso"
                                 value={formData.peso}
                                 onChange={handleChange}
                                 placeholder="Peso"
+                                className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
                             />
                         </div>
                     </div>
 
-                    <h3 className="text-xl font-bold mb-2">Estatísticas</h3>
+                    <h3 className="text-xl font-bold text-white mb-4">Estatísticas</h3>
                     <div className="grid grid-cols-3 gap-4">
                         {Object.entries(estatisticasOrdem).map(([group, fields]) => (
-                            <div key={group} className="border p-2 rounded-md">
-                                <h4 className="text-lg font-bold mb-2 capitalize">{group}</h4>
+                            <div key={group} className="bg-[#1C1C24] border border-gray-700 rounded-lg p-4">
+                                <h4 className="text-lg font-bold text-white mb-4 capitalize">{group}</h4>
                                 {fields.map((field) => (
-                                    <div key={field} className="mb-2">
-                                        <label className="block text-gray-700 font-medium mb-1">
-                                            {field.replace("_", " ").toUpperCase()}
+                                    <div key={field} className="mb-3">
+                                        <label className="block text-gray-300 text-sm font-medium mb-1">
+                                            {field.replace(/_/g, " ").toUpperCase()}
                                         </label>
-                                        <InputField
-                                            name={`${group}.${field}`}
-                                            // @ts-ignore
-                                            value={formData.estatisticas[group as keyof Estatisticas]?.[field] ?? 0} // Usa 0 como fallback
+                                        <input
+                                            type="text"
+                                            name={`${group}.${field}`} //@ts-ignore
+                                            value={formData.estatisticas[group]?.[field] ?? 0}
                                             onChange={handleStatisticChange}
-                                            placeholder={field}
+                                            className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
                                         />
-
                                     </div>
                                 ))}
                             </div>
                         ))}
                     </div>
                 </div>
-                <div className="mt-4 flex justify-between gap-2">
+
+                <div className="mt-6 flex justify-between items-center">
                     <button
                         onClick={handleDelete}
-                        className="bg-red-500 text-white px-4 py-2 rounded-md"
+                        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
                     >
                         Excluir
                     </button>
-                    <div>
+                    <div className="space-x-3">
                         <button
                             onClick={closeModal}
-                            className="bg-gray-500 text-white px-4 py-2 rounded-md mr-2"
+                            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
                         >
                             Fechar
                         </button>
                         <button
                             onClick={handleSave}
-                            className="bg-green-500 text-white px-4 py-2 rounded-md"
+                            className="px-4 py-2 bg-[#63E300] text-black rounded-lg hover:bg-[#50B800] transition-colors"
                         >
                             Salvar
                         </button>

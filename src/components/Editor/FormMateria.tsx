@@ -4,8 +4,8 @@ import { useState } from 'react'
 import { Editor } from './Editor'
 import { InputField } from './InputField'
 import { FormField } from './FormField'
-import { NoticiasService } from '@/services/localStorage'
 import { createNoticia, getNoticias } from '@/api/api'
+import Link from 'next/link'
 
 export const FormMateria = () => {
   const [formData, setFormData] = useState({
@@ -22,11 +22,11 @@ export const FormMateria = () => {
     try {
       // Salva a nova matéria usando a função `createNoticia`
       const novaNoticia = await createNoticia(formData);
-  
+
       // Log para verificar se salvou, obtendo todas as notícias da API
       const noticiasAtualizadas = await getNoticias();
       console.log('Notícias salvas:', noticiasAtualizadas);
-  
+
       alert('Matéria criada com sucesso!');
       // Você pode adicionar redirecionamento aqui se quiser
     } catch (error) {
@@ -37,6 +37,12 @@ export const FormMateria = () => {
 
   return (
     <form onSubmit={handleSubmit} className="max-w-4xl mx-auto bg-[#272731] p-6 rounded-lg shadow">
+      <Link
+        href={`/`}
+        className="w-44 h-12 font-bold text-lg bg-[#63E300] p-2 text-center rounded-md absolute right-6 top-6 text-black hover:bg-[#50B800] transition-colors"
+      >
+        Painel de Times
+      </Link>
       <h1 className="text-2xl font-bold text-white mb-6">Nova Matéria</h1>
 
       <div className="space-y-6">

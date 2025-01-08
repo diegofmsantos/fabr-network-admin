@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { api } from "@/api/api";
-import InputField from "@/components/InputField";
+import InputField from "@/components/Formulario/InputField";
 import { Time } from "@/types/time";
 
 export default function ModalTime({
@@ -61,7 +61,7 @@ export default function ModalTime({
             console.error("Erro ao atualizar time:", error);
         }
     };
-    
+
     // Deleta o time
     const handleDelete = async () => {
         if (confirm("Tem certeza que deseja excluir este time?")) {
@@ -88,19 +88,19 @@ export default function ModalTime({
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className="bg-white p-6 rounded-md w-2/3 h-screen relative flex flex-col">
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+            <div className="bg-[#272731] p-6 rounded-lg w-2/3 h-[90vh] relative flex flex-col">
                 <button
-                    className="absolute top-2 right-2 text-gray-600 hover:text-gray-800"
+                    className="absolute top-4 right-4 text-gray-400 hover:text-white"
                     onClick={closeModal}
                 >
                     ✖
                 </button>
 
-                <h2 className="text-2xl font-bold mb-4">Editar Time</h2>
+                <h2 className="text-2xl font-bold text-white mb-6">Editar Time</h2>
 
                 <div className="overflow-y-auto flex-grow">
-                    <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="grid grid-cols-2 gap-4 mb-6">
                         {[
                             { name: "nome", label: "Nome do Time" },
                             { name: "sigla", label: "Sigla" },
@@ -123,39 +123,36 @@ export default function ModalTime({
                             { name: "titulos.estaduais", label: "Títulos Estaduais" },
                         ].map(({ name, label }) => (
                             <div key={name}>
-                                <label className="block text-gray-700 font-medium mb-1">
+                                <label className="block text-white text-sm font-medium mb-2">
                                     {label}
                                 </label>
-                                <InputField
-                                    name={name}
-                                    value={
-                                        name.startsWith("titulos.")
-                                        // @ts-ignore
-                                            ? formData.titulos?.[name.split(".")[1]] || ""
-                                            // @ts-ignore
-                                            : formData[name] || ""
-                                    }
+                                <input
+                                    type="text"
+                                    name={name} // @ts-ignore
+                                    value={name.startsWith("titulos.") ? formData.titulos?.[name.split(".")[1]] || "" : formData[name] || ""}
                                     onChange={handleChange}
                                     placeholder={label}
+                                    className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
                                 />
                             </div>
                         ))}
                     </div>
 
-                    <h3 className="text-xl font-bold mb-2">Jogadores</h3>
-                    <InputField
-                        name="filter"
+                    <h3 className="text-xl font-bold text-white mb-4">Jogadores</h3>
+                    <input
+                        type="text"
                         value={filter}
                         onChange={handleFilterChange}
                         placeholder="Filtrar jogadores pelo nome"
+                        className="w-full px-3 py-2 mb-4 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
                     />
-                    <div className="overflow-y-auto border rounded-md p-2 mt-2">
-                        <ul>
+                    <div className="bg-[#1C1C24] border border-gray-700 rounded-lg p-4">
+                        <ul className="space-y-2">
                             {filteredJogadores.map((jogador) => (
                                 <li
                                     key={jogador.id}
-                                    className="cursor-pointer text-blue-600 border-b"
                                     onClick={() => openJogadorModal(jogador)}
+                                    className="text-gray-300 hover:text-[#63E300] cursor-pointer transition-colors p-2 hover:bg-[#2C2C34] rounded border-b border-b-gray-100/10"
                                 >
                                     {jogador.nome}
                                 </li>
@@ -164,23 +161,23 @@ export default function ModalTime({
                     </div>
                 </div>
 
-                <div className="mt-4 flex justify-between gap-2">
+                <div className="mt-6 flex justify-between items-center">
                     <button
                         onClick={handleDelete}
-                        className="bg-red-500 text-white px-4 py-2 rounded-md"
+                        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
                     >
                         Excluir Time
                     </button>
-                    <div>
+                    <div className="space-x-3">
                         <button
                             onClick={closeModal}
-                            className="bg-gray-500 text-white px-4 py-2 rounded-md"
+                            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
                         >
                             Fechar
                         </button>
                         <button
                             onClick={handleSave}
-                            className="bg-green-500 text-white px-4 py-2 rounded-md ml-2"
+                            className="px-4 py-2 bg-[#63E300] text-black rounded-lg hover:bg-[#50B800] transition-colors"
                         >
                             Salvar
                         </button>
