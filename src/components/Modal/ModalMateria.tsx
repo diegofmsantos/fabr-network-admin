@@ -7,6 +7,12 @@ import { Editor } from '../Editor/Editor'
 import Image from 'next/image'
 import { z } from 'zod'
 
+// Interface específica para o formulário
+interface MateriaFormData extends Omit<Materia, 'createdAt' | 'updatedAt'> {
+    createdAt: string;
+    updatedAt: string;
+}
+
 const MateriaSchema = z.object({
     id: z.number(),
     titulo: z.string().min(1, 'Título é obrigatório'),
@@ -16,9 +22,9 @@ const MateriaSchema = z.object({
     texto: z.string().min(1, 'Texto é obrigatório'),
     autor: z.string().min(1, 'Autor é obrigatório'),
     autorImage: z.string().min(1, 'Foto do autor é obrigatória'),
-    createdAt: z.string(),
-    updatedAt: z.string()
-})
+    createdAt: z.date(),
+    updatedAt: z.date()
+});
 
 interface ModalMateriaProps {
     materia: Materia
@@ -27,16 +33,16 @@ interface ModalMateriaProps {
 }
 
 export function ModalMateria({ materia, closeModal, onUpdate }: ModalMateriaProps) {
-    const [formData, setFormData] = useState({
+    const formatDateForInput = (date: Date) => {
+        return new Date(date).toISOString().slice(0, 16);
+    };
+
+    const [formData, setFormData] = useState<MateriaFormData>({
         ...materia,
-        titulo: materia.titulo || '',
-        subtitulo: materia.subtitulo || '',
-        imagem: materia.imagem || '',
-        legenda: materia.legenda || '',
-        texto: materia.texto || '',
-        autor: materia.autor || '',
-        autorImage: materia.autorImage || ''
-    })
+        createdAt: formatDateForInput(materia.createdAt),
+        updatedAt: formatDateForInput(materia.updatedAt)
+    });
+
     const [loading, setLoading] = useState(false)
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,40 +84,46 @@ export function ModalMateria({ materia, closeModal, onUpdate }: ModalMateriaProp
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setLoading(true)
+        e.preventDefault();
+        setLoading(true);
 
         try {
-            // Valida os dados antes de enviar
-            const validatedData = MateriaSchema.parse(formData)
-            const updatedMateria = await updateNoticia(materia.id, validatedData)
-            onUpdate(updatedMateria)
-            closeModal()
+            const materiaData = {
+                ...formData,
+                createdAt: new Date(formData.createdAt),
+                updatedAt: new Date(formData.updatedAt)
+            };
+
+            const validatedData = MateriaSchema.parse(materiaData);
+            const updatedMateria = await updateNoticia(materia.id, validatedData);
+            onUpdate(updatedMateria);
+            closeModal();
         } catch (error) {
             if (error instanceof z.ZodError) {
-                const errors = error.errors.map(err => err.message).join('\n')
-                alert(`Erro de validação:\n${errors}`)
+                const errors = error.errors.map(err => err.message).join('\n');
+                alert(`Erro de validação:\n${errors}`);
             } else {
-                console.error('Erro ao atualizar:', error)
-                alert('Erro ao atualizar matéria')
+                console.error('Erro ao atualizar:', error);
+                alert('Erro ao atualizar matéria');
             }
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
 
     const handleDelete = async () => {
         if (window.confirm('Tem certeza que deseja excluir esta matéria?')) {
             try {
                 await deleteNoticia(materia.id)
                 closeModal()
-                window.location.reload() // Recarrega a página para atualizar a lista
+                window.location.reload()
             } catch (error) {
                 console.error('Erro ao deletar:', error)
                 alert('Erro ao deletar matéria')
             }
         }
     }
+
 
     return (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
@@ -220,9 +232,40 @@ export function ModalMateria({ materia, closeModal, onUpdate }: ModalMateriaProp
                                 </div>
                             )}
                         </div>
+
+                        <div>
+                            <label htmlFor="createdAt" className="block text-white text-sm font-medium mb-2">
+                                Data de Criação
+                            </label>
+                            <input
+                                id="createdAt"
+                                type="datetime-local"
+                                value={formData.createdAt}
+                                onChange={(e) => setFormData(prev => ({
+                                    ...prev,
+                                    createdAt: e.target.value
+                                }))}
+                                className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
+                            />
+                        </div>
+
+                        <div>
+                            <label htmlFor="updatedAt" className="block text-white text-sm font-medium mb-2">
+                                Data de Atualização
+                            </label>
+                            <input
+                                id="updatedAt"
+                                type="datetime-local"
+                                value={formData.updatedAt}
+                                onChange={(e) => setFormData(prev => ({
+                                    ...prev,
+                                    updatedAt: e.target.value
+                                }))}
+                                className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
+                            />
+                        </div>
                     </div>
                 </form>
-
                 <div className="mt-6 flex justify-between items-center">
                     <button
                         onClick={handleDelete}
