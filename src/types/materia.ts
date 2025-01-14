@@ -7,6 +7,6 @@ export type Materia = {
     texto: string
     autor: string
     autorImage: string
-    createdAt: string
-    updatedAt: string
+    createdAt: Date
+    updatedAt: Date
 }

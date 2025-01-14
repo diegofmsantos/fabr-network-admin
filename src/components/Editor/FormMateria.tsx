@@ -18,7 +18,9 @@ export const FormMateria = () => {
     legenda: '',
     texto: '',
     autor: '',
-    autorImage: ''
+    autorImage: '',
+    createdAt: new Date().toISOString().slice(0, 16), // formato: YYYY-MM-DDThh:mm
+    updatedAt: new Date().toISOString().slice(0, 16)
   })
 
   const [materias, setMaterias] = useState<Materia[]>([])
@@ -43,15 +45,33 @@ export const FormMateria = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Ajusta o fuso horário mantendo o tipo Date
+      const materiaData = {
+        ...formData,
+        createdAt: new Date(new Date(formData.createdAt).toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' })),
+        updatedAt: new Date(new Date(formData.updatedAt).toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }))
+      };
+
       // Salva a nova matéria usando a função `createNoticia`
-      const novaNoticia = await createNoticia(formData);
+      const novaNoticia = await createNoticia(materiaData);
 
       // Log para verificar se salvou, obtendo todas as notícias da API
       const noticiasAtualizadas = await getNoticias();
       console.log('Notícias salvas:', noticiasAtualizadas);
 
       alert('Matéria criada com sucesso!');
-      // Você pode adicionar redirecionamento aqui se quiser
+      // Reset do formulário após salvar
+      setFormData({
+        titulo: '',
+        subtitulo: '',
+        imagem: '',
+        legenda: '',
+        texto: '',
+        autor: '',
+        autorImage: '',
+        createdAt: new Date().toISOString().slice(0, 16),
+        updatedAt: new Date().toISOString().slice(0, 16)
+      });
     } catch (error) {
       console.error('Erro ao salvar:', error);
       alert('Erro ao salvar a matéria');
@@ -143,6 +163,28 @@ export const FormMateria = () => {
             />
           </FormField>
 
+          <FormField label="Data de Criação">
+            <InputField
+              type="datetime-local"
+              value={formData.createdAt}
+              onChange={(e) => setFormData(prev => ({
+                ...prev,
+                createdAt: e.target.value
+              }))}
+            />
+          </FormField>
+
+          <FormField label="Data de Atualização">
+            <InputField
+              type="datetime-local"
+              value={formData.updatedAt}
+              onChange={(e) => setFormData(prev => ({
+                ...prev,
+                updatedAt: e.target.value
+              }))}
+            />
+          </FormField>
+
           <div className="flex justify-end pt-6">
             <button
               type="submit"
@@ -186,9 +228,14 @@ export const FormMateria = () => {
                   </div>
                   <span className="text-gray-400">{materia.autor}</span>
                 </div>
-                <span className="text-gray-500">
-                  {new Date(materia.createdAt).toLocaleDateString('pt-BR')}
-                </span>
+                <div className="flex flex-col text-right">
+                  <span className="text-gray-500 text-xs">
+                    Criado: {new Date(materia.createdAt).toLocaleString('pt-BR')}
+                  </span>
+                  <span className="text-gray-500 text-xs">
+                    Atualizado: {new Date(materia.updatedAt).toLocaleString('pt-BR')}
+                  </span>
+                </div>
               </div>
             </div>
           ))}
