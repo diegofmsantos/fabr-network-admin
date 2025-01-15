@@ -16,6 +16,7 @@ import ModalSucesso from "../Modal/ModalSucesso"
 import { camposJogador, camposNumericosJogador, camposTime, estatisticas } from "../../utils/campos"
 import Link from "next/link"
 import Image from "next/image"
+import LogoutButton from "../LogoutButton"
 
 type TimeFormData = z.infer<typeof TimeSchema>
 type JogadorFormData = z.infer<typeof JogadorSchema>
@@ -131,6 +132,7 @@ export default function Formulario() {
 
     return (
         <div className="p-4 overflow-x-hidden bg-[#272731] min-h-screen">
+            <LogoutButton />
             <Link
                 href={`/materia`}
                 className="w-44 h-12 font-bold text-lg bg-[#63E300] p-2 text-center rounded-md absolute right-6 top-6 text-black hover:bg-[#50B800] transition-colors"

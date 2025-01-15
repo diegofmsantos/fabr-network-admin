@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import "./globals.css"
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   title: "FABR-NETWORK-ADM",
@@ -14,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="pt-br">
       <body>
-        {children}
+      <Providers>{children}</Providers>
       </body>
     </html>
   )

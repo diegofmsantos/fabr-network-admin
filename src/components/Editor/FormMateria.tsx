@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { Materia } from '@/types/materia'
 import { ModalMateria } from '../Modal/ModalMateria'
 import Image from 'next/image'
+import LogoutButton from '../LogoutButton'
 
 export const FormMateria = () => {
   const [formData, setFormData] = useState({
@@ -80,6 +81,7 @@ export const FormMateria = () => {
 
   return (
     <div>
+      <LogoutButton />
       <form onSubmit={handleSubmit} className="max-w-4xl mx-auto bg-[#272731] p-6 rounded-lg shadow">
         <Link
           href={`/`}
