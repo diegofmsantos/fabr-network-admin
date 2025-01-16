@@ -27,8 +27,8 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900">
-      <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-96">
+    <div className="min-h-screen flex items-center justify-center bg-[#1C1C24]">
+      <div className="bg-[#272731] p-8 rounded-lg shadow-lg w-96">
         <h1 className="text-2xl text-white font-bold mb-6 text-center">Login</h1>
         
         {error && (

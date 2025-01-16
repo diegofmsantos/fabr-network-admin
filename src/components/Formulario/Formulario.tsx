@@ -131,7 +131,7 @@ export default function Formulario() {
     }
 
     return (
-        <div className="p-4 overflow-x-hidden bg-[#272731] min-h-screen">
+        <div className="p-4 overflow-x-hidden bg-[#1C1C24] min-h-screen">
             <LogoutButton />
             <Link
                 href={`/materia`}
