@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { atualizarJogador, deletarJogador } from "@/api/api";
-import InputField from "@/components/Formulario/InputField";
 import { Estatisticas, Jogador } from "@/types/jogador";
 
 export default function ModalJogador({
@@ -19,7 +18,7 @@ export default function ModalJogador({
             recepcao: { recepcoes: 0, alvo: 0, jardas_recebidas: 0, tds_recebidos: 0, fumble_de_recebedor: 0 },
             retorno: { retornos: 0, jardas_retornadas: 0, td_retornados: 0, fumble_retornador: 0 },
             defesa: { tackles_totais: 0, tackles_for_loss: 0, sacks_forcado: 0, fumble_forcado: 0, interceptacao_forcada: 0, passe_desviado: 0, safety: 0, td_defensivo: 0 },
-            kicker: { xp_bons: 0, tentativas_de_xp: 0, fg_bons: 0, tentativas_de_fg: 0, fg_mais_longo: 0, fg_0_10: "0/0", fg_11_20: "0/0", fg_21_30: "0/0", fg_31_40: "0/0", fg_41_50: "0/0" },
+            kicker: { xp_bons: 0, tentativas_de_xp: 0, fg_bons: 0, tentativas_de_fg: 0, fg_mais_longo: 0 },
             punter: { punts: 0, jardas_de_punt: 0 },
         },
     });
@@ -77,7 +76,7 @@ export default function ModalJogador({
                 Object.entries(dataToSave.estatisticas || {}).map(([groupKey, fields]) => [
                     groupKey,
                     Object.fromEntries(
-                        Object.entries(fields || {}).filter(
+                        Object.entries(fields || {}).filter( // @ts-ignore
                             ([_, value]) => value !== undefined && value !== ""
                         )
                     ),
@@ -119,7 +118,7 @@ export default function ModalJogador({
         recepcao: ["recepcoes", "alvo", "jardas_recebidas", "tds_recebidos", "fumble_de_recebedor"],
         retorno: ["retornos", "jardas_retornadas", "td_retornados", "fumble_retornador"],
         defesa: ["tackles_totais", "tackles_for_loss", "sacks_forcado", "fumble_forcado", "interceptacao_forcada", "passe_desviado", "safety", "td_defensivo"],
-        kicker: ["xp_bons", "tentativas_de_xp", "fg_bons", "tentativas_de_fg", "fg_mais_longo", "fg_0_10", "fg_11_20", "fg_21_30", "fg_31_40", "fg_41_50"],
+        kicker: ["xp_bons", "tentativas_de_xp", "fg_bons", "tentativas_de_fg", "fg_mais_longo"],
         punter: ["punts", "jardas_de_punt"],
     };
 

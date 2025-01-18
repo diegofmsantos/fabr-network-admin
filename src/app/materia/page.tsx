@@ -1,4 +1,3 @@
-// app/materia/page.tsx
 "use client"
 
 import { FormMateria } from "../../components/Editor/FormMateria"

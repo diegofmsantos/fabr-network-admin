@@ -45,11 +45,6 @@ export const EstatisticasSchema = z.object({
     fg_bons: z.number().optional(),
     tentativas_de_fg: z.number().optional(),
     fg_mais_longo: z.number().optional(),
-    fg_0_10: z.string().optional(),
-    fg_11_20: z.string().optional(),
-    fg_21_30: z.string().optional(),
-    fg_31_40: z.string().optional(),
-    fg_41_50: z.string().optional(),
   }).optional(),
   punter: z.object({
     punts: z.number().optional(),

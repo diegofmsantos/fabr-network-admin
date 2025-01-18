@@ -22,7 +22,7 @@ export default function Login() {
     if (result?.error) {
       setError("Credenciais inválidas")
     } else {
-      router.push("/") // Redireciona para a página principal após o login
+      router.push("/")
     }
   }
 

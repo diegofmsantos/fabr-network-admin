@@ -15,7 +15,6 @@ import ModalJogador from "@/components/Modal/ModalJogador";
 import ModalSucesso from "../Modal/ModalSucesso"
 import { camposJogador, camposNumericosJogador, camposTime, estatisticas } from "../../utils/campos"
 import Link from "next/link"
-import Image from "next/image"
 import LogoutButton from "../LogoutButton"
 
 type TimeFormData = z.infer<typeof TimeSchema>
@@ -193,7 +192,7 @@ export default function Formulario() {
                             label="Time"
                             id="timeId"
                             register={registerJogador("timeId", {
-                                setValueAs: (v) => (v === "" ? undefined : parseInt(v)), // Converter string para número
+                                setValueAs: (v) => (v === "" ? undefined : parseInt(v)),
                             })}
                             error={jogadorErrors.timeId as FieldError | undefined}
                             type="select"
@@ -292,7 +291,7 @@ export default function Formulario() {
                             e.currentTarget.style.backgroundColor = "transparent";
                             e.currentTarget.style.color = '#fff';
                             e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.borderColor = '#374151'; // gray-700
+                            e.currentTarget.style.borderColor = '#374151'; 
                         }}
                     >
                         <h2 className="text-xl font-bold">{time.nome}</h2>
@@ -331,7 +330,6 @@ export default function Formulario() {
                     onClose={() => setIsSuccessModalOpen(false)}
                 />
             )}
-
 
         </div>
     )

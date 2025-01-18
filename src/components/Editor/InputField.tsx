@@ -1,4 +1,3 @@
-// components/Editor/InputField.tsx
 interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {}
 
 export const InputField = (props: InputFieldProps) => {
