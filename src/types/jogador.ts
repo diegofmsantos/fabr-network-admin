@@ -19,13 +19,11 @@ export type Estatisticas = {
         alvo: number
         jardas_recebidas: number
         tds_recebidos: number
-        fumble_de_recebedor: number
     }
     retorno: {
         retornos: number
         jardas_retornadas: number
         td_retornados: number
-        fumble_retornador: number
     }
     defesa: {
         tackles_totais: number

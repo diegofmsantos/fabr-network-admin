@@ -21,13 +21,11 @@ export const EstatisticasSchema = z.object({
     alvo: z.number().optional(),
     jardas_recebidas: z.number().optional(),
     tds_recebidos: z.number().optional(),
-    fumble_de_recebedor: z.number().optional(),
   }).optional(),
   retorno: z.object({
     retornos: z.number().optional(),
     jardas_retornadas: z.number().optional(),
     td_retornados: z.number().optional(),
-    fumble_retornador: z.number().optional(),
   }).optional(),
   defesa: z.object({
     tackles_totais: z.number().optional(),

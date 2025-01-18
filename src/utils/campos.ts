@@ -85,7 +85,6 @@ export const estatisticas = [
             { id: "alvo", label: "Alvo", type: "number" },
             { id: "jardas_recebidas", label: "Jardas Recebidas", type: "number" },
             { id: "tds_recebidos", label: "Touchdowns Recebidos", type: "number" },
-            { id: "fumble_de_recebedor", label: "Fumbles de Recebedor", type: "number" },
         ],
     },
     {
@@ -94,7 +93,6 @@ export const estatisticas = [
             { id: "retornos", label: "Retornos", type: "number" },
             { id: "jardas_retornadas", label: "Jardas Retornadas", type: "number" },
             { id: "td_retornados", label: "Touchdowns Retornados", type: "number" },
-            { id: "fumble_retornador", label: "Fumbles de Retornador", type: "number" },
         ],
     },
     {

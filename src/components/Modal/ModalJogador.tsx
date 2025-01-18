@@ -15,8 +15,8 @@ export default function ModalJogador({
         estatisticas: jogador.estatisticas || {
             passe: { passes_completos: 0, passes_tentados: 0, jardas_de_passe: 0, td_passados: 0, interceptacoes_sofridas: 0, sacks_sofridos: 0, fumble_de_passador: 0 },
             corrida: { corridas: 0, jardas_corridas: 0, tds_corridos: 0, fumble_de_corredor: 0 },
-            recepcao: { recepcoes: 0, alvo: 0, jardas_recebidas: 0, tds_recebidos: 0, fumble_de_recebedor: 0 },
-            retorno: { retornos: 0, jardas_retornadas: 0, td_retornados: 0, fumble_retornador: 0 },
+            recepcao: { recepcoes: 0, alvo: 0, jardas_recebidas: 0, tds_recebidos: 0 },
+            retorno: { retornos: 0, jardas_retornadas: 0, td_retornados: 0 },
             defesa: { tackles_totais: 0, tackles_for_loss: 0, sacks_forcado: 0, fumble_forcado: 0, interceptacao_forcada: 0, passe_desviado: 0, safety: 0, td_defensivo: 0 },
             kicker: { xp_bons: 0, tentativas_de_xp: 0, fg_bons: 0, tentativas_de_fg: 0, fg_mais_longo: 0 },
             punter: { punts: 0, jardas_de_punt: 0 },
@@ -115,8 +115,8 @@ export default function ModalJogador({
     const estatisticasOrdem = {
         passe: ["passes_completos", "passes_tentados", "jardas_de_passe", "td_passados", "interceptacoes_sofridas", "sacks_sofridos", "fumble_de_passador"],
         corrida: ["corridas", "jardas_corridas", "tds_corridos", "fumble_de_corredor"],
-        recepcao: ["recepcoes", "alvo", "jardas_recebidas", "tds_recebidos", "fumble_de_recebedor"],
-        retorno: ["retornos", "jardas_retornadas", "td_retornados", "fumble_retornador"],
+        recepcao: ["recepcoes", "alvo", "jardas_recebidas", "tds_recebidos"],
+        retorno: ["retornos", "jardas_retornadas", "td_retornados"],
         defesa: ["tackles_totais", "tackles_for_loss", "sacks_forcado", "fumble_forcado", "interceptacao_forcada", "passe_desviado", "safety", "td_defensivo"],
         kicker: ["xp_bons", "tentativas_de_xp", "fg_bons", "tentativas_de_fg", "fg_mais_longo"],
         punter: ["punts", "jardas_de_punt"],
