@@ -8,6 +8,7 @@ interface FormFieldProps {
   type?: "text" | "number" | "select"
   options?: { value: string | number; label: string }[]
   step?: string
+  temporada?: string
 }
 
 export const FormField: React.FC<FormFieldProps> = ({
