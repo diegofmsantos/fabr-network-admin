@@ -11,6 +11,7 @@ export const TimeSchema = z.object({
   id: z.number().optional(),
   nome: z.string(),
   sigla: z.string(),
+  temporada: z.string(),
   cor: z.string(),
   cidade: z.string(),
   bandeira_estado: z.string(),
