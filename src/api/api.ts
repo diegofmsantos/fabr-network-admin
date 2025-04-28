@@ -181,3 +181,18 @@ export const iniciarTemporada = async (ano: string, alteracoes: any): Promise<an
     throw new Error('Falha ao iniciar nova temporada')
   }
 }
+
+export const getTransferenciasFromJson = async (
+  temporadaOrigem: string,
+  temporadaDestino: string
+) => {
+  try {
+    const response = await api.get('/transferencias-json', {
+      params: { temporadaOrigem, temporadaDestino }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao buscar transferências:', error);
+    throw new Error('Falha ao buscar transferências');
+  }
+};

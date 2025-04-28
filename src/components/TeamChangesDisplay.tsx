@@ -29,6 +29,7 @@ export function TeamChangesDisplay({ timeChanges, times, onRemove }: TeamChanges
                   {change.logo && <li>Logo: {change.logo}</li>}
                   {change.presidente && <li>Presidente: {change.presidente}</li>}
                   {change.head_coach && <li>Head Coach: {change.head_coach}</li>}
+                  {change.instagram_coach && <li>Instagram Coach: {change.instagram_coach}</li>}
                   {change.coord_ofen && <li>Coord. Ofensivo: {change.coord_ofen}</li>}
                   {change.coord_defen && <li>Coord. Defensivo: {change.coord_defen}</li>}
                 </ul>

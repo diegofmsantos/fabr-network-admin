@@ -17,6 +17,7 @@ export interface TimeChange {
   capacete?: string;
   presidente?: string;
   head_coach?: string;
+  instagram_coach?: string
   coord_ofen?: string;
   coord_defen?: string;
 }
@@ -42,6 +43,7 @@ export function TeamChangesForm({ times, onAddChange }: TeamChangesProps) {
           capacete: time.capacete,
           presidente: time.presidente,
           head_coach: time.head_coach,
+          instagram_coach: time.instagram_coach,
           coord_ofen: time.coord_ofen,
           coord_defen: time.coord_defen,
         });
@@ -103,6 +105,11 @@ export function TeamChangesForm({ times, onAddChange }: TeamChangesProps) {
     
     if (timeForm.head_coach && timeForm.head_coach !== timeExistente.head_coach) {
       alteracoes.head_coach = timeForm.head_coach;
+      temAlteracoes = true;
+    }
+
+    if (timeForm.instagram_coach && timeForm.instagram_coach !== timeExistente.instagram_coach) {
+      alteracoes.instagram_coach = timeForm.instagram_coach;
       temAlteracoes = true;
     }
     
@@ -254,6 +261,18 @@ export function TeamChangesForm({ times, onAddChange }: TeamChangesProps) {
               type="text"
               value={timeForm.head_coach || ""}
               onChange={(e) => setTimeForm({ ...timeForm, head_coach: e.target.value })}
+              className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
+            />
+          </div>
+
+          <div>
+            <label className="block text-white text-sm font-medium mb-2">
+              Instagram Coach
+            </label>
+            <input
+              type="text"
+              value={timeForm.instagram_coach || ""}
+              onChange={(e) => setTimeForm({ ...timeForm, instagram_coach: e.target.value })}
               className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
             />
           </div>

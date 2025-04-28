@@ -32,6 +32,12 @@ export default function HomePage() {
       description: 'Filtros e insights sobre times e jogadores',
       icon: '/globe.svg',
       route: '/dashboard'
+    },
+    {
+      title: 'Mercado',
+      description: 'Visualizar transferências de jogadores entre temporadas',
+      icon: '/transfer.png', 
+      route: '/mercado'
     }
   ]
 
