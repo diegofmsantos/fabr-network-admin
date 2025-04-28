@@ -65,7 +65,7 @@ export default function MercadoPage() {
     : transferencias;
 
   return (
-    <div className="min-h-screen bg-[#1C1C24]">
+    <div className="min-h-screen pb-4 bg-[#1C1C24]">
       {/* Header */}
       <header className="sticky top-0 z-10 bg-gradient-to-r from-[#191920] to-[#272731] shadow-xl mb-4">
         <div className="w-full px-2 py-4 flex justify-between items-center">
