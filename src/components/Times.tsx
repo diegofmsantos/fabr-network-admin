@@ -94,6 +94,7 @@ export const Times = () => {
             setSuccessMessage("Time adicionado com sucesso!")
             setIsSuccessModalOpen(true)
             reset()
+            setIsSuccessModalOpen(false)
         } catch (error) {
             console.error("Erro ao adicionar time:", error)
         }
@@ -482,7 +483,7 @@ export const Times = () => {
                                 </div>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 py-10 gap-5">
                                 {times.map((time) => (
                                     <div
                                         key={time.id}

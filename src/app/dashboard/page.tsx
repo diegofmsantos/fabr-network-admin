@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { getJogadores, getTimes,  } from '@/api/api'
+import { getTimes, getJogadores } from '@/api/api'
 import { Time } from '@/types/time'
 import { Jogador } from '@/types/jogador'
 import Image from 'next/image'

@@ -1,3 +1,4 @@
+// src/app/page.tsx
 "use client"
 
 import React from 'react'
@@ -34,10 +35,10 @@ export default function HomePage() {
       route: '/dashboard'
     },
     {
-      title: 'Mercado',
-      description: 'Visualizar transferências de jogadores entre temporadas',
-      icon: '/transfer.png', 
-      route: '/mercado'
+      title: 'Importação',
+      description: 'Importar times, jogadores e estatísticas via planilhas',
+      icon: '/globe.svg',
+      route: '/admin'
     }
   ]
 
@@ -46,7 +47,7 @@ export default function HomePage() {
       {/* Header com botão de logout */}
       <header className="flex justify-center items-center mb-8">
         <h1 className="text-5xl text-[#63E300] font-extrabold italic leading-[55px] tracking-[-3px]">
-          FABR NETWORK
+          FABR NETWORK - FUTEBOL AMERICANO
         </h1>
       </header>
         <LogoutButton />
@@ -56,7 +57,7 @@ export default function HomePage() {
           PAINEL DE ADMINISTRAÇÃO
         </h1>
         <p className="text-gray-300 text-center mb-12">
-          Gerencie times, jogadores, matérias e obtenha insights sobre o futebol americano brasileiro
+          Gerencie times, jogadores, matérias, temporada e obtenha insights sobre o futebol americano brasileiro
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

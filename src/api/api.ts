@@ -1,3 +1,4 @@
+// src/api/api.ts - Adicionando as novas funções de importação
 import { Time } from '@/types/time'
 import { Jogador } from '@/types/jogador'
 import axios from 'axios'
@@ -8,6 +9,7 @@ export const api = axios.create({
 });
 
 // Função para obter os times com filtro de temporada
+// Adicione logs para verificar o URL
 export const getTimes = async (temporada = '2024'): Promise<Time[]> => {
   try {
     console.log(`Buscando times com URL: ${api.defaults.baseURL}/times?temporada=${temporada}`);
@@ -81,9 +83,11 @@ export const addJogador = async (data: Omit<Jogador, 'id'>): Promise<Jogador> =>
 
 // Função para atualizar um jogador
 export const atualizarJogador = async (data: any): Promise<Jogador> => {
+  // Aqui enviamos os campos do jogador e também as informações para o relacionamento
   try {
     const response = await api.put(`/jogador/${data.id}`, {
       ...data,
+      // Incluir informações para o relacionamento
       timeId: data.timeId,
       temporada: data.temporada, 
       numero: data.numero,
@@ -101,9 +105,10 @@ export const atualizarJogador = async (data: any): Promise<Jogador> => {
 // Função para deletar um jogador
 export const deletarJogador = async (id: number): Promise<void> => {
   try {
-    console.log(`Tentando excluir jogador com ID: ${id}`);
+    console.log(`Tentando excluir jogador com ID: ${id}`); // Log para debug
     const response = await api.delete(`/jogador/${id}`);
 
+    // Checar se a resposta foi bem-sucedida
     if (response.status === 200) {
       console.log(`Jogador com ID ${id} excluído com sucesso.`);
     } else {
@@ -182,17 +187,92 @@ export const iniciarTemporada = async (ano: string, alteracoes: any): Promise<an
   }
 }
 
-export const getTransferenciasFromJson = async (
-  temporadaOrigem: string,
-  temporadaDestino: string
-) => {
+// NOVAS FUNÇÕES PARA IMPORTAÇÃO DE DADOS
+
+// Função para importar times a partir de uma planilha
+export const importarTimes = async (arquivo: File): Promise<any> => {
   try {
-    const response = await api.get('/transferencias-json', {
-      params: { temporadaOrigem, temporadaDestino }
+    const formData = new FormData();
+    formData.append('arquivo', arquivo);
+    
+    const response = await api.post('/importar-times', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
     });
     return response.data;
   } catch (error) {
-    console.error('Erro ao buscar transferências:', error);
-    throw new Error('Falha ao buscar transferências');
+    console.error('Erro ao importar times:', error);
+    throw new Error('Falha ao importar times');
+  }
+};
+
+// Função para importar jogadores a partir de uma planilha
+export const importarJogadores = async (arquivo: File): Promise<any> => {
+  try {
+    const formData = new FormData();
+    formData.append('arquivo', arquivo);
+    
+    const response = await api.post('/importar-jogadores', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao importar jogadores:', error);
+    throw new Error('Falha ao importar jogadores');
+  }
+};
+
+// Função para importar estatísticas a partir de uma planilha de jogo
+export const atualizarEstatisticas = async (arquivo: File, id_jogo: string, data_jogo: string): Promise<any> => {
+  try {
+    const formData = new FormData();
+    formData.append('arquivo', arquivo);
+    formData.append('id_jogo', id_jogo);
+    formData.append('data_jogo', data_jogo);
+    
+    const response = await api.post('/atualizar-estatisticas', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao atualizar estatísticas:', error);
+    throw new Error('Falha ao atualizar estatísticas');
+  }
+};
+
+// Função para reprocessar estatísticas de um jogo
+export const reprocessarJogo = async (arquivo: File, id_jogo: string, data_jogo: string, force: boolean = false): Promise<any> => {
+  try {
+    const formData = new FormData();
+    formData.append('arquivo', arquivo);
+    formData.append('id_jogo', id_jogo);
+    formData.append('data_jogo', data_jogo);
+    formData.append('force', String(force));
+    
+    const response = await api.post('/reprocessar-jogo', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao reprocessar jogo:', error);
+    throw new Error('Falha ao reprocessar jogo');
+  }
+};
+
+// Função para obter jogos processados
+export const getJogosProcessados = async (): Promise<any> => {
+  try {
+    const response = await api.get('/jogos-processados');
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao obter jogos processados:', error);
+    throw new Error('Falha ao obter jogos processados');
   }
 };
