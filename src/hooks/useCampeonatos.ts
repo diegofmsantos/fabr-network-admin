@@ -16,11 +16,9 @@ export const campeonatoQueryKeys = {
   detail: (id: number) => [...campeonatoQueryKeys.details(), id] as const,
   jogos: (filters: FiltroJogos) => [...campeonatoQueryKeys.all, 'jogos', filters] as const,
   classificacao: (campeonatoId: number) => [...campeonatoQueryKeys.all, 'classificacao', campeonatoId] as const,
-  proximosJogos: (campeonatoId: number) => [...campeonatoQueryKeys.all, 'proximos', campeonatoId] as const,
-  ultimosResultados: (campeonatoId: number) => [...campeonatoQueryKeys.all, 'resultados', campeonatoId] as const,
 }
 
-// Hook para listar campeonatos
+// ✅ CORREÇÃO: Hook para listar campeonatos
 export function useCampeonatos(filters?: { temporada?: string; tipo?: string; status?: string }) {
   return useQuery({
     queryKey: campeonatoQueryKeys.list(filters || {}),
@@ -30,15 +28,15 @@ export function useCampeonatos(filters?: { temporada?: string; tipo?: string; st
       if (filters?.tipo) params.append('tipo', filters.tipo)
       if (filters?.status) params.append('status', filters.status)
 
-    
-      const url = `${API_BASE_URL}/campeonatos${params.toString() ? `?${params.toString()}` : ''}`
+      // ✅ URL CORRIGIDA - adicionando /campeonatos no path
+      const url = `${API_BASE_URL}/campeonatos/campeonatos${params.toString() ? `?${params.toString()}` : ''}`
       
-      console.log('🔍 URL corrigida:', url) // Para debug
+      console.log('🔍 URL de busca:', url) // Para debug
       
       const response = await fetch(url)
       
       if (!response.ok) {
-        throw new Error('Erro ao buscar campeonatos')
+        throw new Error(`Erro ao buscar campeonatos: ${response.status}`)
       }
       
       return response.json()
@@ -47,18 +45,19 @@ export function useCampeonatos(filters?: { temporada?: string; tipo?: string; st
   })
 }
 
-// ===== CORREÇÃO 2: useCampeonato (campeonato específico) =====
+// ✅ CORREÇÃO: useCampeonato (campeonato específico)
 export function useCampeonato(id: number) {
   return useQuery({
     queryKey: campeonatoQueryKeys.detail(id),
     queryFn: async (): Promise<Campeonato> => {
-      const response = await fetch(`${API_BASE_URL}/campeonatos/${id}`)
+      // ✅ URL CORRIGIDA
+      const response = await fetch(`${API_BASE_URL}/campeonatos/campeonatos/${id}`)
       
       if (!response.ok) {
         if (response.status === 404) {
           throw new Error('Campeonato não encontrado')
         }
-        throw new Error('Erro ao buscar campeonato')
+        throw new Error(`Erro ao buscar campeonato: ${response.status}`)
       }
       
       return response.json()
@@ -68,7 +67,7 @@ export function useCampeonato(id: number) {
   })
 }
 
-// ===== CORREÇÃO 3: useJogos =====
+// ✅ CORREÇÃO: useJogos
 export function useJogos(filters: FiltroJogos) {
   return useQuery({
     queryKey: campeonatoQueryKeys.jogos(filters),
@@ -81,11 +80,11 @@ export function useJogos(filters: FiltroJogos) {
         }
       })
 
-      // ✅ CORRIGIR ROTA DE JOGOS:
-      const response = await fetch(`${API_BASE_URL}/jogos?${params.toString()}`)
+      // ✅ URL CORRIGIDA para jogos
+      const response = await fetch(`${API_BASE_URL}/campeonatos/jogos?${params.toString()}`)
       
       if (!response.ok) {
-        throw new Error('Erro ao buscar jogos')
+        throw new Error(`Erro ao buscar jogos: ${response.status}`)
       }
       
       return response.json()
@@ -94,16 +93,16 @@ export function useJogos(filters: FiltroJogos) {
   })
 }
 
-// ===== CORREÇÃO 4: useClassificacao =====
+// ✅ CORREÇÃO: useClassificacao
 export function useClassificacao(campeonatoId: number) {
   return useQuery({
     queryKey: campeonatoQueryKeys.classificacao(campeonatoId),
     queryFn: async (): Promise<ClassificacaoGrupo[]> => {
-      // ✅ CORRIGIR ROTA DE CLASSIFICAÇÃO:
-      const response = await fetch(`${API_BASE_URL}/classificacao/campeonato/${campeonatoId}`)
+      // ✅ URL CORRIGIDA para classificação
+      const response = await fetch(`${API_BASE_URL}/campeonatos/classificacao/campeonato/${campeonatoId}`)
       
       if (!response.ok) {
-        throw new Error('Erro ao buscar classificação')
+        throw new Error(`Erro ao buscar classificação: ${response.status}`)
       }
       
       return response.json()
@@ -113,15 +112,15 @@ export function useClassificacao(campeonatoId: number) {
   })
 }
 
-// ===== CORREÇÃO 5: useCreateCampeonato =====
+// ✅ CORREÇÃO: useCreateCampeonato
 export function useCreateCampeonato() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
 
   return useMutation({
     mutationFn: async (data: CriarCampeonatoRequest): Promise<Campeonato> => {
-      // ✅ CORRIGIR ROTA DE CRIAÇÃO:
-      const response = await fetch(`${API_BASE_URL}/campeonatos`, {
+      // ✅ URL CORRIGIDA para criação
+      const response = await fetch(`${API_BASE_URL}/campeonatos/campeonatos`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
