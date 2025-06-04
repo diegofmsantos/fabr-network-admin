@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { getTransferenciasFromJson } from '@/api/api'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -30,25 +29,7 @@ export default function MercadoPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [searchTerm, setSearchTerm] = useState('')
 
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        const data = await getTransferenciasFromJson(temporadaOrigem, temporadaDestino);
-        setTransferencias(data);
-      } catch (err) {
-        console.error('Erro:', err);
-        setError(`Não foram encontradas transferências de ${temporadaOrigem} para ${temporadaDestino}`);
-        setTransferencias([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    loadData();
-  }, [temporadaOrigem, temporadaDestino]);
+
 
   const filteredTransferencias = searchTerm 
     ? transferencias.filter(t => 

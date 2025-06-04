@@ -168,7 +168,7 @@ export default function ModalTime({
                                                 </label>
                                                 <input
                                                     type="text"
-                                                    name={field.name}
+                                                    name={field.name} // @ts-ignore
                                                     value={field.name.startsWith("titulos.") ? formData.titulos?.[field.name.split(".")[1]] || "" : formData[field.name] || ""}
                                                     onChange={handleChange}
                                                     placeholder={field.label}

@@ -1,4 +1,3 @@
-// src/api/api.ts - Adicionando as novas funções de importação
 import { Time } from '@/types/time'
 import { Jogador } from '@/types/jogador'
 import axios from 'axios'

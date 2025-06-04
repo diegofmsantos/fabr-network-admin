@@ -1,5 +1,4 @@
 import { Jogador } from "@/types/jogador"
-import { StatKey } from "@/types/Stats"
 import { Time } from "@/types/time"
 
 export const createSlug = (text: string): string => {
@@ -88,24 +87,6 @@ export const findPlayerBySlug = (
     return jogadores.find(jogador =>
         getPlayerSlug(jogador.nome) === normalizedPlayerSlug
     ) || null;
-}
-
-export const normalizeValue = (value: string | number | null, statKey: StatKey): string => {
-    if (value === null) return 'N/A'
-
-    if (['fg_11_20', 'fg_21_30', 'fg_31_40', 'fg_41_50'].includes(statKey as string)) return String(value)
-
-    if (typeof value === 'string') return value
-
-    const percentageStats = ['passes_percentual', 'extra_points', 'field_goals']
-    const averageStats = ['jardas_media', 'jardas_corridas_media', 'jardas_recebidas_media', 'jardas_retornadas_media', 'jardas_punt_media']
-
-    if (percentageStats.includes(statKey as string)) {
-        return `${Math.round(value)}%`;
-    } else if (averageStats.includes(statKey as string)) {
-        return value.toFixed(1);
-    }
-    return Math.round(value).toString();
 }
 
 export const formatStatValue = (value: number | null, statKey: string, title: string): string => {
