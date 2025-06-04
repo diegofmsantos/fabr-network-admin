@@ -4,6 +4,7 @@ import { AdminSidebar } from '@/components/Admin/AdminSidebar'
 import { AdminHeader } from '@/components/Admin/AdminHeader'
 import { AdminErrorBoundary } from '@/components/Admin/ErrorBoundary'
 import { NotificationContainer } from '@/components/Admin/NotificationContainer'
+import { HeaderGeneral } from '../HeaderGeneral'
 
 interface AdminLayoutClientProps {
   children: React.ReactNode
@@ -12,14 +13,16 @@ interface AdminLayoutClientProps {
 export const AdminLayoutClient: React.FC<AdminLayoutClientProps> = ({ children }) => {
   return (
     <AdminErrorBoundary>
-      <div className="min-h-screen bg-gray-50">
+      <HeaderGeneral label='CAMPEONATOS' />
+      <AdminHeader />
+      <div className="min-h-screen bg-[#272731]">
         {/* Sidebar */}
         <AdminSidebar />
         
         {/* Main Content */}
         <div className="lg:pl-64">
           {/* Header */}
-          <AdminHeader />
+          
           
           {/* Page Content */}
           <main className="py-6">

@@ -14,7 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-br">
-      <body>
+      <body className="bg-[#272731]">
         <QueryProvider>
           {children}
         </QueryProvider>

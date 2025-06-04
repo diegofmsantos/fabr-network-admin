@@ -90,14 +90,12 @@ export const AdminSidebar: React.FC = () => {
     const active = isActive(item.href)
 
     return (
-      <div key={item.id}>
+      <div key={item.id} className=''>
         {hasChildren ? (
           <button
             onClick={() => toggleExpanded(item.id)}
-            className={`w-full flex items-center justify-between px-3 py-2 text-left text-sm font-medium rounded-md transition-colors
-              ${active 
-                ? 'bg-blue-100 text-blue-700' 
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+            className={`w-full flex items-center justify-between px-3 py-2 text-left text-md font-medium rounded-md transition-colors duration-300 hover:bg-[#373740]
+              ${active ? 'bg-[#373740] text-[#63E300]' : 'text-gray-300 hover:bg-[#373740] hover:text-[#63E300]'
               }`}
             style={{ paddingLeft: `${12 + level * 16}px` }}
           >
@@ -114,10 +112,10 @@ export const AdminSidebar: React.FC = () => {
         ) : (
           <Link
             href={item.href}
-            className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors
+            className={`flex items-center px-3 py-2 text-md font-medium rounded-md transition-colors
               ${active 
-                ? 'bg-blue-100 text-blue-700' 
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                ? 'bg-[#373740] text-[#63E300]' 
+                : 'text-gray-300 hover:bg-[#373740] hover:text-[#63E300]'
               }`}
             style={{ paddingLeft: `${12 + level * 16}px` }}
           >
@@ -136,8 +134,8 @@ export const AdminSidebar: React.FC = () => {
   }
 
   return (
-    <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0">
-      <div className="flex flex-col flex-grow bg-white border-r border-gray-200 pt-5 pb-4 overflow-y-auto">
+    <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 xl:pt-8">
+      <div className="flex flex-col flex-grow bg-[#272731] border-r border-gray-700 pt-5 pb-4 overflow-y-auto">
         {/* Logo */}
         <div className="flex items-center flex-shrink-0 px-4">
           <Link href="/admin" className="flex items-center">
@@ -161,12 +159,12 @@ export const AdminSidebar: React.FC = () => {
         {/* Footer */}
         <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
           <div className="flex items-center">
-            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-[#1C1C24] rounded-full flex items-center justify-center">
               <span className="text-white text-sm font-medium">A</span>
             </div>
             <div className="ml-3">
-              <p className="text-sm font-medium text-gray-700">Admin</p>
-              <p className="text-xs font-medium text-gray-500">FABR Network</p>
+              <p className="text-sm font-medium text-[#63E300]">Admin</p>
+              <p className="text-xs font-medium text-[#63E300]">FABR Network</p>
             </div>
           </div>
         </div>

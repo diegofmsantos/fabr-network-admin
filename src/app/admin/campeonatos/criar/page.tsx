@@ -17,7 +17,7 @@ export default function CriarCampeonato() {
     temporada: '2025',
     tipo: 'REGULAR',
     dataInicio: '',
-    dataFim: undefined, // ✅ Opcional agora
+    dataFim: undefined, 
     descricao: '',
     formato: {
       tipoDisputa: 'PONTOS_CORRIDOS',
@@ -70,85 +70,87 @@ export default function CriarCampeonato() {
   }
 
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <div className="bg-white shadow">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-6">
-            <div className="flex items-center space-x-4">
-              <Link
-                href="/admin/campeonatos"
-                className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Voltar
-              </Link>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Criar Novo Campeonato</h1>
-                <p className="text-sm text-gray-500">
-                  Passo {currentStep} de {steps.length}: {steps[currentStep - 1]?.name}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-3">
-              <button
-                type="button"
-                className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-              >
-                <Eye className="h-4 w-4 mr-2" />
-                Prévia
-              </button>
-
-              {currentStep === steps.length && (
-                <button
-                  onClick={handleSubmit}
-                  disabled={createMutation.isPending || !canProceed()}
-                  className="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 disabled:opacity-50"
-                >
-                  <Save className="h-4 w-4 mr-2" />
-                  {createMutation.isPending ? 'Criando...' : 'Criar Campeonato'}
-                </button>
-              )}
-            </div>
+   <div className="min-h-screen bg-[#1C1C24]">
+  {/* Header */}
+  <div className="bg-[#272731] shadow-xl">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="flex items-center justify-between py-6">
+        <div className="flex items-center space-x-4">
+          <Link
+            href="/admin/campeonatos"
+            className="inline-flex items-center text-sm font-medium text-gray-400 hover:text-white transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Voltar
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold text-white">Criar Novo Campeonato</h1>
+            <p className="text-sm text-gray-400">
+              Passo {currentStep} de {steps.length}: {steps[currentStep - 1]?.name}
+            </p>
           </div>
         </div>
-      </div>
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        <div className="lg:grid lg:grid-cols-12 lg:gap-x-5">
-          {/* Steps Sidebar */}
-          <aside className="py-6 px-2 sm:px-6 lg:col-span-3 lg:py-0 lg:px-0">
-            <nav className="space-y-1">
-              {steps.map((step) => (
-                <button
-                  key={step.id}
-                  onClick={() => setCurrentStep(step.id)}
-                  className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left ${step.id === currentStep
-                    ? 'bg-blue-50 border-blue-500 text-blue-700'
+        <div className="flex items-center space-x-3">
+          <button
+            type="button"
+            className="inline-flex items-center rounded-md bg-[#1C1C24] px-3 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-gray-700 hover:bg-gray-700 transition-colors"
+          >
+            <Eye className="h-4 w-4 mr-2" />
+            Prévia
+          </button>
+
+          {currentStep === steps.length && (
+            <button
+              onClick={handleSubmit}
+              disabled={createMutation.isPending || !canProceed()}
+              className="inline-flex items-center rounded-md bg-[#63E300] px-3 py-2 text-sm font-semibold text-black shadow-sm hover:bg-[#50B800] disabled:opacity-50 transition-colors"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              {createMutation.isPending ? 'Criando...' : 'Criar Campeonato'}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+    <div className="lg:grid lg:grid-cols-12 lg:gap-x-5">
+      {/* Steps Sidebar */}
+      <aside className="py-6 px-2 sm:px-6 lg:col-span-3 lg:py-0 lg:px-0">
+        <nav className="space-y-1">
+          {steps.map((step) => (
+            <button
+              key={step.id}
+              onClick={() => setCurrentStep(step.id)}
+              className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors ${
+                step.id === currentStep
+                  ? 'bg-[#1C1C24] border-[#63E300] text-[#63E300] border-l-4'
+                  : step.id < currentStep
+                    ? 'text-white hover:text-[#63E300] hover:bg-[#1C1C24]'
+                    : 'text-gray-400 hover:text-white hover:bg-[#1C1C24]'
+              }`}
+            >
+              <span
+                className={`flex-shrink-0 -ml-1 mr-3 h-6 w-6 rounded-full flex items-center justify-center text-xs font-medium ${
+                  step.id === currentStep
+                    ? 'bg-[#63E300] text-black'
                     : step.id < currentStep
-                      ? 'text-green-600 hover:text-green-900'
-                      : 'text-gray-900 hover:text-gray-900 hover:bg-gray-50'
-                    }`}
-                >
-                  <span
-                    className={`flex-shrink-0 -ml-1 mr-3 h-6 w-6 rounded-full flex items-center justify-center text-xs font-medium ${step.id === currentStep
-                      ? 'bg-blue-500 text-white'
-                      : step.id < currentStep
-                        ? 'bg-green-500 text-white'
-                        : 'bg-gray-300 text-gray-700'
-                      }`}
-                  >
-                    {step.id < currentStep ? '✓' : step.id}
-                  </span>
-                  <div>
-                    <div className="font-medium">{step.name}</div>
-                    <div className="text-xs text-gray-500">{step.description}</div>
-                  </div>
-                </button>
-              ))}
-            </nav>
-          </aside>
+                      ? 'bg-green-500 text-white'
+                      : 'bg-gray-600 text-gray-300'
+                }`}
+              >
+                {step.id < currentStep ? '✓' : step.id}
+              </span>
+              <div>
+                <div className="font-medium">{step.name}</div>
+                <div className="text-xs text-gray-500">{step.description}</div>
+              </div>
+            </button>
+          ))}
+        </nav>
+      </aside>
 
           {/* Main Content */}
           <div className="space-y-6 sm:px-6 lg:col-span-9 lg:px-0">

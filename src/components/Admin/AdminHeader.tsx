@@ -49,7 +49,7 @@ export const AdminHeader: React.FC = () => {
   }
 
   const markAsRead = (id: string) => {
-    setNotifications(prev => 
+    setNotifications(prev =>
       prev.map(n => n.id === id ? { ...n, read: true } : n)
     )
   }
@@ -60,11 +60,11 @@ export const AdminHeader: React.FC = () => {
 
   return (
     <div className="lg:pl-64">
-      <div className="flex h-16 flex-shrink-0 border-b border-gray-200 bg-white lg:border-none">
+      <div className="flex h-16 flex-shrink-0 border-b border-gray-700 bg-[#272731] lg:border-none">
         {/* Mobile menu button */}
         <button
           type="button"
-          className="border-r border-gray-200 px-4 text-gray-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 lg:hidden"
+          className="border-r border-gray-700 px-4 text-gray-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#63E300] lg:hidden"
         >
           <Menu className="h-6 w-6" />
         </button>
@@ -72,7 +72,7 @@ export const AdminHeader: React.FC = () => {
         {/* Search section */}
         <div className="flex flex-1 justify-between px-4 sm:px-6 lg:mx-auto lg:px-8">
           <div className="flex flex-1 items-center">
-            <h1 className="text-2xl font-semibold text-gray-900">
+            <h1 className="text-2xl font-semibold text-white">
               {getPageTitle()}
             </h1>
           </div>
@@ -86,7 +86,7 @@ export const AdminHeader: React.FC = () => {
               <input
                 type="text"
                 placeholder="Buscar..."
-                className="block w-full rounded-md border-gray-300 pl-10 pr-3 py-2 text-sm placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500"
+                className="block w-full rounded-md bg-[#1C1C24] border-gray-700 pl-10 pr-3 py-2 text-sm text-white placeholder-gray-500 focus:border-[#63E300] focus:ring-[#63E300]"
               />
             </div>
 
@@ -95,7 +95,7 @@ export const AdminHeader: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="relative rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="relative rounded-full bg-[#1C1C24] p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-[#63E300] focus:ring-offset-2 focus:ring-offset-[#272731] transition-colors"
               >
                 <Bell className="h-6 w-6" />
                 {unreadCount > 0 && (
@@ -107,24 +107,24 @@ export const AdminHeader: React.FC = () => {
 
               {/* Notifications dropdown */}
               {showNotifications && (
-                <div className="absolute right-0 z-10 mt-2 w-80 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                  <div className="px-4 py-2 border-b border-gray-100">
+                <div className="absolute right-0 z-10 mt-2 w-80 origin-top-right rounded-md bg-[#272731] py-1 shadow-lg ring-1 ring-gray-700 ring-opacity-50 focus:outline-none">
+                  <div className="px-4 py-2 border-b border-gray-700">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-medium text-gray-900">Notificações</h3>
+                      <h3 className="text-sm font-medium text-white">Notificações</h3>
                       {unreadCount > 0 && (
                         <button
                           onClick={markAllAsRead}
-                          className="text-xs text-blue-600 hover:text-blue-800"
+                          className="text-xs text-[#63E300] hover:text-[#50B800] transition-colors"
                         >
                           Marcar todas como lidas
                         </button>
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="max-h-64 overflow-y-auto">
                     {notifications.length === 0 ? (
-                      <div className="px-4 py-3 text-sm text-gray-500">
+                      <div className="px-4 py-3 text-sm text-gray-400">
                         Nenhuma notificação
                       </div>
                     ) : (
@@ -132,24 +132,23 @@ export const AdminHeader: React.FC = () => {
                         <div
                           key={notification.id}
                           onClick={() => markAsRead(notification.id)}
-                          className={`cursor-pointer px-4 py-3 hover:bg-gray-50 ${
-                            !notification.read ? 'bg-blue-50' : ''
-                          }`}
+                          className={`cursor-pointer px-4 py-3 hover:bg-[#1C1C24] transition-colors ${!notification.read ? 'bg-[#1C1C24]' : ''
+                            }`}
                         >
                           <div className="flex items-start">
                             <div className="flex-1">
-                              <p className="text-sm font-medium text-gray-900">
+                              <p className="text-sm font-medium text-white">
                                 {notification.title}
                               </p>
-                              <p className="text-sm text-gray-500">
+                              <p className="text-sm text-gray-400">
                                 {notification.message}
                               </p>
-                              <p className="text-xs text-gray-400 mt-1">
+                              <p className="text-xs text-gray-500 mt-1">
                                 {notification.time}
                               </p>
                             </div>
                             {!notification.read && (
-                              <div className="ml-2 mt-1 h-2 w-2 rounded-full bg-blue-500"></div>
+                              <div className="ml-2 mt-1 h-2 w-2 rounded-full bg-[#63E300]"></div>
                             )}
                           </div>
                         </div>
@@ -165,33 +164,32 @@ export const AdminHeader: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex max-w-xs items-center rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="flex max-w-xs items-center rounded-full bg-[#1C1C24] text-sm focus:outline-none focus:ring-2 focus:ring-[#63E300] focus:ring-offset-2 focus:ring-offset-[#272731]"
               >
-                <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
-                  <User className="h-5 w-5 text-white" />
+                <div className="h-8 w-8 rounded-full bg-[#63E300] flex items-center justify-center">
+                  <User className="h-5 w-5 text-black" />
                 </div>
               </button>
-
               {/* User dropdown */}
               {showUserMenu && (
-                <div className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                <div className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-[#272731] py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                   <a
                     href="#"
-                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-[#1C1C24] hover:text-white transition-colors"
                   >
                     <User className="mr-3 h-4 w-4" />
                     Perfil
                   </a>
                   <a
                     href="#"
-                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-[#1C1C24] hover:text-white transition-colors"
                   >
                     <Settings className="mr-3 h-4 w-4" />
                     Configurações
                   </a>
                   <a
                     href="#"
-                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-[#1C1C24] hover:text-white transition-colors"
                   >
                     <LogOut className="mr-3 h-4 w-4" />
                     Sair

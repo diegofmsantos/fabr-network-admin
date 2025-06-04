@@ -11,16 +11,16 @@ export const SystemHealth: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'healthy': return 'text-green-600 bg-green-100'
-      case 'warning': return 'text-yellow-600 bg-yellow-100'
-      case 'error': return 'text-red-600 bg-red-100'
-      default: return 'text-gray-600 bg-gray-100'
+      case 'healthy': return 'text-[#63E300] bg-[#1C1C24]'
+      case 'warning': return 'text-yellow-400 bg-[#1C1C24]'
+      case 'error': return 'text-red-400 bg-[#1C1C24]'
+      default: return 'text-gray-400 bg-[#1C1C24]'
     }
   }
 
   return (
-    <div className="bg-white rounded-lg shadow border p-6">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">
+    <div className="bg-[#272731] rounded-lg shadow border border-gray-700 p-6">
+      <h3 className="text-lg font-medium text-white mb-4">
         Status do Sistema
       </h3>
       
@@ -33,10 +33,10 @@ export const SystemHealth: React.FC = () => {
                 <Icon className="w-4 h-4" />
               </div>
               <div className="ml-3">
-                <div className="text-sm font-medium text-gray-900">
+                <div className="text-sm font-medium text-white">
                   {metric.name}
                 </div>
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-gray-400">
                   {metric.value}
                 </div>
               </div>

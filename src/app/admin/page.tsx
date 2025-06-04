@@ -1,10 +1,7 @@
-// src/app/admin/page.tsx - SUBSTITUIR COMPLETAMENTE
 "use client"
 
 import { useState } from 'react'
 import { Loading } from '@/components/ui/Loading'
-
-// Novos componentes do dashboard
 import { QuickStats } from '@/components/Admin/Dashboard/QuickStats'
 import { ActionableAlerts } from '@/components/Admin/Dashboard/ActionableAlerts'
 import { SystemHealth } from '@/components/Admin/Dashboard/SystemHealth'
@@ -12,8 +9,6 @@ import { useAdminStats } from '@/hooks/useAdminStats'
 import { QuickActions } from '@/components/Admin/QuickActions'
 import { RecentActivity } from '@/components/Admin/RecentActivity'
 import { ChartCard } from '@/components/Admin/ChartCard'
-
-// Componentes existentes
 
 export default function AdminDashboard() {
   const [selectedTemporada, setSelectedTemporada] = useState('2025')
@@ -24,10 +19,10 @@ export default function AdminDashboard() {
   if (error) {
     return (
       <div className="text-center py-12">
-        <div className="text-red-600 mb-4">Erro ao carregar dashboard</div>
+        <div className="text-[#63E300] mb-4">Erro ao carregar dashboard</div>
         <button 
           onClick={() => window.location.reload()}
-          className="bg-blue-600 text-white px-4 py-2 rounded"
+          className="bg-[#63E300] text-white px-4 py-2 rounded"
         >
           Tentar novamente
         </button>
@@ -40,7 +35,7 @@ export default function AdminDashboard() {
       {/* Header com Filtros */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard Administrativo</h1>
+          <h1 className="text-2xl font-bold text-white">Dashboard Administrativo</h1>
           <p className="mt-1 text-sm text-gray-500">
             Visão geral dos campeonatos e estatísticas
           </p>
