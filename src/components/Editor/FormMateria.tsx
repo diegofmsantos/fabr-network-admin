@@ -9,10 +9,9 @@ import Link from 'next/link'
 import { Materia } from '@/types/materia'
 import { ModalMateria } from '../Modal/ModalMateria'
 import Image from 'next/image'
-import { motion } from 'framer-motion' // Se você não tiver framer-motion, instale com: npm install framer-motion
+import { motion } from 'framer-motion' 
 
 export const FormMateria = () => {
-  // Estados existentes
   const [formData, setFormData] = useState({
     titulo: '',
     subtitulo: '',
@@ -28,7 +27,6 @@ export const FormMateria = () => {
   const [materias, setMaterias] = useState<Materia[]>([])
   const [selectedMateria, setSelectedMateria] = useState<Materia | null>(null)
 
-  // Novos estados para interações
   const [activeView, setActiveView] = useState<'grid' | 'list'>('grid')
   const [isFormMinimized, setIsFormMinimized] = useState(false)
   const [previewImage, setPreviewImage] = useState<string | null>(null)
@@ -48,7 +46,6 @@ export const FormMateria = () => {
     loadMaterias()
   }, [])
 
-  // Efeito para mostrar temporariamente a mensagem de sucesso
   useEffect(() => {
     if (successMessage) {
       const timer = setTimeout(() => {
@@ -59,10 +56,8 @@ export const FormMateria = () => {
   }, [successMessage])
 
   const formatarDataLocal = () => {
-    // Obtém a data atual
     const dataAtual = new Date();
 
-    // Formata a data no formato ISO para campos datetime-local
     const ano = dataAtual.getFullYear();
     const mes = String(dataAtual.getMonth() + 1).padStart(2, '0');
     const dia = String(dataAtual.getDate()).padStart(2, '0');
@@ -117,7 +112,6 @@ export const FormMateria = () => {
     }
   };
 
-  // Handler para imagem principal com preview
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -131,7 +125,6 @@ export const FormMateria = () => {
     }
   }
 
-  // Handler para foto do autor com preview
   const handleAuthorImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -147,7 +140,6 @@ export const FormMateria = () => {
 
   return (
     <div className="min-h-screen bg-[#0F0F13]">
-      {/* Header moderno com degradê */}
       <header className="sticky top-0 z-10 bg-gradient-to-r from-[#191920] to-[#272731] shadow-xl">
         <div className="w-full px-2 py-4 flex justify-between items-center">
           <Link href="/" className="text-white font-bold text-xl flex items-center">
@@ -193,7 +185,6 @@ export const FormMateria = () => {
         </div>
       </header>
 
-      {/* Mensagem de sucesso */}
       {successMessage && (
         <motion.div
           initial={{ opacity: 0, y: -50 }}
@@ -211,7 +202,6 @@ export const FormMateria = () => {
       )}
 
       <div className="max-w-screen-3xl mx-auto px-6 py-6">
-        {/* Área de controle de visualização */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-white">
             Matérias Publicadas
@@ -239,9 +229,7 @@ export const FormMateria = () => {
           </div>
         </div>
 
-        {/* Layout Flexível */}
         <div className="flex flex-col lg:flex-row gap-6">
-          {/* Formulário (Pode ser minimizado/maximizado) */}
           <motion.div
             className={`${isFormMinimized ? 'lg:w-0 overflow-hidden' : 'lg:w-3/5'} bg-[#191920] rounded-xl shadow-xl transition-all duration-300`}
             initial={{ opacity: 0, x: -50 }}
@@ -257,7 +245,6 @@ export const FormMateria = () => {
                 </h2>
 
                 <div className="space-y-4">
-                  {/* Imagem Principal com Preview */}
                   <div className="mb-6">
                     <label className="block text-white text-sm font-medium mb-2">Imagem Principal</label>
                     <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-700 rounded-lg p-4 transition-all hover:border-[#63E300] cursor-pointer bg-[#0F0F13]">
@@ -295,7 +282,6 @@ export const FormMateria = () => {
                     </div>
                   </div>
 
-                  {/* Campos de texto agrupados */}
                   <div className="flex flex-col gap-4 bg-[#0F0F13] p-4 rounded-lg border border-gray-800">
                     <FormField label="Título">
                       <InputField
@@ -322,7 +308,6 @@ export const FormMateria = () => {
                     </FormField>
                   </div>
 
-                  {/* Editor de texto em um card separado */}
                   <div className="bg-[#0F0F13] p-4 rounded-lg border border-gray-800">
                     <FormField label="Conteúdo da Matéria">
                       <Editor
@@ -332,7 +317,6 @@ export const FormMateria = () => {
                     </FormField>
                   </div>
 
-                  {/* Informações do autor agrupadas */}
                   <div className="bg-[#0F0F13] p-4 rounded-lg border border-gray-800">
                     <h3 className="text-white font-medium mb-4 flex items-center">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-[#63E300]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -381,7 +365,6 @@ export const FormMateria = () => {
                     </div>
                   </div>
 
-                  {/* Datas em linha */}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-[#0F0F13] p-4 rounded-lg border border-gray-800">
                       <FormField label="Data de Criação">
@@ -440,7 +423,6 @@ export const FormMateria = () => {
             )}
           </motion.div>
 
-          {/* Lista de Matérias */}
           <motion.div
             className={`${isFormMinimized ? 'w-full' : 'lg:w-2/5'} transition-all duration-300`}
             initial={{ opacity: 0 }}
@@ -485,7 +467,6 @@ export const FormMateria = () => {
                     `}
                     onClick={() => setSelectedMateria(materia)}
                   >
-                    {/* Imagem */}
                     <div className={`relative ${activeView === 'list' ? 'h-28 w-40' : 'h-48 w-full'}`}>
                       <Image
                         src={materia.imagem}
@@ -496,7 +477,6 @@ export const FormMateria = () => {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-70"></div>
                     </div>
 
-                    {/* Conteúdo */}
                     <div className={`p-4 ${activeView === 'list' ? 'flex-1' : ''}`}>
                       <h3 className="text-white font-bold text-lg line-clamp-2 mb-1 hover:text-[#63E300] transition-colors">
                         {materia.titulo}
@@ -533,7 +513,6 @@ export const FormMateria = () => {
         </div>
       </div>
 
-      {/* Modal de edição */}
       {selectedMateria && (
         <ModalMateria
           materia={selectedMateria}

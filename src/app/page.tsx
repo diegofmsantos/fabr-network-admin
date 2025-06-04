@@ -1,4 +1,3 @@
-// src/app/page.tsx
 "use client"
 
 import React from 'react'
@@ -15,6 +14,12 @@ export default function HomePage() {
       description: 'Gerencie os times, suas informações e jogadores',
       icon: '/window.svg',
       route: '/times'
+    },
+    {
+      title: 'Campeonatos',
+      description: 'Gerencie campeonatos',
+      icon: '/window.svg',
+      route: '/admin'
     },
     {
       title: 'Matérias',
@@ -38,7 +43,7 @@ export default function HomePage() {
       title: 'Importação',
       description: 'Importar times, jogadores e estatísticas via planilhas',
       icon: '/globe.svg',
-      route: '/admin'
+      route: '/importar'
     }
   ]
 
@@ -50,8 +55,8 @@ export default function HomePage() {
           FABR NETWORK - FUTEBOL AMERICANO
         </h1>
       </header>
-        <LogoutButton />
-      
+      <LogoutButton />
+
       <div className="max-w-7xl mx-auto">
         <h1 className="text-5xl text-[#63E300] font-extrabold italic leading-[55px] tracking-[-3px] text-center mb-6">
           PAINEL DE ADMINISTRAÇÃO

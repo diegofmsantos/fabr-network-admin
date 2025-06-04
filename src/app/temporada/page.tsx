@@ -17,25 +17,19 @@ export default function IniciarTemporadaPage() {
   const [loadingData, setLoadingData] = useState(true);
   const [message, setMessage] = useState("");
 
-  // Estado para temporadas
   const [currentSeason, setCurrentSeason] = useState("2024");
   const [targetSeason, setTargetSeason] = useState("2025");
 
-  // Carregar times e jogadores
   useEffect(() => {
     async function carregarDados() {
-      setMessage(""); // Limpar mensagens anteriores
       setLoadingData(true);
 
       try {
-        // Tenta buscar times
         console.log(`Buscando times da temporada ${currentSeason}...`);
         const timesData = await getTimes(currentSeason);
         console.log(`${timesData.length} times encontrados`);
         setTimes(timesData);
 
-        // Se chegou aqui, conseguiu buscar times 
-        // Agora tenta buscar jogadores
         console.log(`Buscando jogadores da temporada ${currentSeason}...`);
         const jogadoresData = await getJogadores(currentSeason);
         console.log(`${jogadoresData.length} jogadores encontrados`);
@@ -52,44 +46,34 @@ export default function IniciarTemporadaPage() {
     carregarDados();
   }, [currentSeason]);
 
-  // Função para adicionar alteração de time
   const adicionarAlteracaoTime = (change: TimeChange) => {
-    // Verificar se já existe uma alteração para este time
     const index = timeChanges.findIndex(tc => tc.timeId === change.timeId);
     if (index >= 0) {
-      // Atualiza a alteração existente
       const updatedChanges = [...timeChanges];
       updatedChanges[index] = { ...updatedChanges[index], ...change };
       setTimeChanges(updatedChanges);
     } else {
-      // Adiciona nova alteração
       setTimeChanges([...timeChanges, change]);
     }
   };
 
-  // Função para adicionar transferência
   const adicionarTransferencia = (transferencia: Transferencia) => {
-    // Verificar se já existe uma transferência para este jogador
     const index = transferencias.findIndex(t => t.jogadorId === transferencia.jogadorId);
     if (index >= 0) {
-      // Atualiza a transferência existente
       const updatedTransfers = [...transferencias];
       updatedTransfers[index] = transferencia;
       setTransferencias(updatedTransfers);
     } else {
-      // Adiciona nova transferência
       setTransferencias([...transferencias, transferencia]);
     }
   };
 
-  // Remover alteração de time
   const removerAlteracaoTime = (index: number) => {
     const updatedChanges = [...timeChanges];
     updatedChanges.splice(index, 1);
     setTimeChanges(updatedChanges);
   };
 
-  // Remover transferência
   const removerTransferencia = (index: number) => {
     const updatedTransfers = [...transferencias];
     updatedTransfers.splice(index, 1);
@@ -114,7 +98,6 @@ export default function IniciarTemporadaPage() {
       console.log("Resposta:", response);
       setMessage(`Temporada ${targetSeason} iniciada com sucesso! ${response.times} times e ${response.jogadores} jogadores criados.`);
 
-      // Limpar os formulários após sucesso
       setTimeChanges([]);
       setTransferencias([]);
     } catch (error) {
@@ -161,7 +144,6 @@ export default function IniciarTemporadaPage() {
         </div>
       </header>
 
-      {/* Seleção de temporadas */}
       <div className="mb-8 bg-[#272731] mt-20 p-6 rounded-lg">
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -195,20 +177,17 @@ export default function IniciarTemporadaPage() {
         </div>
       </div>
 
-      {/* Mensagem de status */}
       {message && (
         <div className="mb-6 p-4 bg-[#272731] rounded-lg">
           <p className="text-white">{message}</p>
         </div>
       )}
 
-      {/* Form de alterações de times */}
       <TeamChangesForm
         times={times}
         onAddChange={adicionarAlteracaoTime}
       />
 
-      {/* Lista de alterações de times */}
       {timeChanges.length > 0 && (
         <div className="mt-4 bg-[#272731] p-6 rounded-lg">
           <h3 className="text-lg font-bold text-white mb-2">Alterações Adicionadas</h3>
@@ -242,7 +221,6 @@ export default function IniciarTemporadaPage() {
         </div>
       )}
 
-       {/* Form de transferências de jogadores */}
        <PlayerTransferForm
         jogadores={jogadores}
         times={times}
@@ -250,7 +228,6 @@ export default function IniciarTemporadaPage() {
         onAddTransfer={adicionarTransferencia}
       />
 
-      {/* Lista de transferências */}
       {transferencias.length > 0 && (
         <div className="mt-4 bg-[#272731] p-6 rounded-lg">
           <h3 className="text-lg font-bold text-white mb-2">Transferências Adicionadas</h3>
@@ -284,7 +261,6 @@ export default function IniciarTemporadaPage() {
         </div>
       )}
 
-      {/* Botão de envio */}
       <div className="flex justify-center mt-8">
         <button
           onClick={handleSubmit}

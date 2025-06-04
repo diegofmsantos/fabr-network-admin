@@ -1,4 +1,3 @@
-// src/app/mercado/page.tsx
 "use client"
 
 import { useState, useEffect } from 'react'
@@ -6,7 +5,6 @@ import { getTransferenciasFromJson } from '@/api/api'
 import Link from 'next/link'
 import Image from 'next/image'
 
-// Tipo simplificado para as transferências
 type Transferencia = {
   id: number;
   jogadorNome: string;
@@ -24,7 +22,6 @@ type Transferencia = {
 }
 
 export default function MercadoPage() {
-  // Estados
   const [transferencias, setTransferencias] = useState<Transferencia[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -33,7 +30,6 @@ export default function MercadoPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [searchTerm, setSearchTerm] = useState('')
 
-  // Buscar dados
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
@@ -54,7 +50,6 @@ export default function MercadoPage() {
     loadData();
   }, [temporadaOrigem, temporadaDestino]);
 
-  // Filtrar transferências por termo de busca
   const filteredTransferencias = searchTerm 
     ? transferencias.filter(t => 
         t.jogadorNome.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -66,7 +61,6 @@ export default function MercadoPage() {
 
   return (
     <div className="min-h-screen pb-4 bg-[#1C1C24]">
-      {/* Header */}
       <header className="sticky top-0 z-10 bg-gradient-to-r from-[#191920] to-[#272731] shadow-xl mb-4">
         <div className="w-full px-2 py-4 flex justify-between items-center">
           <div className="flex items-center">
@@ -96,7 +90,6 @@ export default function MercadoPage() {
         </div>
       </header>
 
-      {/* Filtros */}
       <div className="max-w-7xl mx-auto px-4 mb-6">
         <div className="bg-[#272731] p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-bold text-white mb-4">Filtros</h2>
@@ -142,7 +135,6 @@ export default function MercadoPage() {
               />
             </div>
 
-            {/* Opções de visualização */}
             <div>
               <label className="block text-white text-sm font-medium mb-2">
                 Visualização
@@ -178,7 +170,6 @@ export default function MercadoPage() {
         </div>
       </div>
 
-      {/* Lista de Transferências */}
       <div className="max-w-7xl mx-auto px-4 mb-12">
         <div className="bg-[#272731] rounded-lg shadow-md overflow-hidden">
           <div className="p-4 border-b border-gray-700 flex justify-between items-center">
@@ -206,7 +197,6 @@ export default function MercadoPage() {
               Nenhuma transferência encontrada com os filtros selecionados.
             </div>
           ) : viewMode === 'list' ? (
-            // Visualização em Lista
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-700">
                 <thead className="bg-[#1C1C24]">
@@ -261,14 +251,12 @@ export default function MercadoPage() {
               </table>
             </div>
           ) : (
-            // Visualização em Grid
             <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredTransferencias.map((transferencia) => (
                 <div 
                   key={`${transferencia.id}-${transferencia.timeDestinoId}`}
                   className="bg-[#1C1C24] rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
                 >
-                  {/* Cabeçalho */}
                   <div className="p-4 border-b border-gray-700">
                     <h3 className="text-white font-bold text-lg mb-1 truncate">{transferencia.jogadorNome}</h3>
                     <div className="flex items-center text-sm text-gray-400">
@@ -285,10 +273,8 @@ export default function MercadoPage() {
                     </div>
                   </div>
                   
-                  {/* Visualização da transferência */}
                   <div className="p-4">
                     <div className="flex items-center">
-                      {/* Time origem */}
                       <div className="w-1/3 text-center">
                         <div 
                           className="w-12 h-12 mx-auto rounded-full flex items-center justify-center"
@@ -303,14 +289,12 @@ export default function MercadoPage() {
                         </p>
                       </div>
                       
-                      {/* Seta */}
                       <div className="w-1/3 flex justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#63E300]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                         </svg>
                       </div>
                       
-                      {/* Time destino */}
                       <div className="w-1/3 text-center">
                         <div 
                           className="w-12 h-12 mx-auto rounded-full flex items-center justify-center"
@@ -327,7 +311,6 @@ export default function MercadoPage() {
                     </div>
                   </div>
                   
-                  {/* Rodapé */}
                   <div className="bg-[#272731] text-xs text-gray-400 py-2 px-4 text-right">
                     {new Date(transferencia.data).toLocaleDateString('pt-BR')}
                   </div>

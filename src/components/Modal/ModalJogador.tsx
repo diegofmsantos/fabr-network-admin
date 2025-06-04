@@ -45,10 +45,9 @@ export default function ModalJogador({
         setFormData((prev) => {
             const estatisticas = { ...prev.estatisticas } as Estatisticas;
 
-            if (!estatisticas[groupKey]) { //@ts-ignore
+            if (!estatisticas[groupKey]) { 
                 estatisticas[groupKey] = {};
             }
-            //@ts-ignore
             estatisticas[groupKey][fieldKey] = value === "" 
                 ? 0 
                 : (fieldKey.startsWith("fg") ? value : Number(value));
@@ -63,12 +62,10 @@ export default function ModalJogador({
             console.log("Iniciando atualização do jogador");
             console.log("Valor da camisa antes do envio:", formData.camisa);
             
-            // Converter altura corretamente
             const altura = formData.altura
                 ? Number(String(formData.altura).replace(',', '.'))
                 : jogador.altura;
-    
-            // Garantir conversão adequada dos valores numéricos
+
             const parsedValues = {
                 altura: altura,
                 peso: Number(formData.peso),
@@ -76,22 +73,18 @@ export default function ModalJogador({
                 experiencia: Number(formData.experiencia),
                 numero: Number(formData.numero)
             };
-    
-            // Construir objeto final para envio à API
-            // Cuidado para não duplicar campos que já existem no formData
+
             const apiData = {
-                ...formData,          // Incluir todos os campos do formData primeiro
-                ...parsedValues,      // Sobrescrever com valores numéricos convertidos
-                timeId: jogador.timeId // Garantir que timeId esteja presente
+                ...formData,         
+                ...parsedValues,   
+                timeId: jogador.timeId
             };
     
             console.log("Dados completos enviados para API:", apiData);
-            
-            // Enviar a requisição e aguardar a resposta
+
             const response = await atualizarJogador(apiData);
             console.log("Resposta da API após atualização:", response);
-            
-            // Fechar o modal e atualizar a UI
+
             closeModal();
             router.refresh();
         } catch (error) {
@@ -108,7 +101,7 @@ export default function ModalJogador({
             try {
                 await deletarJogador(jogador.id);
                 closeModal();
-                router.refresh(); // Força recarregamento
+                router.refresh(); 
             } catch (error) {
                 console.error("Erro ao excluir jogador:", error);
             } finally {
@@ -119,15 +112,13 @@ export default function ModalJogador({
 
     return (
         <div className="fixed inset-0 z-50 overflow-hidden">
-            {/* Overlay com blur */}
             <div 
                 className="fixed inset-0 bg-black/70 backdrop-blur-sm"
                 onClick={closeModal}
                 ></div>
-            
-            {/* Modal */}
+
             <div className="absolute inset-12 bg-[#272731] rounded-xl shadow-lg overflow-hidden flex flex-col">
-                {/* Header do modal */}
+
                 <div className="bg-[#1C1C24] px-6 py-4 flex justify-between items-center">
                     <div className="flex items-center">
                         <div 
@@ -150,7 +141,6 @@ export default function ModalJogador({
                     </button>
                 </div>
 
-                {/* Tabs de navegação */}
                 <div className="bg-[#1C1C24] px-6 border-t border-gray-800">
                     <div className="flex space-x-1">
                         <button
@@ -182,10 +172,8 @@ export default function ModalJogador({
                         </button>
                     </div>
                 </div>
-                
-                {/* Conteúdo principal (scrollable) */}
+
                 <div className="flex-grow overflow-y-auto p-6">
-                    {/* Tab de informações do jogador */}
                     {activeTab === 'info' && (
                         <div className="space-y-6 animate-fadeIn">
                             {jogadorGroups.map((group, groupIndex) => (
@@ -229,8 +217,7 @@ export default function ModalJogador({
                             ))}
                         </div>
                     )}
-                    
-                    {/* Tab de estatísticas */}
+
                     {activeTab === 'estatisticas' && (
                         <div className="space-y-6 animate-fadeIn">
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -249,7 +236,7 @@ export default function ModalJogador({
                                                         <div className="flex items-center bg-[#272731] px-2 py-0.5 rounded text-xs">
                                                             <input
                                                                 type="text"
-                                                                name={`${group.id}.${field.id}`} // @ts-ignore
+                                                                name={`${group.id}.${field.id}`} 
                                                                 value={formData.estatisticas[group.id as keyof Estatisticas]?.[field.id as any] ?? 0}
                                                                 onChange={handleStatisticChange}
                                                                 className="w-16 bg-transparent text-right border-none focus:outline-none text-white"
@@ -261,7 +248,7 @@ export default function ModalJogador({
                                                             className="bg-[#63E300] h-1.5 rounded-full" 
                                                             style={{ 
                                                                 width: `${Math.min(
-                                                                    100, // @ts-ignore
+                                                                    100, 
                                                                     (Number(formData.estatisticas[group.id as keyof Estatisticas]?.[field.id as any]) / 
                                                                     (field.id.includes('jardasde') ? 500 : 100)) * 100
                                                                 )}%` 
@@ -277,8 +264,7 @@ export default function ModalJogador({
                         </div>
                     )}
                 </div>
-                
-                {/* Footer com botões de ação */}
+
                 <div className="bg-[#1C1C24] px-6 py-4 border-t border-gray-800 flex justify-between">
                     <button
                         onClick={handleDelete}
@@ -336,8 +322,7 @@ export default function ModalJogador({
                     </div>
                 </div>
             </div>
-            
-            {/* Estilos adicionais */}
+
             <style jsx global>{`
                 .animate-fadeIn {
                     animation: fadeIn 0.3s ease-in-out;

@@ -7,7 +7,6 @@ import { Time } from '@/types/time'
 import { Jogador } from '@/types/jogador'
 import Image from 'next/image'
 
-// Interfaces para relatórios
 interface Relatorio {
     id: string
     titulo: string
@@ -23,7 +22,6 @@ export default function DashboardPage() {
     const [filtroAtivo, setFiltroAtivo] = useState<string | null>(null)
     const [resultados, setResultados] = useState<any>(null)
 
-    // Buscar dados ao carregar a página
     useEffect(() => {
         async function carregarDados() {
             setLoading(true)
@@ -41,7 +39,6 @@ export default function DashboardPage() {
         carregarDados()
     }, [temporada])
 
-    // Lista de relatórios pré-definidos
     const relatorios: Relatorio[] = [
         {
             id: "jogadores-nacionalidade",
@@ -235,7 +232,6 @@ export default function DashboardPage() {
 
                 jogadores.forEach(jogador => {
                     if (jogador.cidade) {
-                        // Extrai o estado do formato "Cidade/UF"
                         const partes = jogador.cidade.split('/')
                         if (partes.length > 1) {
                             const estado = partes[1]
@@ -259,7 +255,6 @@ export default function DashboardPage() {
         }
     ]
 
-    // Executar relatório selecionado
     const executarRelatorio = (id: string) => {
         const relatorio = relatorios.find(r => r.id === id)
         if (relatorio) {
@@ -268,7 +263,6 @@ export default function DashboardPage() {
         }
     }
 
-    // Renderização de diferentes tipos de resultados
     const renderizarResultados = () => {
         if (!resultados) return null
 
@@ -375,13 +369,11 @@ export default function DashboardPage() {
         }
     }
 
-    // Formulário de filtros personalizados
     const renderizarFormularioFiltros = () => {
         return (
             <div className="bg-[#272731] p-6 rounded-lg mb-6">
                 <h3 className="text-xl font-bold text-white mb-4">Filtros Personalizados</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Form para filtros avançados a ser implementado */}
                     <p className="text-gray-400 col-span-3">
                         Funcionalidade de filtros personalizados em desenvolvimento.
                         Por enquanto, utilize os relatórios pré-definidos abaixo.
@@ -441,7 +433,6 @@ export default function DashboardPage() {
                 </div>
             </header>
 
-
             <div className="mb-6 bg-[#272731] p-4 rounded-lg text-gray-300">
                 <p>
                     Utilize esta página para gerar relatórios e insights sobre os times e jogadores do campeonato.
@@ -450,7 +441,6 @@ export default function DashboardPage() {
             </div>
 
             <div className="grid grid-cols-1 gap-6">
-                {/* Seção de estatísticas rápidas */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="bg-[#272731] p-4 rounded-lg flex flex-col">
                         <h3 className="text-gray-400 mb-2">Total de Times</h3>
@@ -468,10 +458,8 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-                {/* Formulário de filtros personalizados */}
                 {renderizarFormularioFiltros()}
 
-                {/* Relatórios pré-definidos */}
                 <div className="bg-[#272731] p-6 rounded-lg">
                     <h3 className="text-xl font-bold text-white mb-4">Relatórios Pré-definidos</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
@@ -495,7 +483,6 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-                {/* Resultados */}
                 {filtroAtivo && (
                     <div className="mt-6">
                         <h3 className="text-xl font-bold text-white mb-4">Resultados</h3>

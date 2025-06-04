@@ -16,13 +16,9 @@ export default function LoginPage() {
     setError('')
     setIsLoading(true)
 
-    // Verificação simples de credenciais
     if (username === 'fabrnetwork' && password === 'fabrnetwork321@@') {
-      // Simulando um pequeno delay para dar feedback visual de carregamento
       setTimeout(() => {
-        // Em um ambiente de produção, você usaria algo como o NextAuth
-        // Aqui, estamos apenas simulando o login salvando em um cookie
-        document.cookie = "fabr_auth_token=true; path=/; max-age=86400; samesite=strict" // expira em 24 horas
+        document.cookie = "fabr_auth_token=true; path=/; max-age=86400; samesite=strict" 
         router.push('/')
       }, 1000)
     } else {
@@ -34,7 +30,6 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-[#1C1C24] flex flex-col justify-center items-center p-4">
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="flex justify-center mb-8">
           <Image 
             src="/logo-fabr-color.png" 
@@ -45,7 +40,6 @@ export default function LoginPage() {
           />
         </div>
 
-        {/* Card de Login */}
         <div className="bg-[#272731] rounded-xl shadow-xl overflow-hidden">
           <div className="p-8">
             <h2 className="text-4xl text-[#63E300] font-extrabold italic leading-[55px] tracking-[-3px] text-center mb-6">
@@ -115,7 +109,6 @@ export default function LoginPage() {
             </form>
           </div>
           
-          {/* Footer */}
           <div className="px-8 py-4 bg-[#1C1C24]">
             <p className="text-gray-500 text-center text-sm">
               © {new Date().getFullYear()} FABR Network - Todos os direitos reservados

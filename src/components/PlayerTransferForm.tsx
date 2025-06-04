@@ -2,8 +2,6 @@
 import { useState, useEffect } from 'react';
 import { Time } from '@/types/time';
 import { Jogador } from '@/types/jogador';
-
-// Definir a interface para alterações de times
 interface TimeChange {
   timeId: number;
   nome?: string;
@@ -22,7 +20,7 @@ interface TimeChange {
 interface PlayerTransferFormProps {
   jogadores: Jogador[];
   times: Time[];
-  timeChanges?: TimeChange[]; // Novo prop opcional
+  timeChanges?: TimeChange[]; 
   onAddTransfer: (transfer: Transferencia) => void;
 }
 
@@ -42,7 +40,7 @@ export interface Transferencia {
 export function PlayerTransferForm({ 
   jogadores, 
   times, 
-  timeChanges = [], // Valor padrão vazio
+  timeChanges = [], 
   onAddTransfer 
 }: PlayerTransferFormProps) {
   const [selectedJogador, setSelectedJogador] = useState<Jogador | null>(null);
@@ -54,7 +52,6 @@ export function PlayerTransferForm({
   const [novaCamisa, setNovaCamisa] = useState<string>('');
   const [showDropdown, setShowDropdown] = useState<boolean>(false);
 
-  // Filtrar jogadores com base no termo de busca
   const filteredJogadores = searchTerm
     ? jogadores.filter(jogador =>
       jogador.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -76,7 +73,6 @@ export function PlayerTransferForm({
 
     const timeOrigem = times.find(t => t.id === selectedJogador.timeId);
     
-    // Verificar se o time de destino terá um novo nome
     const timeDestinoDados = timeChanges.find(tc => tc.timeId === Number(selectedNovoTime));
     const novoTimeNome = timeDestinoDados?.nome || novoTime.nome;
 
@@ -86,7 +82,7 @@ export function PlayerTransferForm({
       timeOrigemId: selectedJogador.timeId,
       timeOrigemNome: timeOrigem?.nome,
       novoTimeId: Number(selectedNovoTime),
-      novoTimeNome: novoTimeNome, // Usar nome novo se existir
+      novoTimeNome: novoTimeNome, 
       novaPosicao: novaPosicao,
       novosetor: novoSetor,
       novoNumero: novoNumero ? Number(novoNumero) : undefined,
@@ -95,7 +91,6 @@ export function PlayerTransferForm({
 
     onAddTransfer(transferencia);
 
-    // Reset
     setSelectedJogador(null);
     setSearchTerm('');
     setSelectedNovoTime('');
@@ -105,7 +100,6 @@ export function PlayerTransferForm({
     setNovaCamisa('')
   };
 
-  // Fechar o dropdown quando clicar fora
   useEffect(() => {
     const handleClickOutside = () => {
       setShowDropdown(false);
@@ -122,7 +116,6 @@ export function PlayerTransferForm({
       <h2 className="text-2xl font-bold text-white mb-4">Transferências de Jogadores</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        {/* Input de busca ao invés de select para jogadores */}
         <div className="relative">
           <label className="block text-white text-sm font-medium mb-2">
             Buscar Jogador
@@ -145,7 +138,6 @@ export function PlayerTransferForm({
             placeholder="Digite o nome do jogador..."
           />
 
-          {/* Lista de jogadores filtrados */}
           {showDropdown && searchTerm && (
             <div
               className="absolute z-10 mt-1 w-full bg-[#1C1C24] border border-gray-700 rounded-lg max-h-60 overflow-y-auto"
@@ -171,7 +163,6 @@ export function PlayerTransferForm({
           )}
         </div>
 
-        {/* Seleção de novo time com indicação de mudanças de nome */}
         <div>
           <label className="block text-white text-sm font-medium mb-2">
             Novo Time
@@ -186,7 +177,6 @@ export function PlayerTransferForm({
             {times
               .filter(time => !selectedJogador || time.id !== selectedJogador.timeId)
               .map((time) => {
-                // Verificar se o time tem alteração de nome
                 const change = timeChanges.find(tc => tc.timeId === time.id && tc.nome);
                 const displayName = change 
                   ? `${time.nome} → ${change.nome} (${change.sigla || time.sigla})`
@@ -201,7 +191,6 @@ export function PlayerTransferForm({
           </select>
         </div>
 
-        {/* Nova Posição */}
         <div>
           <label className="block text-white text-sm font-medium mb-2">
             Nova Posição (opcional)
@@ -216,7 +205,6 @@ export function PlayerTransferForm({
           />
         </div>
 
-        {/* Novo Setor */}
         <div>
           <label className="block text-white text-sm font-medium mb-2">
             Novo Setor (opcional)
@@ -234,7 +222,6 @@ export function PlayerTransferForm({
           </select>
         </div>
 
-        {/* Novo Número */}
         <div>
           <label className="block text-white text-sm font-medium mb-2">
             Novo Número (opcional)
@@ -249,7 +236,6 @@ export function PlayerTransferForm({
           />
         </div>
 
-        {/* Nova Camisa */}
         <div>
           <label className="block text-white text-sm font-medium mb-2">
             Nova Camisa (opcional)
@@ -265,7 +251,6 @@ export function PlayerTransferForm({
         </div>
       </div>
 
-      {/* Informações do jogador selecionado */}
       {selectedJogador && (
         <div className="bg-[#1C1C24] p-4 rounded-lg mb-4">
           <h3 className="text-white font-medium mb-2">Jogador Selecionado</h3>

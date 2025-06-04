@@ -6,10 +6,8 @@ export default function LogoutButton() {
   const router = useRouter()
 
   const handleLogout = () => {
-    // Remover o cookie de autenticação
     document.cookie = "fabr_auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
     
-    // Redirecionar para a página de login
     router.push('/login')
   }
 

@@ -1,4 +1,3 @@
-// src/components/admin/AdminUploadForm.tsx
 import React, { useState } from 'react';
 import { Upload, FileText, Check, AlertTriangle } from 'lucide-react';
 
@@ -10,10 +9,9 @@ const AdminUploadForm = () => {
   const [formData, setFormData] = useState({
     id_jogo: '',
     data_jogo: '',
-    tipo: 'times' // times, jogadores, estatisticas, reprocessar
+    tipo: 'times' 
   });
   
-  // Base URL da API - ajuste para o endereço correto do seu backend
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,7 +71,6 @@ const AdminUploadForm = () => {
         formDataObj.append('data_jogo', formData.data_jogo);
       }
       
-      // Log do endpoint que está sendo chamado
       console.log('Enviando para:', getUploadEndpoint());
       
       const response = await fetch(getUploadEndpoint(), {
@@ -83,17 +80,14 @@ const AdminUploadForm = () => {
       
       console.log('Status da resposta:', response.status);
       console.log('Headers da resposta:', response.headers);
-      
-      // Verifique o tipo de conteúdo da resposta
+
       const contentType = response.headers.get('content-type');
       console.log('Tipo de conteúdo:', contentType);
       
       let responseData;
       if (contentType && contentType.includes('application/json')) {
-        // Se for JSON, faça o parse normalmente
         responseData = await response.json();
       } else {
-        // Se não for JSON, trate como texto e mostre o erro
         const text = await response.text();
         console.error('Resposta não-JSON recebida:', text.substring(0, 500) + '...');
         throw new Error('Resposta do servidor não é um JSON válido');

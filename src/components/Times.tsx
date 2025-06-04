@@ -67,7 +67,6 @@ export const Times = () => {
     const [activeTab, setActiveTab] = useState<'time' | 'jogador' | 'times-cadastrados'>('time')
     const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({})
 
-    // Fetch dos times quando o componente é montado ou a temporada muda
     useEffect(() => {
         const fetchTimes = async () => {
             try {
@@ -104,7 +103,6 @@ export const Times = () => {
         setIsSubmitting(true)
 
         try {
-            // Filtrar estatísticas não preenchidas
             const estatisticasFiltradas = Object.fromEntries(
                 Object.entries(data.estatisticas || {}).map(([group, stats]) => [
                     group,
@@ -112,7 +110,6 @@ export const Times = () => {
                 ])
             );
 
-            // Adicionar temporada manualmente ao objeto de dados
             const jogadorData = {
                 ...data,
                 temporada: jogadorTemporada,
@@ -130,7 +127,6 @@ export const Times = () => {
         }
     }
 
-    // Função para atualizar um time no estado
     const updateTime = (updatedTime: Time) => {
         setTimes((prevTimes) =>
             prevTimes.map((time) =>
@@ -139,7 +135,6 @@ export const Times = () => {
         )
     }
 
-    // Função para lidar com mudança de temporada
     const handleTemporadaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setTemporadaSelecionada(e.target.value);
     }
@@ -153,7 +148,6 @@ export const Times = () => {
 
     return (
         <div className="bg-[#1C1C24] min-h-screen">
-            {/* Header com navegação e seletor de temporada */}
             <header className="sticky top-0 z-10 bg-gradient-to-r from-[#191920] to-[#272731] shadow-xl mb-4">
                 <div className="w-full px-2 py-4 flex justify-between items-center">
                     <div className='flex items-center'>
@@ -194,9 +188,6 @@ export const Times = () => {
                 </div>
             </header>
 
-           
-
-            {/* Tabs de navegação */}
             <div className="bg-[#272731] border-b border-gray-700 sticky top-20 z-10">
                 <div className="max-w-7xl mx-auto px-4">
                     <nav className="flex justify-between">
@@ -243,7 +234,6 @@ export const Times = () => {
             </div>
 
             <div className="max-w-7xl mx-auto px-4 py-6">
-                {/* Seção de Adicionar Time */}
                 {activeTab === 'time' && (
                     <div className="animate-fadeIn">
                         <div className="flex justify-between items-center mb-6">
@@ -267,8 +257,6 @@ export const Times = () => {
                                         error={errors[field.id as keyof TimeFormData] as FieldError | undefined}
                                     />
                                 ))}
-
-                                {/* Campo de temporada para o time */}
                                 <FormField
                                     label="Temporada"
                                     id="temporada"
@@ -280,8 +268,6 @@ export const Times = () => {
                                         { value: "2025", label: "2025" },
                                     ]}
                                 />
-
-                                {/* Campos de Títulos */}
                                 {(["nacionais", "conferencias", "estaduais"] as const).map((titulo) => (
                                     <FormField
                                         key={`titulos.0.${titulo}`}
@@ -304,8 +290,6 @@ export const Times = () => {
                         </form>
                     </div>
                 )}
-
-                {/* Seção de Adicionar Jogador */}
                 {activeTab === 'jogador' && (
                     <div className="animate-fadeIn">
                         <div className="flex justify-between items-center mb-6">
@@ -329,7 +313,6 @@ export const Times = () => {
                             >
                                 <div className="p-6">
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mb-8">
-                                        {/* Campo de Seleção do Time */}
                                         <FormField
                                             label="Time"
                                             id="timeId"
@@ -343,7 +326,6 @@ export const Times = () => {
                                                 .map((time) => ({ value: time.id as number, label: time.nome as string }))}
                                         />
 
-                                        {/* Campo de temporada para jogador */}
                                         <div className="mb-1">
                                             <label className="block text-white text-sm font-medium mb-2">
                                                 Temporada
@@ -358,7 +340,6 @@ export const Times = () => {
                                             </select>
                                         </div>
 
-                                        {/* Campos do Jogador */}
                                         {camposJogador.map((field) => (
                                             <FormField
                                                 key={field.id}
@@ -371,7 +352,6 @@ export const Times = () => {
                                             />
                                         ))}
 
-                                        {/* Campos Numéricos do Jogador */}
                                         {camposNumericosJogador.map((field) => (
                                             <FormField
                                                 key={field.id}
@@ -394,7 +374,6 @@ export const Times = () => {
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-5">
                                         {estatisticas.map((grupo) => (
                                             <div key={grupo.group} className="bg-[#1C1C24] p-4 rounded-lg">
-                                                {/* Cabeçalho clicável do grupo de estatísticas */}
                                                 <button
                                                     type="button"
                                                     onClick={() => toggleGroup(grupo.group)}
@@ -412,7 +391,6 @@ export const Times = () => {
                                                     </svg>
                                                 </button>
 
-                                                {/* Conteúdo que aparece/desaparece */}
                                                 <div
                                                     className={`transition-all duration-300 overflow-hidden ${expandedGroups[grupo.group]
                                                         ? 'max-h-[1000px] opacity-100'
@@ -438,7 +416,6 @@ export const Times = () => {
                                             </div>
                                         ))}
                                     </div>
-
                                 </div>
 
                                 <div className="bg-[#2C2C34] py-4 px-6 flex justify-end">
@@ -465,7 +442,6 @@ export const Times = () => {
                     </div>
                 )}
 
-                {/* Seção de Times Cadastrados */}
                 {activeTab === 'times-cadastrados' && (
                     <div className="animate-fadeIn">
                         <div className="flex justify-between items-center mb-6">
@@ -557,7 +533,6 @@ export const Times = () => {
                 )}
             </div>
 
-            {/* Modal de Time */}
             {isTimeModalOpen && selectedTime && (
                 <ModalTime
                     time={selectedTime}
@@ -570,7 +545,6 @@ export const Times = () => {
                 />
             )}
 
-            {/* Modal de Jogador */}
             {isJogadorModalOpen && selectedJogador && (
                 <ModalJogador
                     jogador={selectedJogador}
@@ -578,7 +552,6 @@ export const Times = () => {
                 />
             )}
 
-            {/* Modal de Sucesso */}
             {isSuccessModalOpen && (
                 <ModalSucesso
                     mensagem={successMessage}
@@ -586,7 +559,6 @@ export const Times = () => {
                 />
             )}
 
-            {/* Estilos CSS adicionais */}
             <style jsx global>{`
                 .animate-fadeIn {
                     animation: fadeIn 0.3s ease-in-out;

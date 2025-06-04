@@ -1,4 +1,3 @@
- // Definindo os campos do Time
  import { TimeSchema } from "@/schemas/Time"
  import { JogadorSchema } from "@/schemas/Jogador"
  import { z } from "zod"
@@ -25,7 +24,6 @@
     { id: "coord_defen", label: "Coordenador Defensivo" },
 ]
 
-// Definindo os campos do Jogador
 export const camposJogador: Array<{ id: keyof JogadorFormData; label: string; type?: string; options?: { value: string; label: string }[] }> = [
     { id: "nome", label: "Nome do Jogador" },
     { id: "timeFormador", label: "Time Formador" },
@@ -47,7 +45,6 @@ export const camposJogador: Array<{ id: keyof JogadorFormData; label: string; ty
     { id: "camisa", label: "Camisa" },
 ]
 
-// Definindo os campos numéricos do Jogador
 export const camposNumericosJogador: Array<{ id: keyof JogadorFormData; label: string; type: "number" }> = [
     { id: "experiencia", label: "Experiência", type: "number" },
     { id: "numero", label: "Número", type: "number" },
@@ -127,8 +124,7 @@ export const estatisticas = [
     },
 ]
 
-export  // Campos organizados em grupos para melhor layout
-const fieldGroups = [
+export  const fieldGroups = [
     {
         title: "Informações Básicas",
         fields: [

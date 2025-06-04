@@ -7,7 +7,6 @@ import { Editor } from '../Editor/Editor'
 import Image from 'next/image'
 import { z } from 'zod'
 
-// Interface específica para o formulário
 interface MateriaFormData extends Omit<Materia, 'createdAt' | 'updatedAt'> {
     createdAt: string;
     updatedAt: string;
