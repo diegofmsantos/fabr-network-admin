@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import "./globals.css"
+import { QueryProvider } from "@/providers/query-provider";
 
 export const metadata: Metadata = {
   title: "FABR-NETWORK-ADM",
@@ -14,7 +15,9 @@ export default function RootLayout({
   return (
     <html lang="pt-br">
       <body>
-        {children}
+        <QueryProvider>
+          {children}
+        </QueryProvider>
       </body>
     </html>
   )

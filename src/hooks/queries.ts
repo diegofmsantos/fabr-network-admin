@@ -63,7 +63,7 @@ const fetchNoticiasLocal = async (): Promise<Materia[]> => {
     await new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 300))
     
     try {
-        const { Noticias } = await import('@/data/noticias')
+        const { Noticias } = await import('@/data/noticias') // @ts-ignore
         return Noticias
     } catch (error) {
         return []

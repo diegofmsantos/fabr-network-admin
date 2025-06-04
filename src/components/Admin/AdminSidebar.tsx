@@ -142,11 +142,11 @@ export const AdminSidebar: React.FC = () => {
         <div className="flex items-center flex-shrink-0 px-4">
           <Link href="/admin" className="flex items-center">
             <Image
-              src="/assets/logo-fabr-color.png"
+              src="/logo-fabr-color.png"
               alt="FABR Network Admin"
               width={150}
               height={40}
-              className="h-8 w-auto"
+              className="h-16 w-auto"
             />
           </Link>
         </div>
