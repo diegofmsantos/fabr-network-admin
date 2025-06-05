@@ -55,12 +55,6 @@ const sidebarItems: SidebarItem[] = [
     label: 'Estatísticas',
     href: '/admin/dashboard',
     icon: BarChart3
-  },
-  {
-    id: 'configuracoes',
-    label: 'Configurações',
-    href: '/admin/configuracoes',
-    icon: Settings
   }
 ]
 

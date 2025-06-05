@@ -1,24 +1,10 @@
-// src/components/Admin/JogoManager.tsx
 "use client"
 
 import { useState, useMemo } from 'react'
 import { Jogo, Campeonato } from '@/types/campeonato'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { 
-  Calendar, 
-  Clock, 
-  Edit, 
-  Trash2, 
-  Play, 
-  Pause, 
-  CheckCircle,
-  MapPin,
-  Filter,
-  Grid,
-  List,
-  MoreHorizontal
-} from 'lucide-react'
+import { Calendar, Clock, Edit, Trash2, Play, Pause, CheckCircle, MapPin, MoreHorizontal } from 'lucide-react'
 import Image from 'next/image'
 import { ImageService } from '@/utils/services/ImageService'
 
@@ -31,14 +17,7 @@ interface JogoManagerProps {
   onRefresh: () => void
 }
 
-export const JogoManager: React.FC<JogoManagerProps> = ({
-  jogos,
-  campeonato,
-  viewMode,
-  selectedJogos,
-  onSelectionChange,
-  onRefresh
-}) => {
+export const JogoManager: React.FC<JogoManagerProps> = ({ jogos, campeonato, viewMode, selectedJogos, onSelectionChange, onRefresh }) => {
   const [editingJogo, setEditingJogo] = useState<number | null>(null)
   const [filterStatus, setFilterStatus] = useState<string>('todos')
   const [filterGrupo, setFilterGrupo] = useState<number | 'todos'>('todos')
@@ -90,7 +69,6 @@ export const JogoManager: React.FC<JogoManagerProps> = ({
   }
 
   const handleUpdateJogo = (jogoId: number, data: Partial<Jogo>) => {
-    // Implementar atualização do jogo
     console.log('Atualizar jogo:', { jogoId, data })
     setEditingJogo(null)
     onRefresh()
@@ -98,7 +76,6 @@ export const JogoManager: React.FC<JogoManagerProps> = ({
 
   const handleDeleteJogo = (jogoId: number) => {
     if (confirm('Tem certeza que deseja excluir este jogo?')) {
-      // Implementar exclusão do jogo
       console.log('Excluir jogo:', jogoId)
       onRefresh()
     }
@@ -125,8 +102,8 @@ export const JogoManager: React.FC<JogoManagerProps> = ({
   }
 
   const JogoCard = ({ jogo }: { jogo: Jogo }) => (
-    <div className={`bg-white rounded-lg border p-4 hover:shadow-md transition-shadow ${
-      selectedJogos.includes(jogo.id) ? 'ring-2 ring-blue-500' : ''
+    <div className={`bg-[#272731] rounded-lg border-4 border-gray-700 p-4 hover:shadow-md transition-shadow ${
+      selectedJogos.includes(jogo.id) ? 'ring-2 ring-[#63E300]' : ''
     }`}>
       {/* Header do Card */}
       <div className="flex items-center justify-between mb-3">
@@ -141,19 +118,19 @@ export const JogoManager: React.FC<JogoManagerProps> = ({
             {jogo.rodada}ª Rodada
           </span>
           {jogo.grupo && (
-            <span className="text-xs text-gray-500">{jogo.grupo.nome}</span>
+            <span className="text-xs text-gray-300">{jogo.grupo.nome}</span>
           )}
         </div>
 
         <div className="flex items-center gap-2">
-          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(jogo.status)}`}>
+          <span className={`inline-flex items-center  gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(jogo.status)}`}>
             {getStatusIcon(jogo.status)}
             {jogo.status}
           </span>
           
           <div className="relative">
             <button className="p-1 hover:bg-gray-100 rounded">
-              <MoreHorizontal className="w-4 h-4" />
+              <MoreHorizontal className="w-4 h-4 text-gray-300" />
             </button>
           </div>
         </div>
@@ -170,9 +147,9 @@ export const JogoManager: React.FC<JogoManagerProps> = ({
               height={32}
               onError={(e) => ImageService.handleTeamLogoError(e, jogo.timeCasa.nome || '')}
             />
-            <span className="font-medium">{jogo.timeCasa.sigla}</span>
+            <span className="font-medium text-gray-300">{jogo.timeCasa.sigla}</span>
           </div>
-          <span className="text-lg font-bold">
+          <span className="text-lg font-bold text-gray-300">
             {jogo.placarCasa !== null ? jogo.placarCasa : '-'}
           </span>
         </div>
@@ -188,16 +165,16 @@ export const JogoManager: React.FC<JogoManagerProps> = ({
               height={32}
               onError={(e) => ImageService.handleTeamLogoError(e, jogo.timeVisitante.nome || '')}
             />
-            <span className="font-medium">{jogo.timeVisitante.sigla}</span>
+            <span className="font-medium text-gray-300">{jogo.timeVisitante.sigla}</span>
           </div>
-          <span className="text-lg font-bold">
+          <span className="text-lg font-bold text-gray-300">
             {jogo.placarVisitante !== null ? jogo.placarVisitante : '-'}
           </span>
         </div>
       </div>
 
       {/* Informações */}
-      <div className="space-y-2 text-sm text-gray-600">
+      <div className="space-y-2 text-sm text-gray-300">
         <div className="flex items-center gap-2">
           <Calendar className="w-4 h-4" />
           {format(parseISO(jogo.dataJogo), "dd/MM 'às' HH:mm", { locale: ptBR })}
@@ -234,12 +211,12 @@ export const JogoManager: React.FC<JogoManagerProps> = ({
         <div className="flex items-center gap-4">
           <button
             onClick={handleSelectAll}
-            className="text-sm text-blue-600 hover:text-blue-800"
+            className="text-sm text-[#63E300] hover:text-gray-500"
           >
             {selectedJogos.length === jogosFiltrados.length ? 'Desmarcar todos' : 'Selecionar todos'}
           </button>
           {selectedJogos.length > 0 && (
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-gray-300">
               {selectedJogos.length} jogo(s) selecionado(s)
             </span>
           )}
@@ -249,7 +226,7 @@ export const JogoManager: React.FC<JogoManagerProps> = ({
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="text-sm border-gray-300 rounded"
+            className="text-sm p-2 border-gray-300 rounded"
           >
             <option value="todos">Todos os Status</option>
             <option value="AGENDADO">Agendados</option>
@@ -261,7 +238,7 @@ export const JogoManager: React.FC<JogoManagerProps> = ({
           <select
             value={filterGrupo}
             onChange={(e) => setFilterGrupo(e.target.value === 'todos' ? 'todos' : parseInt(e.target.value))}
-            className="text-sm border-gray-300 rounded"
+            className="text-sm p-2 border-gray-300 rounded"
           >
             <option value="todos">Todos os Grupos</option>
             {campeonato.grupos.map(grupo => (

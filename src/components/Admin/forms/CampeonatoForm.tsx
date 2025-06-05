@@ -1,82 +1,178 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Time } from '@/types/time'
-import { CriarCampeonatoRequest } from '@/types/campeonato'
+import { Campeonato, CriarCampeonatoRequest } from '@/types/campeonato'
 import { Calendar, Users, Settings, Trophy, Plus, Minus, CheckCircle } from 'lucide-react'
 
 interface CampeonatoFormProps {
-  currentStep: number
-  formData: CriarCampeonatoRequest
-  onChange: (data: CriarCampeonatoRequest) => void
+  currentStep?: number
+  formData?: CriarCampeonatoRequest
+  onChange?: (data: CriarCampeonatoRequest) => void
+  onNext?: () => void
+  onPrevious?: () => void
+  canProceed?: boolean
+  isLastStep?: boolean
+  campeonato?: Campeonato
+  isEditMode?: boolean
+  onSubmit?: () => void
+  loading?: boolean
   times: Time[]
-  onNext: () => void
-  onPrevious: () => void
-  canProceed: boolean
-  isLastStep: boolean
 }
 
 export const CampeonatoForm: React.FC<CampeonatoFormProps> = ({
-  currentStep,
+  currentStep = 1,
   formData,
   onChange,
   times,
   onNext,
   onPrevious,
-  canProceed,
-  isLastStep
+  canProceed = false,
+  isLastStep = false,
+
+  campeonato,
+  isEditMode = false,
+  onSubmit,
+  loading = false
 }) => {
-  const [timesDisponiveis, setTimesDisponiveis] = useState<Time[]>([])
 
-  const grupos = formData.grupos || []
+  const dados = isEditMode && campeonato
+    ? {
+      nome: campeonato.nome,
+      temporada: campeonato.temporada,
+      tipo: campeonato.tipo,
+      dataInicio: campeonato.dataInicio.split('T')[0], 
+      dataFim: campeonato.dataFim?.split('T')[0],
+      descricao: campeonato.descricao,
+      formato: campeonato.formato,
+      grupos: campeonato.grupos?.map(grupo => ({
+        nome: grupo.nome,
+        times: grupo.times.map(gt => gt.timeId)
+      })) || []
+    } as CriarCampeonatoRequest
+    : formData || {} as CriarCampeonatoRequest
 
-  useEffect(() => {
-    const timesUsados = grupos.flatMap(grupo => grupo.times || [])
-    setTimesDisponiveis(times.filter(time => !timesUsados.includes(time.id || 0)))
-  }, [times, grupos])
+  const grupos = dados.grupos || []
+
+const timesDisponiveis = useMemo(() => {
+  const timesUsados = grupos.flatMap(grupo => grupo.times || [])
+  return times.filter(time => !timesUsados.includes(time.id || 0))
+}, [times, grupos])
 
   const handleInputChange = (field: string, value: any) => {
-    onChange({ ...formData, [field]: value })
+    if (isEditMode) {
+      return
+    }
+    onChange?.({ ...dados, [field]: value })
   }
 
   const handleFormatoChange = (field: string, value: any) => {
-    onChange({
-      ...formData,
-      formato: { ...formData.formato, [field]: value }
+    if (isEditMode) return
+
+    onChange?.({
+      ...dados,
+      formato: { ...dados.formato, [field]: value }
     })
   }
 
   const adicionarGrupo = () => {
+    if (isEditMode) return
+
     const novoGrupo = {
       nome: `Grupo ${String.fromCharCode(65 + grupos.length)}`,
       times: []
     }
-    onChange({
-      ...formData,
+    onChange?.({
+      ...dados,
       grupos: [...grupos, novoGrupo]
     })
   }
 
   const removerGrupo = (index: number) => {
+    if (isEditMode) return
+
     const novosGrupos = grupos.filter((_, i) => i !== index)
-    onChange({ ...formData, grupos: novosGrupos })
+    onChange?.({ ...dados, grupos: novosGrupos })
   }
 
   const adicionarTimeAoGrupo = (grupoIndex: number, timeId: number) => {
+    if (isEditMode) return
+
     const novosGrupos = [...grupos]
     if (!novosGrupos[grupoIndex].times) {
       novosGrupos[grupoIndex].times = []
     }
     novosGrupos[grupoIndex].times!.push(timeId)
-    onChange({ ...formData, grupos: novosGrupos })
+    onChange?.({ ...dados, grupos: novosGrupos })
   }
 
   const removerTimeDoGrupo = (grupoIndex: number, timeId: number) => {
+    if (isEditMode) return
+
     const novosGrupos = [...grupos]
     if (novosGrupos[grupoIndex].times) {
       novosGrupos[grupoIndex].times = novosGrupos[grupoIndex].times!.filter(id => id !== timeId)
     }
-    onChange({ ...formData, grupos: novosGrupos })
+    onChange?.({ ...dados, grupos: novosGrupos })
+  }
+
+  if (isEditMode) {
+    return (
+      <div className="bg-[#272731] shadow rounded-lg p-6">
+        <h2 className="text-xl font-semibold text-white mb-6">Informações do Campeonato</h2>
+
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div>
+            <label className="block text-sm font-medium text-white">Nome</label>
+            <input
+              type="text"
+              value={dados.nome}
+              disabled
+              className="mt-1 p-2 block w-full bg-[#1C1C24] border-gray-700 rounded-md text-white opacity-60 cursor-not-allowed"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-white">Status</label>
+            <span className="mt-1 p-2 block w-full text-white">
+              {campeonato?.status === 'NAO_INICIADO' && 'Não Iniciado'}
+              {campeonato?.status === 'EM_ANDAMENTO' && 'Em Andamento'}
+              {campeonato?.status === 'FINALIZADO' && 'Finalizado'}
+            </span>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-white">Temporada</label>
+            <input
+              type="text"
+              value={dados.temporada}
+              disabled
+              className="mt-1 p-2 block w-full bg-[#1C1C24] border-gray-700 rounded-md text-white opacity-60 cursor-not-allowed"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-white">Tipo</label>
+            <input
+              type="text"
+              value={dados.tipo}
+              disabled
+              className="mt-1 p-2 block w-full bg-[#1C1C24] border-gray-700 rounded-md text-white opacity-60 cursor-not-allowed"
+            />
+          </div>
+        </div>
+
+        <div className="mt-6">
+          <button
+            onClick={onSubmit}
+            disabled={loading}
+            className="bg-[#63E300] text-black px-4 py-2 rounded-lg font-medium hover:bg-[#50B800] transition-colors disabled:opacity-50"
+          >
+            {loading ? 'Salvando...' : 'Salvar Alterações'}
+          </button>
+        </div>
+      </div>
+    )
   }
 
   const renderStep1 = () => (
@@ -91,9 +187,9 @@ export const CampeonatoForm: React.FC<CampeonatoFormProps> = ({
           <label className="block text-sm font-medium text-white">Nome do Campeonato</label>
           <input
             type="text"
-            value={formData.nome}
+            value={dados.nome || ''}
             onChange={(e) => handleInputChange('nome', e.target.value)}
-            className="mt-1 p-1 block w-full bg-[#1C1C24] border-gray-700 rounded-md shadow-sm focus:ring-[#63E300] focus:border-[#63E300] text-white"
+            className="mt-1 p-2 block w-full bg-[#1C1C24] border-gray-700 rounded-md shadow-sm focus:ring-[#63E300] focus:border-[#63E300] text-white"
             placeholder="Ex: Brasileirão 2025"
           />
         </div>
@@ -101,7 +197,7 @@ export const CampeonatoForm: React.FC<CampeonatoFormProps> = ({
         <div>
           <label className="block text-sm font-medium text-white">Temporada</label>
           <select
-            value={formData.temporada}
+            value={dados.temporada || '2025'}
             onChange={(e) => handleInputChange('temporada', e.target.value)}
             className="mt-1 p-1 block w-full bg-[#1C1C24] border-gray-700 rounded-md shadow-sm focus:ring-[#63E300] focus:border-[#63E300] text-white"
           >
@@ -113,7 +209,7 @@ export const CampeonatoForm: React.FC<CampeonatoFormProps> = ({
         <div>
           <label className="block text-sm font-medium text-white">Tipo</label>
           <select
-            value={formData.tipo}
+            value={dados.tipo}
             onChange={(e) => handleInputChange('tipo', e.target.value)}
             className="mt-1 p-1 block w-full bg-[#1C1C24] border-gray-700 rounded-md shadow-sm focus:ring-[#63E300] focus:border-[#63E300] text-white"
           >
@@ -127,7 +223,7 @@ export const CampeonatoForm: React.FC<CampeonatoFormProps> = ({
           <label className="block text-sm font-medium text-white">Data de Início</label>
           <input
             type="date"
-            value={formData.dataInicio}
+            value={dados.dataInicio}
             onChange={(e) => handleInputChange('dataInicio', e.target.value)}
             className="mt-1 p-1 block w-full bg-[#1C1C24] border-gray-700 rounded-md shadow-sm focus:ring-[#63E300] focus:border-[#63E300] text-white"
           />
@@ -137,7 +233,7 @@ export const CampeonatoForm: React.FC<CampeonatoFormProps> = ({
           <label className="block text-sm font-medium text-white">Data de Fim (opcional)</label>
           <input
             type="date"
-            value={formData.dataFim}
+            value={dados.dataFim}
             onChange={(e) => handleInputChange('dataFim', e.target.value)}
             className="mt-1 p-1 block w-full bg-[#1C1C24] border-gray-700 rounded-md shadow-sm focus:ring-[#63E300] focus:border-[#63E300] text-white"
           />
@@ -146,7 +242,7 @@ export const CampeonatoForm: React.FC<CampeonatoFormProps> = ({
         <div className="sm:col-span-2">
           <label className="block text-sm font-medium text-white">Descrição (opcional)</label>
           <textarea
-            value={formData.descricao}
+            value={dados.descricao}
             onChange={(e) => handleInputChange('descricao', e.target.value)}
             rows={3}
             className="mt-1 p-1 block w-full bg-[#1C1C24] border-gray-700 rounded-md shadow-sm focus:ring-[#63E300] focus:border-[#63E300] text-white"
@@ -167,9 +263,9 @@ export const CampeonatoForm: React.FC<CampeonatoFormProps> = ({
         <div>
           <label className="block text-sm font-medium text-white">Tipo de Disputa</label>
           <select
-            value={formData.formato.tipoDisputa}
+            value={dados.formato?.tipoDisputa || 'PONTOS_CORRIDOS'}
             onChange={(e) => handleFormatoChange('tipoDisputa', e.target.value)}
-            className="mt-1 p-1 block w-full bg-[#1C1C24] border-gray-700 rounded-md shadow-sm focus:ring-[#63E300] focus:border-[#63E300] text-white"
+            className="mt-1 p-2 block w-full bg-[#1C1C24] border-gray-700 rounded-md shadow-sm focus:ring-[#63E300] focus:border-[#63E300] text-white"
           >
             <option value="PONTOS_CORRIDOS">Pontos Corridos</option>
             <option value="MATA_MATA">Mata-mata</option>
@@ -181,9 +277,9 @@ export const CampeonatoForm: React.FC<CampeonatoFormProps> = ({
           <label className="block text-sm font-medium text-white">Número de Rodadas</label>
           <input
             type="number"
-            value={formData.formato.numeroRodadas}
+            value={dados.formato?.numeroRodadas || 10}
             onChange={(e) => handleFormatoChange('numeroRodadas', parseInt(e.target.value))}
-            className="mt-1 p-1 block w-full bg-[#1C1C24] border-gray-700 rounded-md shadow-sm focus:ring-[#63E300] focus:border-[#63E300] text-white"
+            className="mt-1 p-2 block w-full bg-[#1C1C24] border-gray-700 rounded-md shadow-sm focus:ring-[#63E300] focus:border-[#63E300] text-white"
             min="1"
           />
         </div>
@@ -192,7 +288,7 @@ export const CampeonatoForm: React.FC<CampeonatoFormProps> = ({
           <div className="flex items-center">
             <input
               type="checkbox"
-              checked={formData.formato.temGrupos}
+              checked={dados.formato?.temGrupos || false}
               onChange={(e) => handleFormatoChange('temGrupos', e.target.checked)}
               className="h-4 w-4 text-[#63E300] focus:ring-[#63E300] border-gray-700 rounded bg-[#1C1C24]"
             />
@@ -200,15 +296,15 @@ export const CampeonatoForm: React.FC<CampeonatoFormProps> = ({
           </div>
         </div>
 
-        {formData.formato.temGrupos && (
+        {dados.formato?.temGrupos && (
           <>
             <div>
               <label className="block text-sm font-medium text-white">Número de Grupos</label>
               <input
                 type="number"
-                value={formData.formato.numeroGrupos}
+                value={dados.formato.numeroGrupos || 4}
                 onChange={(e) => handleFormatoChange('numeroGrupos', parseInt(e.target.value))}
-                className="mt-1 p-1 block w-full bg-[#1C1C24] border-gray-700 rounded-md shadow-sm focus:ring-[#63E300] focus:border-[#63E300] text-white"
+                className="mt-1 p-2 block w-full bg-[#1C1C24] border-gray-700 rounded-md shadow-sm focus:ring-[#63E300] focus:border-[#63E300] text-white"
                 min="2"
               />
             </div>
@@ -217,9 +313,9 @@ export const CampeonatoForm: React.FC<CampeonatoFormProps> = ({
               <label className="block text-sm font-medium text-white">Times por Grupo</label>
               <input
                 type="number"
-                value={formData.formato.timesGrupo}
+                value={dados.formato.timesGrupo || 8}
                 onChange={(e) => handleFormatoChange('timesGrupo', parseInt(e.target.value))}
-                className="mt-1 p-1 block w-full bg-[#1C1C24] border-gray-700 rounded-md shadow-sm focus:ring-[#63E300] focus:border-[#63E300] text-white"
+                className="mt-1 p-2 block w-full bg-[#1C1C24] border-gray-700 rounded-md shadow-sm focus:ring-[#63E300] focus:border-[#63E300] text-white"
                 min="2"
               />
             </div>
@@ -228,9 +324,9 @@ export const CampeonatoForm: React.FC<CampeonatoFormProps> = ({
               <label className="block text-sm font-medium text-white">Classificados por Grupo</label>
               <input
                 type="number"
-                value={formData.formato.classificadosGrupo}
+                value={dados.formato.classificadosGrupo || 2}
                 onChange={(e) => handleFormatoChange('classificadosGrupo', parseInt(e.target.value))}
-                className="mt-1 p-1 block w-full bg-[#1C1C24] border-gray-700 rounded-md shadow-sm focus:ring-[#63E300] focus:border-[#63E300] text-white"
+                className="mt-1 p-2 block w-full bg-[#1C1C24] border-gray-700 rounded-md shadow-sm focus:ring-[#63E300] focus:border-[#63E300] text-white"
                 min="1"
               />
             </div>
@@ -241,7 +337,7 @@ export const CampeonatoForm: React.FC<CampeonatoFormProps> = ({
           <div className="flex items-center">
             <input
               type="checkbox"
-              checked={formData.formato.temPlayoffs}
+              checked={dados.formato?.temPlayoffs || false}
               onChange={(e) => handleFormatoChange('temPlayoffs', e.target.checked)}
               className="h-4 w-4 text-[#63E300] focus:ring-[#63E300] border-gray-700 rounded bg-[#1C1C24]"
             />
@@ -280,7 +376,7 @@ export const CampeonatoForm: React.FC<CampeonatoFormProps> = ({
                   onChange={(e) => {
                     const novosGrupos = [...grupos]
                     novosGrupos[index].nome = e.target.value
-                    onChange({ ...formData, grupos: novosGrupos })
+                    onChange?.({ ...dados, grupos: novosGrupos })
                   }}
                   className="text-lg font-medium border-none p-0 focus:ring-0 bg-transparent text-white"
                 />
@@ -347,19 +443,19 @@ export const CampeonatoForm: React.FC<CampeonatoFormProps> = ({
           <dl className="grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2">
             <div>
               <dt className="text-sm font-medium text-gray-400">Nome</dt>
-              <dd className="text-sm text-white">{formData.nome}</dd>
+              <dd className="text-sm text-white">{dados.nome}</dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-gray-400">Temporada</dt>
-              <dd className="text-sm text-white">{formData.temporada}</dd>
+              <dd className="text-sm text-white">{dados.temporada}</dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-gray-400">Tipo</dt>
-              <dd className="text-sm text-white">{formData.tipo}</dd>
+              <dd className="text-sm text-white">{dados.tipo}</dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-gray-400">Data de Início</dt>
-              <dd className="text-sm text-white">{formData.dataInicio}</dd>
+              <dd className="text-sm text-white">{dados.dataInicio}</dd>
             </div>
           </dl>
         </div>
@@ -369,11 +465,11 @@ export const CampeonatoForm: React.FC<CampeonatoFormProps> = ({
           <dl className="grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2">
             <div>
               <dt className="text-sm font-medium text-gray-400">Tipo de Disputa</dt>
-              <dd className="text-sm text-white">{formData.formato.tipoDisputa}</dd>
+              <dd className="text-sm text-white">{dados.formato?.tipoDisputa}</dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-gray-400">Rodadas</dt>
-              <dd className="text-sm text-white">{formData.formato.numeroRodadas}</dd>
+              <dd className="text-sm text-white">{dados.formato?.numeroRodadas}</dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-gray-400">Grupos</dt>
@@ -404,25 +500,27 @@ export const CampeonatoForm: React.FC<CampeonatoFormProps> = ({
       {currentStep === 3 && renderStep3()}
       {currentStep === 4 && renderStep4()}
 
-      <div className="flex justify-between">
-        <button
-          type="button"
-          onClick={onPrevious}
-          disabled={currentStep === 1}
-          className="inline-flex items-center px-4 py-2 border border-gray-700 shadow-sm text-sm font-medium rounded-md text-gray-400 bg-[#1C1C24] hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#63E300] disabled:opacity-50 transition-colors"
-        >
-          Anterior
-        </button>
+      {!isEditMode && (
+        <div className="flex justify-between">
+          <button
+            type="button"
+            onClick={onPrevious}
+            disabled={currentStep === 1}
+            className="inline-flex items-center px-4 py-2 border border-gray-700 shadow-sm text-sm font-medium rounded-md text-gray-400 bg-[#1C1C24] hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#63E300] disabled:opacity-50 transition-colors"
+          >
+            Anterior
+          </button>
 
-        <button
-          type="button"
-          onClick={onNext}
-          disabled={!canProceed}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-black bg-[#63E300] hover:bg-[#50B800] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#63E300] disabled:opacity-50 transition-colors"
-        >
-          {isLastStep ? 'Finalizar' : 'Próximo'}
-        </button>
-      </div>
+          <button
+            type="button"
+            onClick={onNext}
+            disabled={!canProceed}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-black bg-[#63E300] hover:bg-[#50B800] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#63E300] disabled:opacity-50 transition-colors"
+          >
+            {isLastStep ? 'Finalizar' : 'Próximo'}
+          </button>
+        </div>
+      )}
     </div>
   )
 }

@@ -55,26 +55,25 @@ export default function AdminGrupos() {
   }
 
   const handleExportarGrupos = () => {
-    // Implementar exportação dos grupos
     console.log('Exportar grupos')
   }
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white shadow rounded-lg p-6">
+      <div className="bg-[#272731] shadow rounded-lg p-6 border border-gray-700">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <Link
               href={`/admin/campeonatos/${campeonatoId}`}
-              className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700"
+              className="inline-flex items-center text-sm font-medium text-gray-300 hover:text-gray-700"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Voltar
             </Link>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Gerenciar Grupos</h1>
-              <p className="text-sm text-gray-500">
+              <h1 className="text-2xl font-bold text-[#63E300]">Gerenciar Grupos</h1>
+              <p className="text-sm text-gray-300">
                 {campeonato.nome} • {campeonato.grupos.length} grupos
               </p>
             </div>
@@ -143,7 +142,7 @@ export default function AdminGrupos() {
 
       {/* Estatísticas dos Grupos */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="bg-white overflow-hidden shadow rounded-lg">
+        <div className="bg-[#272731] border border-gray-700 overflow-hidden shadow rounded-lg">
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
@@ -151,10 +150,10 @@ export default function AdminGrupos() {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
+                  <dt className="text-sm font-medium text-gray-300 truncate">
                     Total de Grupos
                   </dt>
-                  <dd className="text-lg font-medium text-gray-900">
+                  <dd className="text-lg font-medium text-gray-300">
                     {campeonato.grupos.length}
                   </dd>
                 </dl>
@@ -163,7 +162,7 @@ export default function AdminGrupos() {
           </div>
         </div>
 
-        <div className="bg-white overflow-hidden shadow rounded-lg">
+       <div className="bg-[#272731] border border-gray-700 overflow-hidden shadow rounded-lg">
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
@@ -171,10 +170,10 @@ export default function AdminGrupos() {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
+                  <dt className="text-sm font-medium text-gray-300 truncate">
                     Times Alocados
                   </dt>
-                  <dd className="text-lg font-medium text-gray-900">
+                  <dd className="text-lg font-medium text-gray-300">
                     {campeonato.grupos.reduce((acc, grupo) => acc + grupo.times.length, 0)}
                   </dd>
                 </dl>
@@ -183,7 +182,7 @@ export default function AdminGrupos() {
           </div>
         </div>
 
-        <div className="bg-white overflow-hidden shadow rounded-lg">
+       <div className="bg-[#272731] border border-gray-700 overflow-hidden shadow rounded-lg">
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
@@ -191,10 +190,10 @@ export default function AdminGrupos() {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
+                  <dt className="text-sm font-medium text-gray-300 truncate">
                     Média por Grupo
                   </dt>
-                  <dd className="text-lg font-medium text-gray-900">
+                  <dd className="text-lg font-medium text-gray-300">
                     {campeonato.grupos.length > 0 
                       ? Math.round(campeonato.grupos.reduce((acc, grupo) => acc + grupo.times.length, 0) / campeonato.grupos.length)
                       : 0
@@ -206,7 +205,7 @@ export default function AdminGrupos() {
           </div>
         </div>
 
-        <div className="bg-white overflow-hidden shadow rounded-lg">
+       <div className="bg-[#272731] border border-gray-700 overflow-hidden shadow rounded-lg">
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
@@ -214,10 +213,10 @@ export default function AdminGrupos() {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
+                  <dt className="text-sm font-medium text-gray-300 truncate">
                     Não Alocados
                   </dt>
-                  <dd className="text-lg font-medium text-gray-900">
+                  <dd className="text-lg font-medium text-gray-300">
                     {timesDisponiveis.length}
                   </dd>
                 </dl>
@@ -228,9 +227,9 @@ export default function AdminGrupos() {
       </div>
 
       {/* Grupos */}
-      <div className="space-y-6">
+      <div className="space-y-6 ">
         {campeonato.grupos.length === 0 ? (
-          <div className="text-center py-12 bg-white shadow rounded-lg">
+          <div className="text-center py-12 bg-white shadow rounded-lg ">
             <Users className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">
               Nenhum grupo criado

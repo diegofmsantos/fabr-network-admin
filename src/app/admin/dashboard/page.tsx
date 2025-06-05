@@ -43,8 +43,8 @@ export default function Dashboard() {
       {/* Header com Filtros */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard Executivo</h1>
-          <p className="mt-2 text-sm text-gray-600">
+          <h1 className="text-3xl font-bold text-[#63E300]">Dashboard Executivo</h1>
+          <p className="mt-2 text-sm text-gray-300">
             Acompanhe as métricas e performance dos campeonatos em tempo real
           </p>
         </div>
@@ -53,7 +53,7 @@ export default function Dashboard() {
           <select
             value={selectedPeriod}
             onChange={(e) => setSelectedPeriod(e.target.value)}
-            className="rounded-md border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500"
+            className="rounded-md p-2 border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500"
           >
             <option value="7d">Últimos 7 dias</option>
             <option value="30d">Últimos 30 dias</option>
@@ -64,7 +64,7 @@ export default function Dashboard() {
           <select
             value={selectedTemporada}
             onChange={(e) => setSelectedTemporada(e.target.value)}
-            className="rounded-md border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500"
+            className="rounded-md p-2 border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500"
           >
             <option value="2025">Temporada 2025</option>
             <option value="2024">Temporada 2024</option>

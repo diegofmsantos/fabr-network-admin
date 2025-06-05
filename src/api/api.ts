@@ -12,7 +12,7 @@ export const api = axios.create({
 export const getTimes = async (temporada = '2024'): Promise<Time[]> => {
   try {
     console.log(`Buscando times com URL: ${api.defaults.baseURL}/times?temporada=${temporada}`);
-    const response = await api.get(`/times?temporada=${temporada}`)
+    const response = await api.get(`/times/times?temporada=${temporada}`)
     return response.data || []
   } catch (error) {
     console.error('Erro ao buscar times:', error)
@@ -28,7 +28,7 @@ export const addTime = async (data: Omit<Time, "id">): Promise<Time> => {
       ...data,
       temporada: data.temporada || '2024'
     }
-    const response = await api.post('/time', timeData)
+    const response = await api.post('/times/time', timeData)
     return response.data
   } catch (error) {
     console.error('Erro ao adicionar time:', error)
@@ -39,7 +39,7 @@ export const addTime = async (data: Omit<Time, "id">): Promise<Time> => {
 // Função para atualizar um time
 export const atualizarTime = async (data: Time): Promise<Time> => {
   try {
-    const response = await api.put(`/time/${data.id}`, data)
+    const response = await api.put(`/times/time/${data.id}`, data)
     return response.data
   } catch (error) {
     console.error(`Erro ao atualizar o time com ID ${data.id}:`, error)
@@ -50,7 +50,7 @@ export const atualizarTime = async (data: Time): Promise<Time> => {
 // Função para deletar um time
 export const deletarTime = async (id: number): Promise<void> => {
   try {
-    await api.delete(`/time/${id}`)
+    await api.delete(`/times/time/${id}`)
   } catch (error) {
     console.error(`Erro ao deletar o time com ID ${id}:`, error)
     throw new Error('Falha ao deletar time')
@@ -61,7 +61,7 @@ export const deletarTime = async (id: number): Promise<void> => {
 export const getJogadores = async (temporada = '2024'): Promise<any[]> => {
   try {
     console.log(`Buscando jogadores com URL: ${api.defaults.baseURL}/jogadores?temporada=${temporada}`);
-    const response = await api.get(`/jogadores?temporada=${temporada}`)
+    const response = await api.get(`/jogadores/jogadores?temporada=${temporada}`)
     return response.data || []
   } catch (error) {
     console.error('Erro ao buscar jogadores:', error)
@@ -72,7 +72,7 @@ export const getJogadores = async (temporada = '2024'): Promise<any[]> => {
 // Função para adicionar um jogador
 export const addJogador = async (data: Omit<Jogador, 'id'>): Promise<Jogador> => {
   try {
-    const response = await api.post('/jogador', data)
+    const response = await api.post('/jogadores/jogador', data)
     return response.data;
   } catch (error) {
     console.error('Erro ao adicionar jogador:', error)
@@ -84,7 +84,7 @@ export const addJogador = async (data: Omit<Jogador, 'id'>): Promise<Jogador> =>
 export const atualizarJogador = async (data: any): Promise<Jogador> => {
   // Aqui enviamos os campos do jogador e também as informações para o relacionamento
   try {
-    const response = await api.put(`/jogador/${data.id}`, {
+    const response = await api.put(`/jogadores/jogador/${data.id}`, {
       ...data,
       // Incluir informações para o relacionamento
       timeId: data.timeId,
@@ -105,7 +105,7 @@ export const atualizarJogador = async (data: any): Promise<Jogador> => {
 export const deletarJogador = async (id: number): Promise<void> => {
   try {
     console.log(`Tentando excluir jogador com ID: ${id}`); // Log para debug
-    const response = await api.delete(`/jogador/${id}`);
+    const response = await api.delete(`/jogadores/jogador/${id}`);
 
     // Checar se a resposta foi bem-sucedida
     if (response.status === 200) {
@@ -123,7 +123,7 @@ export const deletarJogador = async (id: number): Promise<void> => {
 // Função para obter todas as notícias
 export const getNoticias = async (): Promise<Materia[]> => {
   try {
-    const response = await api.get('/materias');
+    const response = await api.get('/materias/materias');
     return response.data || [];
   } catch (error) {
     console.error('Erro ao buscar notícias:', error);
@@ -136,7 +136,7 @@ export const createNoticia = async (
   noticia: Omit<Materia, 'id'>
 ): Promise<Materia> => {
   try {
-    const response = await api.post('/materias', {
+    const response = await api.post('/materias/materias', {
       ...noticia,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -154,7 +154,7 @@ export const updateNoticia = async (
   noticia: Partial<Materia>
 ): Promise<Materia> => {
   try {
-    const response = await api.put(`/materias/${id}`, {
+    const response = await api.put(`/materias/materias/${id}`, {
       ...noticia,
       updatedAt: new Date()
     });
@@ -168,7 +168,7 @@ export const updateNoticia = async (
 // Função para deletar uma notícia
 export const deleteNoticia = async (id: number): Promise<void> => {
   try {
-    await api.delete(`/materia/${id}`);
+    await api.delete(`/materias/materia/${id}`);
   } catch (error) {
     console.error(`Erro ao deletar notícia com ID ${id}:`, error);
     throw new Error('Falha ao deletar notícia');
@@ -178,7 +178,7 @@ export const deleteNoticia = async (id: number): Promise<void> => {
 // Função para iniciar nova temporada
 export const iniciarTemporada = async (ano: string, alteracoes: any): Promise<any> => {
   try {
-    const response = await api.post(`/iniciar-temporada/${ano}`, alteracoes)
+    const response = await api.post(`/admin/iniciar-temporada/${ano}`, alteracoes)
     return response.data
   } catch (error) {
     console.error(`Erro ao iniciar temporada ${ano}:`, error)
@@ -194,7 +194,7 @@ export const importarTimes = async (arquivo: File): Promise<any> => {
     const formData = new FormData();
     formData.append('arquivo', arquivo);
     
-    const response = await api.post('/importar-times', formData, {
+    const response = await api.post('/admin/importar-times', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -212,7 +212,7 @@ export const importarJogadores = async (arquivo: File): Promise<any> => {
     const formData = new FormData();
     formData.append('arquivo', arquivo);
     
-    const response = await api.post('/importar-jogadores', formData, {
+    const response = await api.post('/admin/importar-jogadores', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -232,7 +232,7 @@ export const atualizarEstatisticas = async (arquivo: File, id_jogo: string, data
     formData.append('id_jogo', id_jogo);
     formData.append('data_jogo', data_jogo);
     
-    const response = await api.post('/atualizar-estatisticas', formData, {
+    const response = await api.post('/admin/atualizar-estatisticas', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -253,7 +253,7 @@ export const reprocessarJogo = async (arquivo: File, id_jogo: string, data_jogo:
     formData.append('data_jogo', data_jogo);
     formData.append('force', String(force));
     
-    const response = await api.post('/reprocessar-jogo', formData, {
+    const response = await api.post('/admin/reprocessar-jogo', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -268,7 +268,7 @@ export const reprocessarJogo = async (arquivo: File, id_jogo: string, data_jogo:
 // Função para obter jogos processados
 export const getJogosProcessados = async (): Promise<any> => {
   try {
-    const response = await api.get('/jogos-processados');
+    const response = await api.get('/admin/jogos-processados');
     return response.data;
   } catch (error) {
     console.error('Erro ao obter jogos processados:', error);

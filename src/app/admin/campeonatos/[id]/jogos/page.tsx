@@ -2,22 +2,13 @@
 
 import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { useCampeonato, useJogos, useGerarJogos } from '@/hooks/useCampeonatos'
+import { useCampeonato } from '@/hooks/useCampeonatos'
 import { Loading } from '@/components/ui/Loading'
 import { NoDataFound } from '@/components/ui/NoDataFound'
-import {
-  ArrowLeft,
-  Plus,
-  Calendar,
-  Play,
-  RotateCcw,
-  Download,
-  Filter,
-  Search,
-  Zap
-} from 'lucide-react'
+import { ArrowLeft, Plus, Calendar, Download, Filter, Search, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { JogoManager } from '@/components/Admin/JogoManager'
+import { useGerarJogos, useJogos } from '@/hooks/useJogos.ts'
 
 type FilterStatus = 'todos' | 'AGENDADO' | 'AO_VIVO' | 'FINALIZADO' | 'ADIADO'
 type ViewMode = 'calendar' | 'list' | 'table'
@@ -41,7 +32,6 @@ export default function AdminJogos() {
 
   const loading = loadingCampeonato || loadingJogos
 
-  // Filtros
   const jogosFiltrados = jogos.filter(jogo => {
     const matchStatus = filterStatus === 'todos' || jogo.status === filterStatus
     const matchGrupo = filterGrupo === 'todos' || jogo.grupoId === filterGrupo
@@ -69,7 +59,6 @@ export default function AdminJogos() {
       alert('Selecione ao menos um jogo')
       return
     }
-
     console.log(`Ação em lote: ${action}`, selectedJogos)
   }
 
@@ -101,20 +90,19 @@ export default function AdminJogos() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white shadow rounded-lg p-6">
+      <div className="bg-[#272731] shadow rounded-lg p-6 border border-gray-700">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <Link
               href={`/admin/campeonatos/${campeonatoId}`}
-              className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700"
+              className="inline-flex items-center text-sm font-medium text-gray-300 hover:text-gray-700"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Voltar
             </Link>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Gerenciar Jogos</h1>
-              <p className="text-sm text-gray-500">
+              <h1 className="text-2xl font-bold text-[#63E300]">Gerenciar Jogos</h1>
+              <p className="text-sm text-gray-300">
                 {campeonato.nome} • {estadisticas.total} jogos
               </p>
             </div>
@@ -150,44 +138,44 @@ export default function AdminJogos() {
 
       {/* Estatísticas */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-5">
-        <div className="bg-white overflow-hidden shadow rounded-lg">
+        <div className="bg-[#272731] shadow rounded-lg border border-gray-700">
           <div className="p-5">
-            <dt className="text-sm font-medium text-gray-500 truncate">Total</dt>
-            <dd className="mt-1 text-3xl font-semibold text-gray-900">{estadisticas.total}</dd>
+            <dt className="text-sm font-medium text-gray-300 truncate">Total</dt>
+            <dd className="mt-1 text-3xl font-semibold text-gray-500">{estadisticas.total}</dd>
           </div>
         </div>
 
-        <div className="bg-white overflow-hidden shadow rounded-lg">
+        <div className="bg-[#272731] shadow rounded-lg border border-gray-700">
           <div className="p-5">
-            <dt className="text-sm font-medium text-gray-500 truncate">Agendados</dt>
+            <dt className="text-sm font-medium text-gray-300 truncate">Agendados</dt>
             <dd className="mt-1 text-3xl font-semibold text-blue-600">{estadisticas.agendados}</dd>
           </div>
         </div>
 
-        <div className="bg-white overflow-hidden shadow rounded-lg">
+        <div className="bg-[#272731] shadow rounded-lg border border-gray-700">
           <div className="p-5">
-            <dt className="text-sm font-medium text-gray-500 truncate">Ao Vivo</dt>
+            <dt className="text-sm font-medium text-gray-300 truncate">Ao Vivo</dt>
             <dd className="mt-1 text-3xl font-semibold text-red-600">{estadisticas.aoVivo}</dd>
           </div>
         </div>
 
-        <div className="bg-white overflow-hidden shadow rounded-lg">
+        <div className="bg-[#272731] shadow rounded-lg border border-gray-700">
           <div className="p-5">
-            <dt className="text-sm font-medium text-gray-500 truncate">Finalizados</dt>
+            <dt className="text-sm font-medium text-gray-300 truncate">Finalizados</dt>
             <dd className="mt-1 text-3xl font-semibold text-green-600">{estadisticas.finalizados}</dd>
           </div>
         </div>
 
-        <div className="bg-white overflow-hidden shadow rounded-lg">
+       <div className="bg-[#272731] shadow rounded-lg border border-gray-700">
           <div className="p-5">
-            <dt className="text-sm font-medium text-gray-500 truncate">Adiados</dt>
+            <dt className="text-sm font-medium text-gray-300 truncate">Adiados</dt>
             <dd className="mt-1 text-3xl font-semibold text-yellow-600">{estadisticas.adiados}</dd>
           </div>
         </div>
       </div>
 
       {/* Filtros e Busca */}
-      <div className="bg-white shadow rounded-lg p-6">
+      <div className="bg-[#272731] shadow rounded-lg border border-gray-700 p-4">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
           {/* Search */}
           <div className="relative">
@@ -197,7 +185,7 @@ export default function AdminJogos() {
               placeholder="Buscar times..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="block w-full rounded-md border-gray-300 pl-10 focus:border-blue-500 focus:ring-blue-500"
+              className="block p-2 w-full rounded-md border-gray-300 pl-10 focus:border-blue-500 focus:ring-blue-500"
             />
           </div>
 
@@ -205,7 +193,7 @@ export default function AdminJogos() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as FilterStatus)}
-            className="block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+            className="block p-2 w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
           >
             <option value="todos">Todos os Status</option>
             <option value="AGENDADO">Agendados</option>
@@ -218,7 +206,7 @@ export default function AdminJogos() {
           <select
             value={filterGrupo}
             onChange={(e) => setFilterGrupo(e.target.value === 'todos' ? 'todos' : parseInt(e.target.value))}
-            className="block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+            className="block p-2 w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
           >
             <option value="todos">Todos os Grupos</option>
             {campeonato.grupos.map(grupo => (
@@ -230,7 +218,7 @@ export default function AdminJogos() {
           <select
             value={filterRodada}
             onChange={(e) => setFilterRodada(e.target.value === 'todas' ? 'todas' : parseInt(e.target.value))}
-            className="block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+            className="block p-2 w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
           >
             <option value="todas">Todas as Rodadas</option>
             {rodadas.map(rodada => (
@@ -242,7 +230,7 @@ export default function AdminJogos() {
           <select
             value={viewMode}
             onChange={(e) => setViewMode(e.target.value as ViewMode)}
-            className="block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+            className="block p-2 w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
           >
             <option value="list">Lista</option>
             <option value="calendar">Calendário</option>

@@ -70,8 +70,8 @@ export const GrupoManager: React.FC<GrupoManagerProps> = ({
 
   return (
     <div 
-      className={`bg-white rounded-lg border-2 transition-all duration-200 ${
-        isSelected ? 'border-blue-500 shadow-lg' : 'border-gray-200 hover:border-gray-300'
+      className={`bg-[#272731] rounded-lg border-2 border-gray-700 transition-all duration-200 ${
+        isSelected ? 'border-blue-500 shadow-lg' : 'border-gray-200 hover:border-[#63E300]'
       }`}
       onClick={isReorganizing ? onSelect : undefined}
     >
@@ -110,7 +110,7 @@ export const GrupoManager: React.FC<GrupoManagerProps> = ({
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <h3 className="text-lg font-semibold text-gray-900">{grupo.nome}</h3>
+                <h3 className="text-lg font-semibold text-gray-300">{grupo.nome}</h3>
                 <button
                   onClick={() => setIsEditing(true)}
                   className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded"
@@ -121,8 +121,8 @@ export const GrupoManager: React.FC<GrupoManagerProps> = ({
             )}
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500">
+          <div className="flex items-center gap-2 ">
+            <span className="text-sm text-gray-300">
               {grupo.times.length} times
             </span>
             
@@ -134,7 +134,7 @@ export const GrupoManager: React.FC<GrupoManagerProps> = ({
                   onChange={onSelect}
                   className="rounded border-gray-300"
                 />
-                <label className="text-sm text-gray-600">Selecionar</label>
+                <label className="text-sm text-gray-300">Selecionar</label>
               </div>
             )}
           </div>
@@ -142,7 +142,7 @@ export const GrupoManager: React.FC<GrupoManagerProps> = ({
       </div>
 
       {/* Lista de Times */}
-      <div className="p-4">
+      <div className="p-4 ">
         <div className="space-y-3">
           {grupo.times.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
@@ -157,10 +157,10 @@ export const GrupoManager: React.FC<GrupoManagerProps> = ({
               return (
                 <div 
                   key={grupoTime.timeId}
-                  className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${
+                  className={`flex items-center justify-between p-3 rounded-lg border border-gray-400 transition-colors ${
                     isReorganizing && timesSelecionados.includes(grupoTime.timeId)
                       ? 'border-blue-300 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                      : 'border-gray-200 hover:border-[#63E300]'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -183,8 +183,8 @@ export const GrupoManager: React.FC<GrupoManagerProps> = ({
                     />
                     
                     <div>
-                      <div className="font-medium text-gray-900">{time.nome}</div>
-                      <div className="text-sm text-gray-500">{time.sigla}</div>
+                      <div className="font-medium text-gray-300">{time.nome}</div>
+                      <div className="text-sm text-gray-300">{time.sigla}</div>
                     </div>
                   </div>
 
@@ -222,7 +222,7 @@ export const GrupoManager: React.FC<GrupoManagerProps> = ({
               )}
               
               <div className="flex gap-2">
-                <button className="flex-1 text-sm px-3 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
+                <button className="flex-1 text-sm px-3 py-2 bg-gray-100 text-gray-300 rounded hover:bg-gray-200">
                   Esvaziar Grupo
                 </button>
                 <button className="flex-1 text-sm px-3 py-2 bg-purple-100 text-purple-700 rounded hover:bg-purple-200">
@@ -257,15 +257,15 @@ export const GrupoManager: React.FC<GrupoManagerProps> = ({
 
               {/* Estatísticas do Grupo */}
               <div className="grid grid-cols-2 gap-4 text-center">
-                <div className="bg-gray-50 rounded p-2">
-                  <div className="text-lg font-semibold text-gray-900">{grupo.times.length}</div>
-                  <div className="text-xs text-gray-500">Times</div>
+                <div className="bg-gray-400 rounded p-2">
+                  <div className="text-lg font-semibold text-gray-800">{grupo.times.length}</div>
+                  <div className="text-xs text-gray-700">Times</div>
                 </div>
-                <div className="bg-gray-50 rounded p-2">
-                  <div className="text-lg font-semibold text-gray-900">
+                <div className="bg-gray-400 rounded p-2">
+                  <div className="text-lg font-semibold text-gray-800">
                     {grupo.classificacoes?.length || 0}
                   </div>
-                  <div className="text-xs text-gray-500">Jogos</div>
+                  <div className="text-xs text-gray-700">Jogos</div>
                 </div>
               </div>
 

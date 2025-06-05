@@ -8,7 +8,6 @@ interface AdminStatsParams {
 }
 
 interface AdminStats {
-  // Estatísticas principais
   totalCampeonatos: number
   campeonatosAtivos: number
   jogosAgendados: number
@@ -17,13 +16,11 @@ interface AdminStats {
   timesParticipantes: number
   jogosEstaSemana: number;
 
-  // Métricas de crescimento
   crescimentoCampeonatos: number
   novosTimes: number
   melhoriaOperacional: number
   taxaConclusao: number
 
-  // Dados para gráficos
   campeonatosPorStatus: Array<{
     status: string
     quantidade: number
@@ -66,7 +63,6 @@ interface AdminStats {
     variacao: number
   }>
 
-  // Atividades e alertas
   atividadesRecentes: Array<{
     id: string
     tipo: 'campeonato_criado' | 'jogo_finalizado' | 'classificacao_atualizada'
@@ -85,7 +81,6 @@ interface AdminStats {
     data: string
   }>
 
-  // Top performers
   topCampeonatos: Array<{
     id: number
     nome: string
@@ -109,7 +104,6 @@ interface AdminStats {
     crescimento: number
   }>
 
-  // Métricas detalhadas
   mediaJogosPorCampeonato: number
   tempoMedioDuracao: number
   taxaAdiamentos: number
@@ -117,7 +111,6 @@ interface AdminStats {
   participacaoMedia: number
   pontuacaoMedia: number
 
-  // Atividades recentes
   recentActivities: Array<{
     id: string
     type: string
@@ -126,55 +119,83 @@ interface AdminStats {
     user?: string
   }>
 
-  // Alertas do sistema
   alerts: string[]
 }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 export function useAdminStats(params?: AdminStatsParams | string) {
-  // Suporte para ambos os formatos: objeto ou string (temporada)
-  const queryParams = typeof params === 'string' ? { temporada: params } : params || {}
+  const queryParams = typeof params === 'string' 
+    ? { temporada: params } 
+    : params || {}
 
   return useQuery({
     queryKey: ['adminStats', queryParams],
     queryFn: async (): Promise<AdminStats> => {
-      const searchParams = new URLSearchParams()
+      try {
+        const searchParams = new URLSearchParams()
+        
+        if (queryParams.temporada) {
+          searchParams.append('temporada', queryParams.temporada)
+        }
+        if (queryParams.period) {
+          searchParams.append('period', queryParams.period)
+        }
 
-      if (queryParams.temporada) {
-        searchParams.append('temporada', queryParams.temporada)
-      }
-      if (queryParams.period) {
-        searchParams.append('period', queryParams.period)
-      }
+        const queryString = searchParams.toString()
+        const url = `${API_BASE_URL}/admin/campeonatos/estatisticas${queryString ? `?${queryString}` : ''}`
+        
+        console.log('🔍 Buscando stats em:', url) 
+        
+        const response = await fetch(url)
+        
+        if (response.status === 404) {
+          console.warn('⚠️ Rota de estatísticas não encontrada, usando dados mockados')
+          return getMockAdminStats(queryParams.temporada || '2025')
+        }
+        
+        if (!response.ok) {
+          console.warn(`⚠️ Erro ${response.status}, usando dados mockados como fallback`)
+          return getMockAdminStats(queryParams.temporada || '2025')
+        }
 
-      const url = `${API_BASE_URL}/admin/stats${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
-      const response = await fetch(url)
+        const data = await response.json()
+        
+        if (!data || typeof data !== 'object') {
+          console.warn('⚠️ Dados inválidos recebidos, usando dados mockados')
+          return getMockAdminStats(queryParams.temporada || '2025')
+        }
 
-      if (!response.ok) {
-        throw new Error('Erro ao buscar estatísticas admin')
-      }
+        console.log('✅ Estatísticas carregadas da API')
+        return data
 
-      const data = await response.json()
-
-      // Se a API não estiver implementada, retornar dados mockados
-      if (response.status === 404 || !data) {
+      } catch (error) {
+        console.error('❌ Erro ao buscar estatísticas:', error)
+        console.log('🔄 Usando dados mockados como fallback')
         return getMockAdminStats(queryParams.temporada || '2025')
       }
-
-      return data
     },
-    staleTime: 1000 * 60 * 5, // 5 minutos
-    gcTime: 1000 * 60 * 10,   // 10 minutos
+    
+    staleTime: 1000 * 60 * 5,  
+    gcTime: 1000 * 60 * 10,    
+    
+    retry: (failureCount, error) => {
+      if (error.message.includes('404')) return false
+
+      return failureCount < 2
+    },
+
+    refetchOnWindowFocus: false,  
+    refetchOnReconnect: true,    
+
+    throwOnError: false,        
   })
 }
 
-// Dados mockados para desenvolvimento
 function getMockAdminStats(temporada: string): AdminStats {
   const isCurrent = temporada === '2025'
 
   return {
-    // Estatísticas principais
     totalCampeonatos: isCurrent ? 8 : 6,
     campeonatosAtivos: isCurrent ? 3 : 0,
     jogosAgendados: isCurrent ? 45 : 0,
@@ -183,13 +204,11 @@ function getMockAdminStats(temporada: string): AdminStats {
     timesParticipantes: isCurrent ? 32 : 28,
     jogosEstaSemana: isCurrent ? 8 : 0,
 
-    // Métricas de crescimento
     crescimentoCampeonatos: isCurrent ? 25 : 0,
     novosTimes: isCurrent ? 4 : 0,
     melhoriaOperacional: isCurrent ? 15 : 0,
     taxaConclusao: isCurrent ? 85 : 100,
 
-    // Dados para gráficos
     campeonatosPorStatus: [
       { status: 'Não Iniciado', quantidade: isCurrent ? 2 : 0, cor: '#9CA3AF' },
       { status: 'Em Andamento', quantidade: isCurrent ? 3 : 0, cor: '#10B981' },
@@ -244,14 +263,13 @@ function getMockAdminStats(temporada: string): AdminStats {
       { mes: 'Jun', valor: isCurrent ? 93 : 89, variacao: isCurrent ? 3 : -1 }
     ],
 
-    // Atividades recentes
     atividadesRecentes: [
       {
         id: '1',
         tipo: 'jogo_finalizado',
         titulo: 'Jogo Finalizado',
         descricao: 'Flamengo 28 x 14 Vasco - Brasileirão 2025',
-        data: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 min atrás
+        data: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
         usuario: 'Admin'
       },
       {
@@ -259,20 +277,18 @@ function getMockAdminStats(temporada: string): AdminStats {
         tipo: 'campeonato_criado',
         titulo: 'Novo Campeonato',
         descricao: 'Copa do Nordeste 2025 foi criada',
-        data: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2h atrás
-        usuario: 'Admin'
+        data: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), 
       },
       {
         id: '3',
         tipo: 'classificacao_atualizada',
         titulo: 'Classificação Atualizada',
         descricao: 'Tabela do Grupo A foi recalculada',
-        data: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(), // 4h atrás
+        data: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(), 
         usuario: 'Sistema'
       }
     ],
 
-    // Alertas
     alertas: isCurrent ? [
       {
         id: '1',
@@ -292,7 +308,6 @@ function getMockAdminStats(temporada: string): AdminStats {
       }
     ] : [],
 
-    // Top performers
     topCampeonatos: [
       { id: 1, nome: 'Brasileirão 2025', jogos: 85, times: 16, popularidade: 95 },
       { id: 2, nome: 'Copa do Brasil 2025', jogos: 42, times: 12, popularidade: 88 },
@@ -311,7 +326,6 @@ function getMockAdminStats(temporada: string): AdminStats {
       { nome: 'Nordeste', times: 6, campeonatos: 3, crescimento: 20 }
     ],
 
-    // Métricas detalhadas
     mediaJogosPorCampeonato: isCurrent ? 21 : 30,
     tempoMedioDuracao: isCurrent ? 45 : 60,
     taxaAdiamentos: isCurrent ? 1.2 : 0.8,
@@ -319,7 +333,6 @@ function getMockAdminStats(temporada: string): AdminStats {
     participacaoMedia: isCurrent ? 8 : 7,
     pontuacaoMedia: isCurrent ? 24 : 28,
 
-    // Atividades recentes (formato alternativo)
     recentActivities: [
       {
         id: '1',
@@ -337,7 +350,6 @@ function getMockAdminStats(temporada: string): AdminStats {
       }
     ],
 
-    // Alertas do sistema (formato alternativo)
     alerts: isCurrent ? [
       '3 jogos agendados para hoje precisam de confirmação',
       'Grupo B precisa de recálculo de classificação',

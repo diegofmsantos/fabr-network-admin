@@ -79,11 +79,11 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
     .slice(0, maxItems)
 
   return (
-    <div className="bg-white shadow rounded-lg">
+    <div className="bg-[#272731]  shadow rounded-lg border border-gray-700">
       <div className="p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium text-gray-900">Atividades Recentes</h3>
-          <button className="text-sm text-blue-600 hover:text-blue-800">
+          <h3 className="text-lg font-medium text-[#63E300]">Atividades Recentes</h3>
+          <button className="text-sm text-[#63E300] hover:text-gray-200">
             Ver todas
           </button>
         </div>
@@ -105,7 +105,7 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
                 </div>
                 
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-900">
+                  <p className="text-sm text-gray-">
                     {activity.message}
                   </p>
                   

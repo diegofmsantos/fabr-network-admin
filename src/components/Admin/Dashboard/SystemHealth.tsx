@@ -20,7 +20,7 @@ export const SystemHealth: React.FC = () => {
 
   return (
     <div className="bg-[#272731] rounded-lg shadow border border-gray-700 p-6">
-      <h3 className="text-lg font-medium text-white mb-4">
+      <h3 className="text-lg font-medium text-[#63E300] mb-4">
         Status do Sistema
       </h3>
       

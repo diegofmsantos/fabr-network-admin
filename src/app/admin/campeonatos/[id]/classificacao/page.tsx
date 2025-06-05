@@ -6,25 +6,8 @@ import { useCampeonato, useClassificacao } from '@/hooks/useCampeonatos'
 import { TabelaClassificacao } from '@/components/TabelaClassificacao'
 import { Loading } from '@/components/ui/Loading'
 import { NoDataFound } from '@/components/ui/NoDataFound'
-import { 
-  ArrowLeft, 
-  RotateCcw, 
-  Download, 
-  Plus,
-  Minus,
-  AlertTriangle,
-  CheckCircle,
-  Calculator,
-  History,
-  Settings,
-  Filter,
-  TrendingUp,
-  TrendingDown,
-  Trophy
-} from 'lucide-react'
+import { ArrowLeft, RotateCcw, Download, Plus, Minus, AlertTriangle, CheckCircle, Calculator, History, Settings, Filter, TrendingUp, TrendingDown, Trophy } from 'lucide-react'
 import Link from 'next/link'
-import Image from 'next/image'
-import { ImageService } from '@/utils/services/ImageService'
 
 interface AjustePontuacao {
   timeId: number
@@ -37,7 +20,7 @@ interface AjustePontuacao {
 export default function AdminClassificacao() {
   const params = useParams()
   const router = useRouter()
-  
+
   const [selectedGrupo, setSelectedGrupo] = useState<number | 'todos'>('todos')
   const [showAjustes, setShowAjustes] = useState(false)
   const [ajustesPontuacao, setAjustesPontuacao] = useState<AjustePontuacao[]>([])
@@ -55,13 +38,11 @@ export default function AdminClassificacao() {
 
   const loading = loadingCampeonato || loadingClassificacao
 
-  // Filtrar classificação por grupo
   const classificacaoFiltrada = useMemo(() => {
     if (selectedGrupo === 'todos') return classificacao
     return classificacao.filter(item => item.grupoId === selectedGrupo)
   }, [classificacao, selectedGrupo])
 
-  // Estatísticas da classificação
   const statsClassificacao = useMemo(() => {
     if (!classificacao.length) return null
 
@@ -69,7 +50,6 @@ export default function AdminClassificacao() {
     const totalPontos = classificacao.reduce((acc, item) => acc + item.pontosPro, 0)
     const mediaAproveitamento = classificacao.reduce((acc, item) => acc + item.aproveitamento, 0) / classificacao.length
 
-    // Identificar líder de cada grupo
     const lideresPorGrupo = campeonato?.grupos.map(grupo => {
       const timesGrupo = classificacao.filter(c => c.grupoId === grupo.id)
       return {
@@ -78,10 +58,9 @@ export default function AdminClassificacao() {
       }
     }) || []
 
-    // Times em situação crítica (últimas posições)
     const timesEmRisco = classificacao.filter(item => {
       const timesNoGrupo = classificacao.filter(c => c.grupoId === item.grupoId).length
-      return item.posicao > timesNoGrupo - 2 // Últimas 2 posições
+      return item.posicao > timesNoGrupo - 2
     })
 
     return {
@@ -97,7 +76,6 @@ export default function AdminClassificacao() {
   const handleRecalcularClassificacao = async () => {
     if (confirm('Recalcular a classificação com base nos resultados atuais dos jogos?')) {
       try {
-        // Aqui você chamaria a API para recalcular
         await refetch()
         alert('Classificação recalculada com sucesso!')
       } catch (error) {
@@ -119,14 +97,12 @@ export default function AdminClassificacao() {
 
     setAjustesPontuacao(prev => [...prev, ajuste])
     setNovoAjuste({ timeId: 0, motivo: '', pontos: 0, tipo: 'penalizacao' })
-    
-    // Aqui você salvaria no backend
+
     console.log('Ajuste adicionado:', ajuste)
   }
 
   const handleExportar = (formato: 'csv' | 'pdf' | 'excel') => {
     console.log('Exportar classificação em:', formato)
-    // Implementar exportação
   }
 
   if (loading) return <Loading />
@@ -151,19 +127,18 @@ export default function AdminClassificacao() {
   const StatCard = ({ icon: Icon, title, value, subtitle, color = "blue", trend }: {
     icon: any, title: string, value: string | number, subtitle?: string, color?: string, trend?: 'up' | 'down' | 'neutral'
   }) => (
-    <div className="bg-white rounded-lg p-4 border">
+    <div className="bg-[#272731] border border-gray-700 rounded-lg p-4 ">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-gray-600">{title}</p>
-          <p className="text-xl font-bold text-gray-900">{value}</p>
-          {subtitle && <p className="text-xs text-gray-500">{subtitle}</p>}
+          <p className="text-sm text-gray-300">{title}</p>
+          <p className="text-xl font-bold text-gray-300">{value}</p>
+          {subtitle && <p className="text-xs text-gray-300">{subtitle}</p>}
         </div>
         <div className="flex items-center gap-2">
           {trend && (
-            <div className={`p-1 rounded ${
-              trend === 'up' ? 'bg-green-100' : 
-              trend === 'down' ? 'bg-red-100' : 'bg-gray-100'
-            }`}>
+            <div className={`p-1 rounded ${trend === 'up' ? 'bg-green-100' :
+                trend === 'down' ? 'bg-red-100' : 'bg-gray-100'
+              }`}>
               {trend === 'up' ? (
                 <TrendingUp className="w-3 h-3 text-green-600" />
               ) : trend === 'down' ? (
@@ -181,25 +156,24 @@ export default function AdminClassificacao() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white shadow rounded-lg p-6">
+      <div className="bg-[#272731] shadow rounded-lg p-6 border border-gray-700">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <Link
               href={`/admin/campeonatos/${campeonatoId}`}
-              className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700"
+              className="inline-flex items-center text-sm font-medium text-gray-300 hover:text-gray-700"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Voltar
             </Link>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Gerenciar Classificação</h1>
-              <p className="text-sm text-gray-500">
+              <h1 className="text-2xl font-bold text-[#63E300]">Gerenciar Classificação</h1>
+              <p className="text-sm text-gray-300">
                 {campeonato.nome} • {classificacao.length} times
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-3">
             <button
               onClick={() => setShowAjustes(!showAjustes)}
@@ -226,7 +200,7 @@ export default function AdminClassificacao() {
                 </button>
               </div>
             </div>
-            
+
             <button
               onClick={handleRecalcularClassificacao}
               className="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500"
@@ -238,7 +212,6 @@ export default function AdminClassificacao() {
         </div>
       </div>
 
-      {/* Estatísticas Resumidas */}
       {statsClassificacao && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
@@ -276,10 +249,9 @@ export default function AdminClassificacao() {
         </div>
       )}
 
-      {/* Líderes por Grupo */}
       {statsClassificacao?.lideresPorGrupo && (
-        <div className="bg-white rounded-lg p-6 border">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Líderes por Grupo</h3>
+        <div className="bg-[#272731] border border-gray-700  rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-gray-300 mb-4 ">Líderes por Grupo</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {statsClassificacao.lideresPorGrupo.map((item, index) => (
               <div key={index} className="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
@@ -300,8 +272,7 @@ export default function AdminClassificacao() {
         </div>
       )}
 
-      {/* Filtros */}
-      <div className="bg-white rounded-lg p-4 border">
+      <div className="bg-[#272731] border border-gray-700 rounded-lg p-4 ">
         <div className="flex items-center gap-4">
           <Filter className="w-5 h-5 text-gray-500" />
           <select
@@ -316,21 +287,19 @@ export default function AdminClassificacao() {
               </option>
             ))}
           </select>
-          
+
           <div className="flex-1"></div>
-          
-          <span className="text-sm text-gray-600">
+
+          <span className="text-sm text-gray-300">
             Mostrando {classificacaoFiltrada.length} de {classificacao.length} times
           </span>
         </div>
       </div>
 
-      {/* Painel de Ajustes */}
       {showAjustes && (
         <div className="bg-white rounded-lg border p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Ajustes de Pontuação</h3>
-          
-          {/* Formulário de Novo Ajuste */}
+
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
@@ -345,7 +314,7 @@ export default function AdminClassificacao() {
                 ))}
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
               <select
@@ -357,7 +326,7 @@ export default function AdminClassificacao() {
                 <option value="bonificacao">Bonificação</option>
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Pontos</label>
               <input
@@ -368,7 +337,7 @@ export default function AdminClassificacao() {
                 min="1"
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Motivo</label>
               <input
@@ -379,7 +348,7 @@ export default function AdminClassificacao() {
                 className="w-full border rounded-md px-3 py-2"
               />
             </div>
-            
+
             <div className="flex items-end">
               <button
                 onClick={handleAdicionarAjuste}
@@ -391,7 +360,6 @@ export default function AdminClassificacao() {
             </div>
           </div>
 
-          {/* Lista de Ajustes Aplicados */}
           {ajustesPontuacao.length > 0 && (
             <div>
               <h4 className="font-medium text-gray-900 mb-3">Ajustes Aplicados</h4>
@@ -399,9 +367,8 @@ export default function AdminClassificacao() {
                 {ajustesPontuacao.map((ajuste, index) => (
                   <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex items-center gap-3">
-                      <div className={`p-1 rounded ${
-                        ajuste.tipo === 'penalizacao' ? 'bg-red-100' : 'bg-green-100'
-                      }`}>
+                      <div className={`p-1 rounded ${ajuste.tipo === 'penalizacao' ? 'bg-red-100' : 'bg-green-100'
+                        }`}>
                         {ajuste.tipo === 'penalizacao' ? (
                           <Minus className="w-4 h-4 text-red-600" />
                         ) : (
@@ -416,9 +383,8 @@ export default function AdminClassificacao() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className={`font-bold ${
-                        ajuste.tipo === 'penalizacao' ? 'text-red-600' : 'text-green-600'
-                      }`}>
+                      <div className={`font-bold ${ajuste.tipo === 'penalizacao' ? 'text-red-600' : 'text-green-600'
+                        }`}>
                         {ajuste.tipo === 'penalizacao' ? '-' : '+'}{ajuste.pontos} pts
                       </div>
                       <div className="text-xs text-gray-500">
@@ -439,9 +405,7 @@ export default function AdminClassificacao() {
         </div>
       )}
 
-      {/* Alertas e Inconsistências */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Alertas */}
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
           <div className="flex items-center gap-2 mb-3">
             <AlertTriangle className="w-5 h-5 text-yellow-600" />
@@ -461,7 +425,6 @@ export default function AdminClassificacao() {
           </div>
         </div>
 
-        {/* Times em Destaque */}
         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
           <div className="flex items-center gap-2 mb-3">
             <CheckCircle className="w-5 h-5 text-green-600" />
@@ -485,7 +448,6 @@ export default function AdminClassificacao() {
           </div>
         </div>
 
-        {/* Próximas Ações */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-center gap-2 mb-3">
             <History className="w-5 h-5 text-blue-600" />
@@ -505,19 +467,17 @@ export default function AdminClassificacao() {
         </div>
       </div>
 
-      {/* Tabelas de Classificação */}
       <div className="space-y-6">
         {selectedGrupo === 'todos' ? (
-          // Mostrar todos os grupos
           campeonato.grupos.map(grupo => {
             const classificacaoGrupo = classificacao.filter(c => c.grupoId === grupo.id)
             if (classificacaoGrupo.length === 0) return null
-            
+
             return (
               <div key={grupo.id} className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900">{grupo.nome}</h3>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <h3 className="text-lg font-semibold text-gray-300">{grupo.nome}</h3>
+                  <div className="flex items-center gap-2 text-sm text-gray-300">
                     <span>{classificacaoGrupo.length} times</span>
                     <span>•</span>
                     <span>
@@ -533,7 +493,6 @@ export default function AdminClassificacao() {
             )
           })
         ) : (
-          // Mostrar grupo específico
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">
@@ -555,70 +514,19 @@ export default function AdminClassificacao() {
         )}
       </div>
 
-      {/* Simulador de Cenários */}
-      <div className="bg-white rounded-lg border p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Simulador de Cenários</h3>
-        <div className="bg-gray-50 rounded-lg p-4">
-          <p className="text-gray-600 text-center">
-            Funcionalidade em desenvolvimento - Simular resultados futuros e ver impacto na classificação
-          </p>
-        </div>
-      </div>
-
-      {/* Histórico de Alterações */}
-      <div className="bg-white rounded-lg border p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Histórico de Alterações</h3>
-          <button className="text-sm text-blue-600 hover:text-blue-800">
-            Ver completo
-          </button>
-        </div>
-        <div className="space-y-3">
-          <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-            <div className="p-2 bg-blue-100 rounded-full">
-              <RotateCcw className="w-4 h-4 text-blue-600" />
-            </div>
-            <div className="flex-1">
-              <div className="font-medium text-gray-900">Classificação recalculada</div>
-              <div className="text-sm text-gray-600">Hoje às 14:30</div>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-            <div className="p-2 bg-green-100 rounded-full">
-              <CheckCircle className="w-4 h-4 text-green-600" />
-            </div>
-            <div className="flex-1">
-              <div className="font-medium text-gray-900">Resultado inserido: Time A 21 x 14 Time B</div>
-              <div className="text-sm text-gray-600">Hoje às 13:45</div>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-            <div className="p-2 bg-yellow-100 rounded-full">
-              <Settings className="w-4 h-4 text-yellow-600" />
-            </div>
-            <div className="flex-1">
-              <div className="font-medium text-gray-900">Penalização aplicada: Time C (-3 pontos)</div>
-              <div className="text-sm text-gray-600">Ontem às 16:20</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Rodapé com Informações */}
-      <div className="bg-blue-50 rounded-lg p-6 border border-blue-200">
+      <div className="bg-[#272731] border border-gray-700  p-6 ">
         <div className="flex items-start gap-3">
-          <Trophy className="w-6 h-6 text-blue-600 flex-shrink-0 mt-1" />
+          <Trophy className="w-6 h-6 text-gray-300 flex-shrink-0 mt-1" />
           <div>
-            <h3 className="font-semibold text-blue-900 mb-2">Critérios de Classificação</h3>
-            <div className="text-sm text-blue-800 space-y-1">
+            <h3 className="font-semibold text-gray-300  mb-2">Critérios de Classificação</h3>
+            <div className="text-sm text-gray-300  space-y-1">
               <p><strong>1º critério:</strong> Maior número de pontos</p>
               <p><strong>2º critério:</strong> Melhor saldo de pontos</p>
               <p><strong>3º critério:</strong> Maior número de pontos marcados</p>
               <p><strong>4º critério:</strong> Confronto direto (quando aplicável)</p>
             </div>
-            <div className="mt-3 pt-3 border-t border-blue-200 text-xs text-blue-700">
+            <div className="mt-3 pt-3 border-t border-blue-200 text-xs text-gray-300">
               <p><strong>Última atualização:</strong> {new Date().toLocaleString('pt-BR')}</p>
               <p><strong>Próximo recálculo automático:</strong> Após o próximo jogo finalizado</p>
             </div>

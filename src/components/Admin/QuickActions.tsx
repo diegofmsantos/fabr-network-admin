@@ -106,11 +106,11 @@ export const QuickActions: React.FC = () => {
   }
 
   return (
-    <div className="bg-white shadow rounded-lg">
+    <div className="bg-[#272731] shadow rounded-lg border border-gray-700">
       <div className="p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Ações Rápidas</h3>
+        <h3 className="text-lg font-medium text-[#63E300] mb-4">Ações Rápidas</h3>
         
-        <div className="grid grid-cols-2 lg:grid-cols-1 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 hover:text-[#63E300]">
           {actions.map((action) => {
             const Icon = action.icon
             
@@ -120,10 +120,10 @@ export const QuickActions: React.FC = () => {
                   <Icon className="w-6 h-6" />
                 </div>
                 <div className="ml-4 flex-1">
-                  <p className="text-sm font-medium text-gray-900">
+                  <p className="text-sm font-medium text-gray-200">
                     {action.label}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-300 mt-1">
                     {action.description}
                   </p>
                 </div>
@@ -135,7 +135,7 @@ export const QuickActions: React.FC = () => {
                 <Link
                   key={action.id}
                   href={action.href}
-                  className="flex items-center p-3 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all duration-200"
+                  className="flex items-center p-3 border border-gray-700 rounded-lg hover:border-[#63E300] hover:shadow-sm transition-all duration-200"
                 >
                   {ActionContent}
                 </Link>
@@ -146,7 +146,7 @@ export const QuickActions: React.FC = () => {
               <button
                 key={action.id}
                 onClick={() => handleActionClick(action)}
-                className="flex items-center p-3 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all duration-200 text-left w-full"
+                className="flex items-center p-3 border border-gray-700 rounded-lg hover:border-[#63E300] hover:shadow-sm transition-all duration-200 text-left w-full"
               >
                 {ActionContent}
               </button>
@@ -155,9 +155,9 @@ export const QuickActions: React.FC = () => {
         </div>
       </div>
       
-      <div className="bg-gray-50 px-6 py-3 border-t border-gray-200">
-        <div className="text-xs text-gray-500 text-center">
-          Precisa de ajuda? <a href="#" className="text-blue-600 hover:text-blue-800">Consulte a documentação</a>
+      <div className=" px-6 py-3 border-t border-[#63E300]">
+        <div className="text-xs text-gray-300 text-center">
+          Precisa de ajuda? <a href="#" className="text-[#63E300] hover:text-blue-800">Consulte a documentação</a>
         </div>
       </div>
     </div>

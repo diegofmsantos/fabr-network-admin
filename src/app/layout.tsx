@@ -14,6 +14,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-br">
+      <head>
+        <link rel="shortcut icon" href="/assets/favicon.png" type="image/x-icon" />
+      </head>
       <body className="bg-[#272731]">
         <QueryProvider>
           {children}

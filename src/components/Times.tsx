@@ -17,6 +17,7 @@ import { camposJogador, camposNumericosJogador, camposTime, estatisticas } from 
 import Link from "next/link"
 import Image from "next/image"
 import { HeaderGeneral } from "./HeaderGeneral"
+import { ImageService } from "@/utils/services/ImageService"
 
 type TimeFormData = z.infer<typeof TimeSchema>
 type JogadorFormData = z.infer<typeof JogadorSchema>
@@ -430,13 +431,21 @@ export const Times = () => {
                                             setSelectedTime(time);
                                             setIsTimeModalOpen(true);
                                         }}
-                                        className="bg-[#272731] rounded-xl shadow-lg overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 group"
+                                        className="bg-[#272731] hover:border hover:border-[#63E300] rounded-xl shadow-lg overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 group"
                                         style={{
                                             borderLeft: `4px solid ${time.cor || '#63E300'}`
                                         }}
                                     >
-                                        <div className="p-5">
+                                        <div className="p-3">
                                             <div className="flex justify-between items-start mb-4">
+                                                <Image
+                                                    src={ImageService.getTeamLogo(time.nome || '')}
+                                                    alt={`Logo ${time.nome}`}
+                                                    width={40}
+                                                    height={40}
+                                                    className="rounded"
+                                                    onError={(e) => ImageService.handleTeamLogoError(e, time.nome || '')}
+                                                />
                                                 <h3 className="text-xl font-bold text-white group-hover:text-[#63E300] transition-colors">
                                                     {time.nome}
                                                 </h3>
