@@ -172,9 +172,9 @@ export default function AdminCampeonatos() {
               campeonato={campeonato}
               onEdit={() => router.push(`/admin/campeonatos/${campeonato.id}`)}
               onDelete={() => handleDelete(campeonato.id)}
-              onViewDetails={() => router.push(`/admin/campeonatos/${campeonato.id}`)} // ← CORRIGIDO
+              onViewDetails={() => router.push(`/admin/campeonatos/${campeonato.id}`)}
             />
-          ))}F
+          ))}
         </div>
       )}
     </div>

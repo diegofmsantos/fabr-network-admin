@@ -19,6 +19,7 @@ import Image from "next/image"
 import { HeaderGeneral } from "./HeaderGeneral"
 import { ImageService } from "@/utils/services/ImageService"
 
+
 type TimeFormData = z.infer<typeof TimeSchema>
 type JogadorFormData = z.infer<typeof JogadorSchema>
 
