@@ -1,4 +1,4 @@
-import { Time } from '@/types/time';
+import { Time } from '@/types';
 import { TimeChange } from './TeamChangesForm';
 
 interface TeamChangesDisplayProps {

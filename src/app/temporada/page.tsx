@@ -1,12 +1,14 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { iniciarTemporada, getTimes, getJogadores } from "@/api/api"
-import { Time } from "@/types/time"
 import { TeamChangesForm, TimeChange } from "@/components/TeamChangesForm"
 import { PlayerTransferForm, Transferencia } from "@/components/PlayerTransferForm"
 import Link from "next/link"
 import Image from "next/image"
+import { Time } from "@/types"
+import { useIniciarTemporada } from '@/hooks/useTemporada'
+import { useTimes } from '@/hooks/useTimes'
+import { useJogadores } from '@/hooks/useJogadores'
 
 export default function IniciarTemporadaPage() {
   const [times, setTimes] = useState<Time[]>([]);
@@ -20,31 +22,6 @@ export default function IniciarTemporadaPage() {
   const [currentSeason, setCurrentSeason] = useState("2024");
   const [targetSeason, setTargetSeason] = useState("2025");
 
-  useEffect(() => {
-    async function carregarDados() {
-      setLoadingData(true);
-
-      try {
-        console.log(`Buscando times da temporada ${currentSeason}...`);
-        const timesData = await getTimes(currentSeason);
-        console.log(`${timesData.length} times encontrados`);
-        setTimes(timesData);
-
-        console.log(`Buscando jogadores da temporada ${currentSeason}...`);
-        const jogadoresData = await getJogadores(currentSeason);
-        console.log(`${jogadoresData.length} jogadores encontrados`);
-        setJogadores(jogadoresData);
-
-      } catch (error) {
-        console.error("Erro ao buscar dados:", error);
-        setMessage("Erro ao carregar dados. Verifique se o servidor backend está rodando.");
-      } finally {
-        setLoadingData(false);
-      }
-    }
-
-    carregarDados();
-  }, [currentSeason]);
 
   const adicionarAlteracaoTime = (change: TimeChange) => {
     const index = timeChanges.findIndex(tc => tc.timeId === change.timeId);
@@ -80,35 +57,16 @@ export default function IniciarTemporadaPage() {
     setTransferencias(updatedTransfers);
   };
 
-  const handleSubmit = async () => {
-    setLoading(true);
-    setMessage("");
+  const { data: times = [] } = useTimes(currentSeason)
+  const { data: jogadores = [] } = useJogadores(currentSeason)
+  const iniciarTemporadaMutation = useIniciarTemporada()
 
-    try {
-      console.log(`Iniciando temporada ${targetSeason} com:`, {
-        timeChanges,
-        transferencias
-      });
-
-      const response = await iniciarTemporada(targetSeason, {
-        timeChanges,
-        transferencias
-      });
-
-      console.log("Resposta:", response);
-      setMessage(`Temporada ${targetSeason} iniciada com sucesso! ${response.times} times e ${response.jogadores} jogadores criados.`);
-
-      setTimeChanges([]);
-      setTransferencias([]);
-    } catch (error) {
-      console.error("Erro ao iniciar temporada:", error);
-      setMessage(error instanceof Error
-        ? `Erro: ${error.message}`
-        : "Erro ao iniciar temporada. Verifique o console para mais detalhes.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleSubmit = () => {
+    iniciarTemporadaMutation.mutate({
+      ano: targetSeason,
+      alteracoes: { timeChanges, transferencias }
+    })
+  }
 
   if (loadingData) {
     return <div className="p-4 overflow-x-hidden bg-[#1C1C24] min-h-screen flex items-center justify-center">
@@ -130,7 +88,7 @@ export default function IniciarTemporadaPage() {
           </Link>
           <h1 className="text-4xl text-[#63E300] font-extrabold italic leading-[55px] tracking-[-3px]">GERENCIAR MATÉRIAS - INICIAR TEMPORADA {targetSeason}</h1>
           <div className="flex ml-auto gap-4 mr-4">
-            
+
             <Link
               href={`/`}
               className="px-4 py-2 bg-[#63E300] text-black rounded-lg hover:bg-[#50B800] transition-colors flex items-center font-medium"
@@ -221,10 +179,10 @@ export default function IniciarTemporadaPage() {
         </div>
       )}
 
-       <PlayerTransferForm
+      <PlayerTransferForm
         jogadores={jogadores}
         times={times}
-        timeChanges={timeChanges} 
+        timeChanges={timeChanges}
         onAddTransfer={adicionarTransferencia}
       />
 

@@ -1,8 +1,8 @@
 import React from 'react'
-import { ClassificacaoGrupo } from '@/types/campeonato'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ImageService } from '@/utils/services/ImageService'
+import { ClassificacaoGrupo } from '@/types'
 
 interface TabelaClassificacaoProps {
   classificacao: ClassificacaoGrupo[]

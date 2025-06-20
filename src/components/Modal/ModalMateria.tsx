@@ -1,11 +1,11 @@
 "use client"
 
-import { Materia } from '@/types/materia'
 import { updateNoticia, deleteNoticia } from '@/api/api'
 import { useState } from 'react'
 import { Editor } from '../Editor/Editor'
 import Image from 'next/image'
 import { z } from 'zod'
+import { Materia } from '@/types'
 
 interface MateriaFormData extends Omit<Materia, 'createdAt' | 'updatedAt'> {
     createdAt: string;

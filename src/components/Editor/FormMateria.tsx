@@ -6,10 +6,10 @@ import { InputField } from './InputField'
 import { FormField } from './FormField'
 import { createNoticia, getNoticias } from '@/api/api'
 import Link from 'next/link'
-import { Materia } from '@/types/materia'
 import { ModalMateria } from '../Modal/ModalMateria'
 import Image from 'next/image'
 import { motion } from 'framer-motion' 
+import { Materia } from '@/types'
 
 export const FormMateria = () => {
   const [formData, setFormData] = useState({

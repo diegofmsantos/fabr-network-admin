@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Time } from '@/types/time';
+import { Time } from '@/types';
+import { useState } from 'react';
 
 interface TeamChangesProps {
   times: Time[];

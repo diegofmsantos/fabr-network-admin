@@ -7,7 +7,7 @@ import { useTimes } from '@/hooks/queries'
 import { ArrowLeft, Save, Eye } from 'lucide-react'
 import Link from 'next/link'
 import { CampeonatoForm } from '@/components/Admin/forms/CampeonatoForm'
-import { CriarCampeonatoRequest } from '@/types/campeonato'
+import { CriarCampeonatoRequest } from '@/types'
 
 // Componente principal separado
 function CriarCampeonatoContent() {

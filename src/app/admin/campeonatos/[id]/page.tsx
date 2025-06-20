@@ -1,4 +1,3 @@
-// src/app/admin/campeonatos/[id]/page.tsx
 "use client"
 
 import { useState } from 'react'
@@ -6,20 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useCampeonato, useClassificacao, useDeleteCampeonato, useUpdateCampeonato } from '@/hooks/useCampeonatos'
 import { Loading } from '@/components/ui/Loading'
 import { NoDataFound } from '@/components/ui/NoDataFound'
-import {
-  ArrowLeft,
-  Save,
-  Trash2,
-  Play,
-  Pause,
-  Settings,
-  Calendar,
-  Users,
-  BarChart3,
-  Trophy,
-  CheckCircle,
-  Clock
-} from 'lucide-react'
+import { ArrowLeft, Save, Trash2, Play, Pause, Settings, Calendar, Users, BarChart3, Trophy, CheckCircle, Clock } from 'lucide-react'
 import Link from 'next/link'
 import { CampeonatoForm } from '@/components/Admin/forms/CampeonatoForm'
 import { useTimes } from '@/hooks/queries'

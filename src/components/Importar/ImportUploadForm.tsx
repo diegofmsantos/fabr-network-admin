@@ -1,162 +1,123 @@
-import React, { useState } from 'react';
-import { Upload, FileText, Check, AlertTriangle } from 'lucide-react';
+import React, { useState } from 'react'
+import { Upload, FileText, Check, AlertTriangle, Loader2 } from 'lucide-react'
+import { useImportarTimes } from '@/hooks/useTimes'
+import { useAtualizarEstatisticas, useImportarJogadores } from '@/hooks/useJogadores'
 
 const AdminUploadForm = () => {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [result, setResult] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [formData, setFormData] = useState({
     id_jogo: '',
     data_jogo: '',
     tipo: 'times' 
-  });
-  
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
-  
+  })
+
+  // 🚀 HOOKS DO TANSTACK QUERY - SUBSTITUI fetch manual + loading states
+  const importTimesMutation = useImportarTimes()
+  const importJogadoresMutation = useImportarJogadores()
+  const atualizarEstatisticasMutation = useAtualizarEstatisticas()
+
+  // 🎯 ESTADO UNIFICADO DOS MUTATIONS
+  const isUploading = importTimesMutation.isPending || 
+                     importJogadoresMutation.isPending || 
+                     atualizarEstatisticasMutation.isPending
+
+  const error = importTimesMutation.error || 
+                importJogadoresMutation.error || 
+                atualizarEstatisticasMutation.error
+
+  const isSuccess = importTimesMutation.isSuccess || 
+                    importJogadoresMutation.isSuccess || 
+                    atualizarEstatisticasMutation.isSuccess
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
+      setSelectedFile(e.target.files[0])
     }
-  };
-  
+  }
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-  
-  const getUploadEndpoint = () => {
-    switch (formData.tipo) {
-      case 'times': return `${API_BASE_URL}/importar-times`;
-      case 'jogadores': return `${API_BASE_URL}/importar-jogadores`;
-      case 'estatisticas': return `${API_BASE_URL}/atualizar-estatisticas`;
-      case 'reprocessar': return `${API_BASE_URL}/reprocessar-jogo`;
-      default: return `${API_BASE_URL}/importar-times`;
-    }
-  };
-  
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     
     if (!selectedFile) {
-      setError('Selecione um arquivo para upload');
-      return;
+      alert('Selecione um arquivo para upload')
+      return
     }
-    
-    if (formData.tipo === 'estatisticas' || formData.tipo === 'reprocessar') {
-      if (!formData.id_jogo.trim()) {
-        setError('O ID do jogo é obrigatório');
-        return;
-      }
-      if (!formData.data_jogo.trim()) {
-        setError('A data do jogo é obrigatória');
-        return;
-      }
-    }
-    
-    try {
-      setUploading(true);
-      setError(null);
-      setResult(null);
-      
-      const formDataObj = new FormData();
-      formDataObj.append('arquivo', selectedFile);
-      
-      // Adiciona dados extras para estatísticas de jogo
-      if (formData.tipo === 'estatisticas' || formData.tipo === 'reprocessar') {
-        formDataObj.append('id_jogo', formData.id_jogo);
-        formDataObj.append('data_jogo', formData.data_jogo);
-      }
-      
-      console.log('Enviando para:', getUploadEndpoint());
-      
-      const response = await fetch(getUploadEndpoint(), {
-        method: 'POST',
-        body: formDataObj,
-      });
-      
-      console.log('Status da resposta:', response.status);
-      console.log('Headers da resposta:', response.headers);
 
-      const contentType = response.headers.get('content-type');
-      console.log('Tipo de conteúdo:', contentType);
-      
-      let responseData;
-      if (contentType && contentType.includes('application/json')) {
-        responseData = await response.json();
-      } else {
-        const text = await response.text();
-        console.error('Resposta não-JSON recebida:', text.substring(0, 500) + '...');
-        throw new Error('Resposta do servidor não é um JSON válido');
+    // Validação para estatísticas
+    if (formData.tipo === 'estatisticas') {
+      if (!formData.id_jogo.trim() || !formData.data_jogo.trim()) {
+        alert('ID do jogo e data são obrigatórios para estatísticas')
+        return
       }
-      
-      if (!response.ok) {
-        throw new Error(responseData.error || `Erro ao fazer upload: ${response.status}`);
-      }
-      
-      setResult(responseData);
-      setSelectedFile(null);
-      // Resetar o input de arquivo
-      const fileInput = document.getElementById('file-input') as HTMLInputElement;
-      if (fileInput) fileInput.value = '';
-      
-    } catch (err: any) {
-      setError(err.message || 'Erro ao fazer upload');
-      console.error('Erro:', err);
-    } finally {
-      setUploading(false);
     }
-  };
-  
+
+    // 🎯 EXECUTA A MUTATION APROPRIADA
+    try {
+      switch (formData.tipo) {
+        case 'times':
+          importTimesMutation.mutate(selectedFile)
+          break
+          
+        case 'jogadores':
+          importJogadoresMutation.mutate(selectedFile)
+          break
+          
+        case 'estatisticas':
+          atualizarEstatisticasMutation.mutate({
+            arquivo: selectedFile,
+            idJogo: formData.id_jogo,
+            dataJogo: formData.data_jogo
+          })
+          break
+      }
+    } catch (err) {
+      console.error('Erro no upload:', err)
+    }
+  }
+
+  // 🧹 RESET FORM APÓS SUCESSO
+  const resetForm = () => {
+    setSelectedFile(null)
+    setFormData({ id_jogo: '', data_jogo: '', tipo: 'times' })
+    
+    // Reset mutations
+    importTimesMutation.reset()
+    importJogadoresMutation.reset()
+    atualizarEstatisticasMutation.reset()
+  }
+
   return (
-    <div className="max-w-md mx-auto bg-[#1C1C24] p-6 rounded-lg shadow-md">
-      <h2 className="text-xl font-bold mb-4 text-[#63E300]">Upload de Planilhas</h2>
-      
-      {error && (
-        <div className="bg-red-500/20 border border-red-500 text-red-100 px-4 py-3 rounded mb-4 flex items-center">
-          <AlertTriangle size={20} className="mr-2" />
-          {error}
-        </div>
-      )}
-      
-      {result && (
-        <div className="bg-green-500/20 border border-green-500 text-green-100 px-4 py-3 rounded mb-4 flex items-center">
-          <Check size={20} className="mr-2" />
-          <div>
-            <p className="font-bold">{result.mensagem}</p>
-            {result.erros && result.erros.length > 0 && (
-              <p className="text-xs mt-1">Com {result.erros.length} erros. Verifique o console para detalhes.</p>
-            )}
-          </div>
-        </div>
-      )}
-      
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="max-w-2xl mx-auto">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        
+        {/* Tipo de Upload */}
         <div>
-          <label className="block text-sm font-medium text-[#63E300] mb-1">
-            Tipo de Planilha
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            Tipo de Importação
           </label>
           <select
             name="tipo"
             value={formData.tipo}
             onChange={handleInputChange}
-            className="w-full border border-gray-700 bg-[#272731] text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#63E300]"
-            required
+            className="w-full p-3 bg-[#1C1C24] border border-gray-600 rounded-lg text-white"
+            disabled={isUploading}
           >
-            <option value="times">Times</option>
-            <option value="jogadores">Jogadores</option>
-            <option value="estatisticas">Estatísticas de Jogo</option>
-            <option value="reprocessar">Reprocessar Jogo</option>
+            <option value="times">Importar Times</option>
+            <option value="jogadores">Importar Jogadores</option>
+            <option value="estatisticas">Atualizar Estatísticas de Jogo</option>
           </select>
         </div>
-        
-        {(formData.tipo === 'estatisticas' || formData.tipo === 'reprocessar') && (
+
+        {/* Campos extras para estatísticas */}
+        {formData.tipo === 'estatisticas' && (
           <>
             <div>
-              <label className="block text-sm font-medium text-white mb-1">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 ID do Jogo
               </label>
               <input
@@ -164,14 +125,15 @@ const AdminUploadForm = () => {
                 name="id_jogo"
                 value={formData.id_jogo}
                 onChange={handleInputChange}
-                placeholder="Ex: jogo_001"
-                className="w-full border border-gray-700 bg-[#272731] text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#63E300]"
+                className="w-full p-3 bg-[#1C1C24] border border-gray-600 rounded-lg text-white"
+                placeholder="Ex: JOGO001"
+                disabled={isUploading}
                 required
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-white mb-1">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 Data do Jogo
               </label>
               <input
@@ -179,21 +141,25 @@ const AdminUploadForm = () => {
                 name="data_jogo"
                 value={formData.data_jogo}
                 onChange={handleInputChange}
-                className="w-full border border-gray-700 bg-[#272731] text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#63E300]"
+                className="w-full p-3 bg-[#1C1C24] border border-gray-600 rounded-lg text-white"
+                disabled={isUploading}
                 required
               />
             </div>
           </>
         )}
-        
-        <div className="border-2 border-dashed border-gray-700 rounded-lg p-6 text-center" 
-             style={{ background: selectedFile ? '#272731' : '#1C1C24' }}>
+
+        {/* Upload de Arquivo */}
+        <div className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+          selectedFile ? 'border-[#63E300] bg-[#272731]' : 'border-gray-600 bg-[#1C1C24]'
+        }`}>
           <input
             id="file-input"
             type="file"
             accept=".xlsx,.xls"
             onChange={handleFileChange}
             className="hidden"
+            disabled={isUploading}
           />
           <label htmlFor="file-input" className="cursor-pointer">
             <div className="flex flex-col items-center justify-center gap-2">
@@ -205,36 +171,67 @@ const AdminUploadForm = () => {
                   Clique para selecionar uma planilha Excel
                 </span>
               )}
-              <span className="text-xs text-gray-500">
-                (.xlsx, .xls)
-              </span>
+              <span className="text-xs text-gray-500">(.xlsx, .xls)</span>
             </div>
           </label>
         </div>
-        
+
+        {/* Botão de Submit */}
         <button
           type="submit"
-          disabled={uploading}
-          className="w-full bg-[#63E300] hover:bg-[#50B800] text-black font-medium py-2 px-4 rounded-lg flex items-center justify-center disabled:opacity-50"
+          disabled={isUploading || !selectedFile}
+          className="w-full bg-[#63E300] text-black py-3 px-6 rounded-lg font-semibold hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
         >
-          {uploading ? (
+          {isUploading ? (
             <>
-              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
               Processando...
             </>
           ) : (
             <>
-              <Upload size={20} className="mr-2" />
-              Enviar Planilha
+              <Upload className="w-5 h-5 mr-2" />
+              Importar Dados
             </>
           )}
         </button>
       </form>
-    </div>
-  );
-};
 
-export default AdminUploadForm;
+      {/* 🎉 FEEDBACK VISUAL AUTOMÁTICO */}
+      {isSuccess && (
+        <div className="mt-6 p-4 bg-green-900/20 border border-green-500 rounded-lg">
+          <div className="flex items-center text-green-400">
+            <Check className="w-5 h-5 mr-2" />
+            <span className="font-semibold">Importação realizada com sucesso!</span>
+          </div>
+          <button
+            onClick={resetForm}
+            className="mt-2 text-sm text-green-300 hover:text-green-200 underline"
+          >
+            Fazer nova importação
+          </button>
+        </div>
+      )}
+
+      {/* ❌ ERROR HANDLING AUTOMÁTICO */}
+      {error && (
+        <div className="mt-6 p-4 bg-red-900/20 border border-red-500 rounded-lg">
+          <div className="flex items-center text-red-400">
+            <AlertTriangle className="w-5 h-5 mr-2" />
+            <span className="font-semibold">Erro na importação</span>
+          </div>
+          <p className="text-red-300 text-sm mt-1">
+            {error.message || 'Erro desconhecido. Tente novamente.'}
+          </p>
+          <button
+            onClick={resetForm}
+            className="mt-2 text-sm text-red-300 hover:text-red-200 underline"
+          >
+            Tentar novamente
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default AdminUploadForm

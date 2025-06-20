@@ -1,12 +1,12 @@
 "use client"
 
 import { useState, useMemo } from 'react'
-import { Jogo, Campeonato } from '@/types/campeonato'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Calendar, Clock, Edit, Trash2, Play, Pause, CheckCircle, MapPin, MoreHorizontal } from 'lucide-react'
 import Image from 'next/image'
 import { ImageService } from '@/utils/services/ImageService'
+import { Campeonato, Jogo } from '@/types'
 
 interface JogoManagerProps {
   jogos: Jogo[]

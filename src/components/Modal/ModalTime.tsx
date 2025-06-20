@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { api } from "@/api/api";
-import { Time } from "@/types/time";
 import { fieldGroups } from "@/utils/campos";
+import { Time } from "@/types";
 
 export default function ModalTime({
     time,

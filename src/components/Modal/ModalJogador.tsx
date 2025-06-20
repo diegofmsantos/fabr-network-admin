@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { atualizarJogador, deletarJogador } from "@/api/api";
-import { Estatisticas, Jogador } from "@/types/jogador";
 import { useRouter } from "next/navigation";
 import { estatisticasGroups } from "@/utils/stats";
 import { jogadorGroups } from "@/utils/jogador";
+import { Estatisticas, Jogador } from "@/types";
 
 export default function ModalJogador({
     jogador,

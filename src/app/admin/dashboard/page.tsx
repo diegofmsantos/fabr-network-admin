@@ -2,17 +2,6 @@
 
 import { useState } from 'react'
 import { Loading } from '@/components/ui/Loading'
-import { 
-  Trophy, 
-  Calendar, 
-  Users, 
-  BarChart3, 
-  TrendingUp,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Play
-} from 'lucide-react'
 import { useAdminStats } from '@/hooks/useAdminStats'
 import { QuickStats } from '@/components/Admin/Dashboard/QuickStats'
 import { ActionableAlerts } from '@/components/Admin/Dashboard/ActionableAlerts'

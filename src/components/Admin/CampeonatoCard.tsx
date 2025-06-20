@@ -2,7 +2,7 @@ import React from 'react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Trophy, Calendar, Play, Edit, Trash2, Eye, CheckCircle, Clock, Pause } from 'lucide-react'
-import { Campeonato } from '@/types/campeonato'
+import { Campeonato } from '@/types'
 
 interface CampeonatoCardProps {
   campeonato: Campeonato

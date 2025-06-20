@@ -1,12 +1,10 @@
-// src/components/Admin/GrupoManager.tsx
 "use client"
 
 import { useState } from 'react'
-import { Campeonato, Grupo } from '@/types/campeonato'
-import { Time } from '@/types/time'
 import { Users, Plus, Minus, Edit2, Save, X, Shuffle } from 'lucide-react'
 import Image from 'next/image'
 import { ImageService } from '@/utils/services/ImageService'
+import { Campeonato, Grupo, Time } from '@/types'
 
 interface GrupoManagerProps {
   grupo: Grupo

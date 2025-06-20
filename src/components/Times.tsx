@@ -4,7 +4,6 @@ import { useForm, SubmitHandler, FieldError } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useEffect, useState } from "react"
-import { Time } from "../types/time"
 import { TimeSchema } from "@/schemas/Time"
 import { JogadorSchema } from "@/schemas/Jogador"
 import { api, getTimes } from "@/api/api"
@@ -14,10 +13,11 @@ import ModalTime from "@/components/Modal/ModalTime";
 import ModalJogador from "@/components/Modal/ModalJogador";
 import ModalSucesso from "./Modal/ModalSucesso"
 import { camposJogador, camposNumericosJogador, camposTime, estatisticas } from "../utils/campos"
-import Link from "next/link"
 import Image from "next/image"
 import { HeaderGeneral } from "./HeaderGeneral"
 import { ImageService } from "@/utils/services/ImageService"
+import { Time } from "@/types"
+import { useTimes, useCreateTime, useUpdateTime, useDeleteTime } from '@/hooks/useTimes'
 
 
 type TimeFormData = z.infer<typeof TimeSchema>
@@ -56,8 +56,6 @@ export const Times = () => {
         },
     })
 
-    const [times, setTimes] = useState<Time[]>([])
-    const [loading, setLoading] = useState(true)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [selectedTime, setSelectedTime] = useState<Time | null>(null)
     const [selectedJogador, setSelectedJogador] = useState<any | null>(null)
@@ -69,20 +67,25 @@ export const Times = () => {
     const [jogadorTemporada, setJogadorTemporada] = useState("2024")
     const [activeTab, setActiveTab] = useState<'time' | 'jogador' | 'times-cadastrados'>('time')
     const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({})
+    const { data: times = [], isLoading: loading, error } = useTimes(temporada)
+    const createTimeMutation = useCreateTime()
+    const updateTimeMutation = useUpdateTime()
+    const deleteTimeMutation = useDeleteTime()
 
-    useEffect(() => {
-        const fetchTimes = async () => {
-            try {
-                const data = await getTimes(temporadaSelecionada)
-                setTimes(data)
-            } catch (error) {
-                console.error("Erro ao buscar os times:", error)
-            } finally {
-                setLoading(false)
-            }
-        }
-        fetchTimes()
-    }, [temporadaSelecionada])
+    // Para criar time
+    const handleCreateTime = (timeData: Omit<Time, 'id'>) => {
+        createTimeMutation.mutate(timeData)
+    }
+
+    // Para atualizar time
+    const handleUpdateTime = (id: number, timeData: Partial<Time>) => {
+        updateTimeMutation.mutate({ id, data: timeData })
+    }
+
+    // Para deletar time
+    const handleDeleteTime = (id: number) => {
+        deleteTimeMutation.mutate(id)
+    }
 
     const removeEmptyFields = (obj: any) => {
         return Object.fromEntries(

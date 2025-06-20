@@ -1,12 +1,11 @@
+// src/app/dashboard/page.tsx - VERSÃO MIGRADA
 "use client"
 
-import React, { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { getTimes, getJogadores } from '@/api/api'
-import { Time } from '@/types/time'
-import { Jogador } from '@/types/jogador'
-import Image from 'next/image'
+import React, { useState } from 'react'
 import { HeaderGeneral } from '@/components/HeaderGeneral'
+import { Jogador, Time } from '@/types'
+import { useTimes } from '@/hooks/useTimes'
+import { useJogadores } from '@/hooks/useJogadores'
 
 interface Relatorio {
     id: string
@@ -16,29 +15,26 @@ interface Relatorio {
 }
 
 export default function DashboardPage() {
-    const [times, setTimes] = useState<Time[]>([])
-    const [jogadores, setJogadores] = useState<Jogador[]>([])
     const [temporada, setTemporada] = useState("2024")
-    const [loading, setLoading] = useState(true)
     const [filtroAtivo, setFiltroAtivo] = useState<string | null>(null)
     const [resultados, setResultados] = useState<any>(null)
 
-    useEffect(() => {
-        async function carregarDados() {
-            setLoading(true)
-            try {
-                const timesData = await getTimes(temporada)
-                setTimes(timesData)
-                const jogadoresData = await getJogadores(temporada)
-                setJogadores(jogadoresData)
-            } catch (error) {
-                console.error("Erro ao carregar dados:", error)
-            } finally {
-                setLoading(false)
-            }
-        }
-        carregarDados()
-    }, [temporada])
+    // 🚀 HOOKS DO TANSTACK QUERY - SUBSTITUI useEffect + useState + api calls
+    const { 
+        data: times = [], 
+        isLoading: loadingTimes, 
+        error: errorTimes 
+    } = useTimes(temporada)
+
+    const { 
+        data: jogadores = [], 
+        isLoading: loadingJogadores, 
+        error: errorJogadores 
+    } = useJogadores(temporada)
+
+    // 🎯 LOADING STATE UNIFICADO
+    const loading = loadingTimes || loadingJogadores
+    const error = errorTimes || errorJogadores
 
     const relatorios: Relatorio[] = [
         {

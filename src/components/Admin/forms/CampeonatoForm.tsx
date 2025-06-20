@@ -1,9 +1,8 @@
 "use client"
 
-import { useState, useEffect, useMemo } from 'react'
-import { Time } from '@/types/time'
-import { Campeonato, CriarCampeonatoRequest } from '@/types/campeonato'
-import { Calendar, Users, Settings, Trophy, Plus, Minus, CheckCircle } from 'lucide-react'
+import { useMemo } from 'react'
+import { Calendar, Users, Settings, Plus, Minus, CheckCircle } from 'lucide-react'
+import { Campeonato, CriarCampeonatoRequest, Time } from '@/types'
 
 interface CampeonatoFormProps {
   currentStep?: number

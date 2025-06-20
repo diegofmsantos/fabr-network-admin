@@ -1,7 +1,5 @@
-// components/PlayerTransferForm.tsx
+import { Jogador, Time } from '@/types';
 import { useState, useEffect } from 'react';
-import { Time } from '@/types/time';
-import { Jogador } from '@/types/jogador';
 interface TimeChange {
   timeId: number;
   nome?: string;

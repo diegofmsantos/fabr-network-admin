@@ -1,486 +1,236 @@
-"use client"
-
+// src/hooks/useCampeonatos.ts
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Campeonato, Jogo, ClassificacaoGrupo, FiltroJogos, CriarCampeonatoRequest } from '@/types/campeonato'
-import { useNotifications } from '@/hooks/useNotifications'
-import { handleApiError } from '@/utils/errorHandler'
+import { CampeonatosService } from '@/services/campeonatos.service'
+import { queryKeys } from './queryKeys'
+import { useNotifications } from './useNotifications'
+import { Campeonato, CriarCampeonatoRequest, FiltroJogos } from '@/types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+// ==================== CAMPEONATOS ====================
 
-// Query Keys
-export const campeonatoQueryKeys = {
-  all: ['campeonatos'] as const,
-  lists: () => [...campeonatoQueryKeys.all, 'list'] as const,
-  list: (filters: Record<string, any>) => [...campeonatoQueryKeys.lists(), filters] as const,
-  details: () => [...campeonatoQueryKeys.all, 'detail'] as const,
-  detail: (id: number) => [...campeonatoQueryKeys.details(), id] as const,
-  jogos: (filters: FiltroJogos) => [...campeonatoQueryKeys.all, 'jogos', filters] as const,
-  classificacao: (campeonatoId: number) => [...campeonatoQueryKeys.all, 'classificacao', campeonatoId] as const,
-  proximosJogos: (campeonatoId: number) => [...campeonatoQueryKeys.all, 'proximos', campeonatoId] as const,
-  ultimosResultados: (campeonatoId: number) => [...campeonatoQueryKeys.all, 'resultados', campeonatoId] as const,
-}
-
-// ✅ CORREÇÃO: Hook para listar campeonatos
+// Hook para buscar campeonatos
 export function useCampeonatos(filters?: { temporada?: string; tipo?: string; status?: string }) {
   return useQuery({
-    queryKey: campeonatoQueryKeys.list(filters || {}),
-    queryFn: async (): Promise<Campeonato[]> => {
-      const params = new URLSearchParams()
-      if (filters?.temporada) params.append('temporada', filters.temporada)
-      if (filters?.tipo) params.append('tipo', filters.tipo)
-      if (filters?.status) params.append('status', filters.status)
-
-      // ✅ URL CORRIGIDA - adicionando /campeonatos no path
-      const url = `${API_BASE_URL}/campeonatos/campeonatos${params.toString() ? `?${params.toString()}` : ''}`
-      
-      console.log('🔍 URL de busca:', url) // Para debug
-      
-      const response = await fetch(url)
-      
-      if (!response.ok) {
-        throw new Error(`Erro ao buscar campeonatos: ${response.status}`)
-      }
-      
-      return response.json()
-    },
+    queryKey: queryKeys.campeonatos.list(filters || {}),
+    queryFn: () => CampeonatosService.getCampeonatos(filters),
     staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
+    retry: 2,
+    refetchOnWindowFocus: false,
   })
 }
 
-// ✅ CORREÇÃO: useCampeonato (campeonato específico)
+// Hook para buscar um campeonato específico
 export function useCampeonato(id: number) {
   return useQuery({
-    queryKey: campeonatoQueryKeys.detail(id),
-    queryFn: async (): Promise<Campeonato> => {
-      // ✅ URL CORRIGIDA
-      const response = await fetch(`${API_BASE_URL}/campeonatos/campeonatos/${id}`)
-      
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error('Campeonato não encontrado')
-        }
-        throw new Error(`Erro ao buscar campeonato: ${response.status}`)
-      }
-      
-      return response.json()
-    },
+    queryKey: queryKeys.campeonatos.detail(id),
+    queryFn: () => CampeonatosService.getCampeonato(id),
     enabled: !!id,
     staleTime: 1000 * 60 * 5,
+    retry: 2,
   })
 }
 
-
-// ✅ CORREÇÃO: useClassificacao
-export function useClassificacao(campeonatoId: number) {
-  return useQuery({
-    queryKey: campeonatoQueryKeys.classificacao(campeonatoId),
-    queryFn: async (): Promise<ClassificacaoGrupo[]> => {
-      // ✅ URL CORRIGIDA para classificação
-      const response = await fetch(`${API_BASE_URL}/campeonatos/classificacao/campeonato/${campeonatoId}`)
-      
-      if (!response.ok) {
-        throw new Error(`Erro ao buscar classificação: ${response.status}`)
-      }
-      
-      return response.json()
-    },
-    enabled: !!campeonatoId,
-    staleTime: 1000 * 60 * 5,
-  })
-}
-
-// ✅ CORREÇÃO: useCreateCampeonato
+// Hook para criar campeonato
 export function useCreateCampeonato() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: async (data: CriarCampeonatoRequest): Promise<Campeonato> => {
-      // ✅ URL CORRIGIDA para criação
-      const response = await fetch(`${API_BASE_URL}/campeonatos/campeonatos`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+    mutationFn: (data: CriarCampeonatoRequest) => CampeonatosService.createCampeonato(data),
+    onSuccess: (newCampeonato) => {
+      // Invalidar lista de campeonatos
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.campeonatos.lists() 
       })
-
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({}))
-        throw handleApiError({ response, message: error.message })
-      }
-
-      return response.json()
+      
+      // Adicionar ao cache
+      queryClient.setQueryData(queryKeys.campeonatos.detail(newCampeonato.id), newCampeonato)
+      
+      notifications.success('Campeonato criado!', `${newCampeonato.nome} foi criado com sucesso`)
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: campeonatoQueryKeys.lists() })
-      notifications.success(
-        'Campeonato criado!', 
-        `${data.nome} foi criado com sucesso`
-      )
-    },
-    onError: (error) => {
-      notifications.error(
-        'Erro ao criar campeonato', 
-        error.message || 'Tente novamente'
-      )
+    onError: (error: any) => {
+      notifications.error('Erro ao criar campeonato', error.message || 'Tente novamente')
     },
   })
 }
 
+// Hook para atualizar campeonato
 export function useUpdateCampeonato() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: async ({ 
-      id, 
-      data 
-    }: { 
-      id: number; 
-      data: Partial<Campeonato> 
-    }): Promise<Campeonato> => {
-      const response = await fetch(`${API_BASE_URL}/campeonatos/campeonatos/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+    mutationFn: ({ id, data }: { id: number; data: Partial<Campeonato> }) =>
+      CampeonatosService.updateCampeonato(id, data),
+    onSuccess: (updatedCampeonato, { id }) => {
+      // Atualizar cache específico
+      queryClient.setQueryData(queryKeys.campeonatos.detail(id), updatedCampeonato)
+      
+      // Invalidar lista de campeonatos
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.campeonatos.lists() 
       })
-
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({}))
-        throw handleApiError({ response, message: error.message })
-      }
-
-      return response.json()
-    },
-    onSuccess: (data, { id }) => {
-      // Atualizar cache do campeonato específico
-      queryClient.setQueryData(campeonatoQueryKeys.detail(id), data)
       
-      // Invalidar listas relacionadas
-      queryClient.invalidateQueries({ queryKey: campeonatoQueryKeys.lists() })
-      
-      notifications.success(
-        'Campeonato atualizado!', 
-        `${data.nome} foi atualizado com sucesso`
-      )
+      notifications.success('Campeonato atualizado!', `${updatedCampeonato.nome} foi atualizado`)
     },
-    onError: (error) => {
-      notifications.error(
-        'Erro ao atualizar campeonato', 
-        error.message || 'Verifique os dados e tente novamente'
-      )
-    }
+    onError: (error: any) => {
+      notifications.error('Erro ao atualizar campeonato', error.message)
+    },
   })
 }
 
-// ===== CORREÇÃO 8: useDeleteCampeonato =====
-// src/hooks/useDeleteCampeonato.ts
+// Hook para deletar campeonato
 export function useDeleteCampeonato() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: async (campeonatoId: number): Promise<void> => {
-      // ✅ CORRIGIR ROTA DE DELETE:
-      const response = await fetch(`${API_BASE_URL}/campeonatos/campeonatos/${campeonatoId}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+    mutationFn: CampeonatosService.deleteCampeonato,
+    onSuccess: (_, id) => {
+      // Remover do cache
+      queryClient.removeQueries({ 
+        queryKey: queryKeys.campeonatos.detail(id) 
       })
-
-      if (!response.ok) {
-        throw handleApiError({ response })
-      }
-    },
-    onSuccess: (_, campeonatoId) => {
-      queryClient.invalidateQueries({ queryKey: campeonatoQueryKeys.lists() })
-      queryClient.removeQueries({ queryKey: campeonatoQueryKeys.detail(campeonatoId) })
       
-      notifications.success(
-        'Campeonato excluído!', 
-        'O campeonato foi removido permanentemente'
-      )
+      // Invalidar listas
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.campeonatos.lists() 
+      })
+      
+      notifications.success('Campeonato removido!', 'Campeonato foi excluído com sucesso')
     },
-    onError: (error) => {
-      notifications.error(
-        'Erro ao excluir campeonato', 
-        error.message || 'Verifique se o campeonato não possui jogos associados'
-      )
-    }
+    onError: (error: any) => {
+      notifications.error('Erro ao remover campeonato', error.message)
+    },
+  })
+}
+
+// ==================== GRUPOS ====================
+
+// Hook para buscar grupos do campeonato
+export function useGrupos(campeonatoId: number) {
+  return useQuery({
+    queryKey: queryKeys.campeonatos.grupos(campeonatoId),
+    queryFn: () => CampeonatosService.getGrupos(campeonatoId),
+    enabled: !!campeonatoId,
+    staleTime: 1000 * 60 * 3,
+  })
+}
+
+// ==================== JOGOS ====================
+
+// Hook para buscar jogos
+export function useJogos(filters: FiltroJogos) {
+  return useQuery({
+    queryKey: queryKeys.jogos.list(filters),
+    queryFn: () => CampeonatosService.getJogos(filters),
+    staleTime: 1000 * 60 * 2, // Jogos mudam mais frequentemente
+    gcTime: 1000 * 60 * 5,
+    retry: 2,
+  })
+}
+
+// Hook para buscar um jogo específico
+export function useJogo(id: number) {
+  return useQuery({
+    queryKey: queryKeys.jogos.detail(id),
+    queryFn: () => CampeonatosService.getJogo(id),
+    enabled: !!id,
+    staleTime: 1000 * 60 * 2,
+  })
+}
+
+// Hook para próximos jogos
+export function useProximosJogos(campeonatoId: number, limit?: number) {
+  return useQuery({
+    queryKey: queryKeys.campeonatos.proximosJogos(campeonatoId, limit),
+    queryFn: () => CampeonatosService.getProximosJogos(campeonatoId, limit),
+    enabled: !!campeonatoId,
+    staleTime: 1000 * 60 * 1, // 1 minuto para próximos jogos
+  })
+}
+
+// Hook para últimos resultados
+export function useUltimosResultados(campeonatoId: number, limit?: number) {
+  return useQuery({
+    queryKey: queryKeys.campeonatos.ultimosResultados(campeonatoId, limit),
+    queryFn: () => CampeonatosService.getUltimosResultados(campeonatoId, limit),
+    enabled: !!campeonatoId,
+    staleTime: 1000 * 60 * 5,
+  })
+}
+
+// ==================== CLASSIFICAÇÃO ====================
+
+// Hook para buscar classificação do campeonato
+export function useClassificacao(campeonatoId: number) {
+  return useQuery({
+    queryKey: queryKeys.classificacao.campeonato(campeonatoId),
+    queryFn: () => CampeonatosService.getClassificacao(campeonatoId),
+    enabled: !!campeonatoId,
+    staleTime: 1000 * 60 * 2,
   })
 }
 
 // Hook para classificação de um grupo específico
 export function useClassificacaoGrupo(grupoId: number) {
   return useQuery({
-    queryKey: [...campeonatoQueryKeys.all, 'classificacao-grupo', grupoId] as const,
-    queryFn: async (): Promise<ClassificacaoGrupo[]> => {
-      const response = await fetch(`${API_BASE_URL}/campeonatos/classificacao/grupo/${grupoId}`)
-      
-      if (!response.ok) {
-        throw new Error('Erro ao buscar classificação do grupo')
-      }
-      
-      return response.json()
-    },
+    queryKey: queryKeys.classificacao.grupo(grupoId),
+    queryFn: () => CampeonatosService.getClassificacaoGrupo(grupoId),
     enabled: !!grupoId,
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    staleTime: 1000 * 60 * 2,
   })
 }
 
-// ===========================================
-// HOOKS DE CRUD PARA GRUPOS
-// ===========================================
+// ==================== MUTATIONS UTILITÁRIAS ====================
 
-// Criar novo grupo
-export function useCreateGrupo() {
+// Hook para gerar jogos
+export function useGerarJogos() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: async (data: {
-      nome: string;
-      campeonatoId: number;
-      ordem?: number;
-      times?: number[];
-    }): Promise<any> => {
-      const response = await fetch(`${API_BASE_URL}/campeonatos/grupos`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+    mutationFn: (campeonatoId: number) => CampeonatosService.gerarJogos(campeonatoId),
+    onSuccess: (result, campeonatoId) => {
+      // Invalidar dados relacionados ao campeonato
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.campeonatos.detail(campeonatoId) 
       })
-
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({}))
-        throw handleApiError({ response, message: error.message })
-      }
-
-      return response.json()
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: campeonatoQueryKeys.detail(data.campeonatoId) })
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.jogos.lists() 
+      })
       
       notifications.success(
-        'Grupo criado!',
-        `O grupo ${data.nome} foi criado com sucesso`
+        'Jogos gerados!', 
+        `${result.jogosGerados || 0} jogos foram criados com sucesso`
       )
     },
-    onError: (error) => {
-      notifications.error(
-        'Erro ao criar grupo',
-        error.message || 'Verifique os dados e tente novamente'
-      )
+    onError: (error: any) => {
+      notifications.error('Erro ao gerar jogos', error.message)
     },
   })
 }
 
-// Atualizar grupo
-export function useUpdateGrupo() {
-  const queryClient = useQueryClient()
-  const notifications = useNotifications()
-
-  return useMutation({
-    mutationFn: async ({ 
-      id, 
-      data 
-    }: { 
-      id: number; 
-      data: {
-        nome?: string;
-        ordem?: number;
-        times?: number[];
-      }
-    }): Promise<any> => {
-      const response = await fetch(`${API_BASE_URL}/campeonatos/grupos/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      })
-
-      if (!response.ok) {
-        throw handleApiError({ response })
-      }
-
-      return response.json()
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: campeonatoQueryKeys.detail(data.campeonatoId) })
-      
-      notifications.success(
-        'Grupo atualizado!',
-        `O grupo foi atualizado com sucesso`
-      )
-    },
-    onError: (error) => {
-      notifications.error(
-        'Erro ao atualizar grupo',
-        error.message || 'Tente novamente'
-      )
-    }
-  })
-}
-
-// Deletar grupo
-export function useDeleteGrupo() {
-  const queryClient = useQueryClient()
-  const notifications = useNotifications()
-
-  return useMutation({
-    mutationFn: async (grupoId: number): Promise<void> => {
-      const response = await fetch(`${API_BASE_URL}/campeonatos/grupos/${grupoId}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-      })
-
-      if (!response.ok) {
-        throw handleApiError({ response })
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: campeonatoQueryKeys.lists() })
-      
-      notifications.success(
-        'Grupo excluído!',
-        'O grupo foi removido do campeonato'
-      )
-    },
-    onError: (error) => {
-      notifications.error(
-        'Erro ao excluir grupo',
-        error.message || 'Verifique se o grupo não possui jogos associados'
-      )
-    }
-  })
-}
-
-// ===========================================
-// HOOKS DE OPERAÇÕES EM MASSA
-// ===========================================
-
-// Bulk delete campeonatos
-export function useBulkDeleteCampeonatos() {
-  const queryClient = useQueryClient()
-  const notifications = useNotifications()
-
-  return useMutation({
-    mutationFn: async (campeonatoIds: number[]): Promise<void> => {
-      const response = await fetch(`${API_BASE_URL}/admin/campeonatos/bulk-delete`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ids: campeonatoIds })
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.message || 'Erro ao excluir campeonatos')
-      }
-
-      return response.json()
-    },
-    onSuccess: (_, campeonatoIds) => {
-      // Invalidar todas as queries relacionadas
-      queryClient.invalidateQueries({ queryKey: campeonatoQueryKeys.lists() })
-      
-      // Remover cada campeonato do cache
-      campeonatoIds.forEach(id => {
-        queryClient.removeQueries({ queryKey: campeonatoQueryKeys.detail(id) })
-        queryClient.removeQueries({ queryKey: campeonatoQueryKeys.jogos({ campeonatoId: id }) })
-        queryClient.removeQueries({ queryKey: campeonatoQueryKeys.classificacao(id) })
-      })
-
-      notifications.success(
-        'Campeonatos excluídos!',
-        `${campeonatoIds.length} campeonatos foram removidos`
-      )
-    },
-    onError: (error) => {
-      notifications.error(
-        'Erro ao excluir campeonatos',
-        error.message || 'Alguns campeonatos podem ter jogos associados'
-      )
-    }
-  })
-}
-
-
-// ===========================================
-// HOOKS UTILITÁRIOS EXTRAS
-// ===========================================
-
-// Recalcular classificação manualmente
+// Hook para recalcular classificação
 export function useRecalcularClassificacao() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: async (grupoId: number): Promise<any> => {
-      const response = await fetch(`${API_BASE_URL}/campeonatos/classificacao/recalcular/${grupoId}`, {
-        method: 'POST',
-      })
-
-      if (!response.ok) {
-        throw new Error('Erro ao recalcular classificação')
-      }
-
-      return response.json()
-    },
+    mutationFn: (grupoId: number) => CampeonatosService.recalcularClassificacao(grupoId),
     onSuccess: (_, grupoId) => {
-      queryClient.invalidateQueries({ queryKey: [...campeonatoQueryKeys.all, 'classificacao-grupo', grupoId] })
-      queryClient.invalidateQueries({ queryKey: campeonatoQueryKeys.lists() })
-      
-      notifications.success(
-        'Classificação recalculada!',
-        'A tabela foi atualizada com sucesso'
-      )
-    },
-    onError: (error) => {
-      notifications.error(
-        'Erro ao recalcular',
-        error.message || 'Tente novamente'
-      )
-    }
-  })
-}
-
-// Processar estatísticas de um jogo
-export function useProcessarEstatisticas() {
-  const queryClient = useQueryClient()
-  const notifications = useNotifications()
-
-  return useMutation({
-    mutationFn: async ({ 
-      jogoId, 
-      estatisticas 
-    }: { 
-      jogoId: number; 
-      estatisticas: any[] 
-    }): Promise<any> => {
-      const response = await fetch(`${API_BASE_URL}/campeonatos/jogos/${jogoId}/estatisticas`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ estatisticas }),
+      // Invalidar classificações
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.classificacao.grupo(grupoId) 
       })
-
-      if (!response.ok) {
-        throw new Error('Erro ao processar estatísticas')
-      }
-
-      return response.json()
-    },
-    onSuccess: (_, { jogoId }) => {
-      queryClient.invalidateQueries({ queryKey: [...campeonatoQueryKeys.all, 'jogo', jogoId] })
-      queryClient.invalidateQueries({ queryKey: campeonatoQueryKeys.jogos({}) })
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.classificacao.all 
+      })
       
-      notifications.success(
-        'Estatísticas processadas!',
-        'As estatísticas do jogo foram salvas'
-      )
+      notifications.success('Classificação recalculada!', 'As posições foram atualizadas')
     },
-    onError: (error) => {
-      notifications.error(
-        'Erro ao processar estatísticas',
-        error.message || 'Verifique os dados e tente novamente'
-      )
-    }
+    onError: (error: any) => {
+      notifications.error('Erro ao recalcular classificação', error.message)
+    },
   })
 }

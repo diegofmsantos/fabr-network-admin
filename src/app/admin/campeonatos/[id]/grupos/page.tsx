@@ -6,15 +6,7 @@ import { useCampeonato } from '@/hooks/useCampeonatos'
 import { useTimes } from '@/hooks/queries'
 import { Loading } from '@/components/ui/Loading'
 import { NoDataFound } from '@/components/ui/NoDataFound'
-import { 
-  ArrowLeft, 
-  Plus, 
-  Users, 
-  Shuffle, 
-  Download,
-  Settings,
-  AlertCircle
-} from 'lucide-react'
+import {   ArrowLeft, Plus, Users, Shuffle, Download, Settings, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { GrupoManager } from '@/components/Admin/GrupoManager'
 

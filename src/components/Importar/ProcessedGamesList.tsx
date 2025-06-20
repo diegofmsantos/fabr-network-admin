@@ -1,145 +1,129 @@
-// src/components/admin/ProcessedGamesList.tsx
-import React, { useState, useEffect } from 'react';
-import { ClipboardList, RefreshCw, AlertTriangle } from 'lucide-react';
+import React from 'react'
+import { ClipboardList, RefreshCw, AlertTriangle, Loader2 } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { BaseService } from '@/services/base.service'
 
 interface ProcessedGame {
-    id_jogo: string;
-    data_jogo: string;
-    processado_em: string;
+  id_jogo: string
+  data_jogo: string
+  processado_em: string
+}
+
+// Service para jogos processados
+class JogosProcessadosService extends BaseService {
+  static async getJogosProcessados(): Promise<{ jogos: ProcessedGame[] }> {
+    const service = new JogosProcessadosService()
+    return service.get<{ jogos: ProcessedGame[] }>('/admin/jogos-processados')
+  }
 }
 
 const ProcessedGamesList = () => {
-    const [games, setGames] = useState<ProcessedGame[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+  // 🚀 HOOK DO TANSTACK QUERY - SUBSTITUI useEffect + useState + fetch
+  const { 
+    data, 
+    isLoading, 
+    error, 
+    refetch 
+  } = useQuery({
+    queryKey: ['jogosProcessados'],
+    queryFn: JogosProcessadosService.getJogosProcessados,
+    staleTime: 1000 * 60 * 5, // 5 minutos
+    retry: 2,
+  })
 
-    const fetchProcessedGames = async () => {
-        try {
-            setLoading(true);
-            setError(null);
+  const games = data?.jogos || []
 
-            const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+  const formatDate = (dateString: string) => {
+    try {
+      return new Date(dateString).toLocaleDateString('pt-BR')
+    } catch (e) {
+      return dateString
+    }
+  }
 
-            const baseUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+  const formatDateTime = (dateTimeString: string) => {
+    try {
+      const date = new Date(dateTimeString)
+      return `${date.toLocaleDateString('pt-BR')} ${date.toLocaleTimeString('pt-BR')}`
+    } catch (e) {
+      return dateTimeString
+    }
+  }
 
-            const url = `${baseUrl}/jogos-processados`;
-            
-            console.log(`Buscando jogos processados em: ${url}`);
-            
-            const response = await fetch(url);
+  return (
+    <div className="max-w-2xl mx-auto bg-[#1C1C24] p-6 rounded-lg shadow-md">
+      
+      {/* Header */}
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold text-[#63E300]">Jogos Processados</h2>
+        <button
+          onClick={() => refetch()}
+          disabled={isLoading}
+          className="text-[#63E300] hover:text-[#50B800] flex items-center transition-colors disabled:opacity-50"
+        >
+          <RefreshCw size={16} className={`mr-1 ${isLoading ? 'animate-spin' : ''}`} />
+          Atualizar
+        </button>
+      </div>
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error(`Resposta (${response.status}):`, errorText.substring(0, 200));
-                throw new Error(`Erro ao buscar jogos: ${response.status} ${response.statusText}`);
-            }
-
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                const text = await response.text();
-                console.error('Resposta não-JSON recebida:', text.substring(0, 200));
-                throw new Error('O servidor retornou um formato de resposta inválido');
-            }
-
-            const data = await response.json();
-            setGames(data.jogos || []);
-        } catch (err: any) {
-            setError(err.message || 'Erro ao buscar jogos processados');
-            console.error('Erro:', err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchProcessedGames();
-    }, []);
-
-    const formatDate = (dateString: string) => {
-        try {
-            return new Date(dateString).toLocaleDateString('pt-BR');
-        } catch (e) {
-            return dateString;
-        }
-    };
-
-    const formatDateTime = (dateTimeString: string) => {
-        try {
-            const date = new Date(dateTimeString);
-            return `${date.toLocaleDateString('pt-BR')} ${date.toLocaleTimeString('pt-BR')}`;
-        } catch (e) {
-            return dateTimeString;
-        }
-    };
-
-    return (
-        <div className="max-w-2xl mx-auto bg-[#1C1C24] p-6 rounded-lg shadow-md">
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-[#63E300]">Jogos Processados</h2>
-                <button
-                    onClick={fetchProcessedGames}
-                    className="text-[#63E300] hover:text-[#50B800] flex items-center transition-colors"
-                >
-                    <RefreshCw size={16} className="mr-1" />
-                    Atualizar
-                </button>
-            </div>
-
-            {error && (
-                <div className="bg-red-500/20 border border-red-500 text-red-100 px-4 py-3 rounded mb-4 flex items-center">
-                    <AlertTriangle size={20} className="mr-2" />
-                    {error}
-                </div>
-            )}
-
-            {loading ? (
-                <div className="flex justify-center py-8">
-                    <svg className="animate-spin h-8 w-8 text-[#63E300]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                </div>
-            ) : games.length === 0 ? (
-                <div className="text-center py-8 text-gray-400">
-                    <ClipboardList size={48} className="mx-auto mb-4 text-gray-500" />
-                    <p>Nenhum jogo processado ainda.</p>
-                </div>
-            ) : (
-                <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-700">
-                        <thead className="bg-[#272731]">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                    ID do Jogo
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                    Data do Jogo
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                    Processado em
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-[#1C1C24] divide-y divide-gray-700">
-                            {games.map((game) => (
-                                <tr key={game.id_jogo} className="hover:bg-[#272731] transition-colors">
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
-                                        {game.id_jogo}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                        {formatDate(game.data_jogo)}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                        {formatDateTime(game.processado_em)}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
+      {/* Error State */}
+      {error && (
+        <div className="bg-red-500/20 border border-red-500 text-red-100 px-4 py-3 rounded mb-4 flex items-center">
+          <AlertTriangle size={20} className="mr-2" />
+          {error.message || 'Erro ao carregar jogos processados'}
         </div>
-    );
-};
+      )}
 
-export default ProcessedGamesList;
+      {/* Loading State */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-8 text-gray-400">
+          <Loader2 className="w-6 h-6 animate-spin mr-2" />
+          Carregando jogos processados...
+        </div>
+      ) : games.length === 0 ? (
+        // Empty State
+        <div className="text-center py-8 text-gray-400">
+          <ClipboardList size={48} className="mx-auto mb-4 opacity-50" />
+          <p>Nenhum jogo processado encontrado</p>
+          <button
+            onClick={() => refetch()}
+            className="mt-2 text-[#63E300] hover:text-[#50B800] text-sm"
+          >
+            Tentar novamente
+          </button>
+        </div>
+      ) : (
+        // Games List
+        <div className="space-y-3">
+          {games.map((game, index) => (
+            <div
+              key={`${game.id_jogo}-${index}`}
+              className="bg-[#272731] border border-gray-700 rounded-lg p-4 hover:border-[#63E300] transition-colors"
+            >
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="font-semibold text-white">
+                    Jogo: {game.id_jogo}
+                  </h3>
+                  <p className="text-gray-400 text-sm">
+                    Data do Jogo: {formatDate(game.data_jogo)}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[#63E300] text-sm font-medium">
+                    Processado
+                  </p>
+                  <p className="text-gray-400 text-xs">
+                    {formatDateTime(game.processado_em)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default ProcessedGamesList

@@ -1,62 +1,96 @@
-import { create } from 'zustand'
+// src/hooks/useNotifications.ts
+import { Notification } from '@/types'
+import { useState, useCallback } from 'react'
 
-interface Notification {
-  id: string
-  type: 'success' | 'error' | 'warning' | 'info'
-  title: string
-  message: string
-  duration?: number
-  action?: {
-    label: string
-    onClick: () => void
-  }
-}
+export function useNotifications() {
+  const [notifications, setNotifications] = useState<Notification[]>([])
 
-interface NotificationStore {
-  notifications: Notification[]
-  addNotification: (notification: Omit<Notification, 'id'>) => void
-  removeNotification: (id: string) => void
-  clearAll: () => void
-}
-
-export const useNotificationStore = create<NotificationStore>((set) => ({
-  notifications: [],
-  addNotification: (notification) => {
-    const id = Math.random().toString(36).substr(2, 9)
-    const newNotification = { ...notification, id }
-    
-    set((state) => ({
-      notifications: [...state.notifications, newNotification]
-    }))
-
-    // Auto remove após duration (padrão 5s)
-    const duration = notification.duration ?? 5000
-    if (duration > 0) {
-      setTimeout(() => {
-        set((state) => ({
-          notifications: state.notifications.filter(n => n.id !== id)
-        }))
-      }, duration)
+  const addNotification = useCallback((notification: Omit<Notification, 'id' | 'timestamp'>) => {
+    const newNotification: Notification = {
+      ...notification,
+      id: Math.random().toString(36).substr(2, 9),
+      timestamp: new Date(),
+      duration: notification.duration || 5000,
     }
-  },
-  removeNotification: (id) =>
-    set((state) => ({
-      notifications: state.notifications.filter(n => n.id !== id)
-    })),
-  clearAll: () => set({ notifications: [] })
-}))
 
-export const useNotifications = () => {
-  const { addNotification } = useNotificationStore()
+    setNotifications(prev => [...prev, newNotification])
+
+    // Auto-remover após o tempo especificado
+    if (newNotification.duration > 0) {
+      setTimeout(() => {
+        removeNotification(newNotification.id)
+      }, newNotification.duration)
+    }
+
+    return newNotification.id
+  }, [])
+
+  const removeNotification = useCallback((id: string) => {
+    setNotifications(prev => prev.filter(notification => notification.id !== id))
+  }, [])
+
+  const clearAll = useCallback(() => {
+    setNotifications([])
+  }, [])
+
+  // Métodos de conveniência
+  const success = useCallback((title: string, message?: string, duration?: number) => {
+    return addNotification({ type: 'success', title, message, duration })
+  }, [addNotification])
+
+  const error = useCallback((title: string, message?: string, duration?: number) => {
+    return addNotification({ type: 'error', title, message, duration: duration || 8000 })
+  }, [addNotification])
+
+  const warning = useCallback((title: string, message?: string, duration?: number) => {
+    return addNotification({ type: 'warning', title, message, duration })
+  }, [addNotification])
+
+  const info = useCallback((title: string, message?: string, duration?: number) => {
+    return addNotification({ type: 'info', title, message, duration })
+  }, [addNotification])
+
+  // Log no console para desenvolvimento
+  const logNotification = useCallback((notification: Notification) => {
+    const emoji = {
+      success: '✅',
+      error: '❌',
+      warning: '⚠️',
+      info: 'ℹ️'
+    }
+
+    console.log(`${emoji[notification.type]} ${notification.title}`, notification.message || '')
+  }, [])
+
+  // Usar console.log como fallback simples por enquanto
+  const successWithLog = useCallback((title: string, message?: string, duration?: number) => {
+    console.log(`✅ ${title}`, message || '')
+    return success(title, message, duration)
+  }, [success])
+
+  const errorWithLog = useCallback((title: string, message?: string, duration?: number) => {
+    console.error(`❌ ${title}`, message || '')
+    return error(title, message, duration)
+  }, [error])
+
+  const warningWithLog = useCallback((title: string, message?: string, duration?: number) => {
+    console.warn(`⚠️ ${title}`, message || '')
+    return warning(title, message, duration)
+  }, [warning])
+
+  const infoWithLog = useCallback((title: string, message?: string, duration?: number) => {
+    console.log(`ℹ️ ${title}`, message || '')
+    return info(title, message, duration)
+  }, [info])
 
   return {
-    success: (title: string, message: string) =>
-      addNotification({ type: 'success', title, message }),
-    error: (title: string, message: string) =>
-      addNotification({ type: 'error', title, message, duration: 8000 }),
-    warning: (title: string, message: string) =>
-      addNotification({ type: 'warning', title, message }),
-    info: (title: string, message: string) =>
-      addNotification({ type: 'info', title, message }),
+    notifications,
+    addNotification,
+    removeNotification,
+    clearAll,
+    success: successWithLog,
+    error: errorWithLog,
+    warning: warningWithLog,
+    info: infoWithLog,
   }
 }
