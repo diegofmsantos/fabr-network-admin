@@ -71,20 +71,20 @@ export type TimeOptional = {
   jogadores?: Jogador[]
 }
 
-export interface Transferencia {
-  id: number
-  jogadorNome: string
-  timeOrigemId?: number
-  timeOrigemNome?: string
-  timeOrigemSigla?: string
-  timeDestinoId: number
-  timeDestinoNome?: string
-  timeDestinoSigla?: string
-  novaPosicao?: string | null
-  novoSetor?: string | null
-  novoNumero?: number | null
-  novaCamisa?: string | null
-  data: string
+export type Transferencia = {
+  id: number;
+  jogadorNome: string;
+  timeOrigemId?: number;
+  timeOrigemNome?: string;
+  timeOrigemSigla?: string;
+  timeDestinoId: number;
+  timeDestinoNome: string;
+  timeDestinoSigla: string;
+  novaPosicao?: string;
+  novoSetor?: string;
+  novoNumero?: number;
+  novaCamisa?: string;
+  data: string;
 }
 
 export interface TimeMercadoCardProps {
@@ -995,6 +995,7 @@ export interface TabelaClassificacaoProps {
   grupoNome?: string
   showGroup?: boolean
   compact?: boolean
+  temporada?: string
 }
 
 export interface CampeonatoHeaderProps {
@@ -1024,13 +1025,31 @@ export interface UseMutationResult<TData, TVariables> {
 
 export interface TimeChange {
   timeId: number
-  alteracoes: Record<string, any>
+  alteracoes: Record<string, any>  // ← Este campo é obrigatório
+  nome?: string
+  sigla?: string
+  cor?: string
+  instagram?: string
+  instagram2?: string
+  logo?: string
+  capacete?: string
+  presidente?: string
+  head_coach?: string
+  coord_ofen?: string
+  coord_defen?: string
 }
 
 export interface TransferenciaTemporada {
   jogadorId: number
+  jogadorNome?: string        // ← ADICIONAR
   timeOrigemId: number
+  timeOrigemNome?: string     // ← VERIFICAR se existe
+  timeOrigemSigla?: string    // ← ADICIONAR se necessário
   timeDestinoId: number
+  timeDestinoNome?: string    // ← TROCAR de novoTimeNome para timeDestinoNome
+  timeDestinoSigla?: string   // ← ADICIONAR se necessário
+  novaPosicao?: string
+  novoSetor?: string
   novoNumero?: number
   novaCamisa?: string
 }
@@ -1232,6 +1251,31 @@ export interface JogoValidation {
   placarCasa?: number
   placarVisitante?: number
   observacoes?: string
+}
+
+export interface ImportacaoResponse {
+  sucesso: number
+  erros?: Array<{
+    item: string
+    erro: string
+  }>
+  mensagem: string
+  detalhes?: any
+}
+
+export interface EstatisticasResponse {
+  jogoId: string
+  jogadoresAtualizados: number
+  estatisticasProcessadas: number
+  mensagem: string
+  erros?: any[]
+}
+
+export interface TransferenciasResponse {
+  message: string
+  times: number
+  jogadores: number
+  transferencias: number
 }
 
 // ==================== TYPES ESPECÍFICOS PARA PÁGINAS ====================

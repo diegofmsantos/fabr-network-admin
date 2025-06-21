@@ -1,45 +1,18 @@
-import { Jogador, Time } from '@/types';
+import { Jogador, Time, TimeChange, Transferencia, TransferenciaTemporada } from '@/types';
 import { useState, useEffect } from 'react';
-interface TimeChange {
-  timeId: number;
-  nome?: string;
-  sigla?: string;
-  cor?: string;
-  instagram?: string;
-  instagram2?: string;
-  logo?: string;
-  capacete?: string;
-  presidente?: string;
-  head_coach?: string;
-  coord_ofen?: string;
-  coord_defen?: string;
-}
 
 interface PlayerTransferFormProps {
   jogadores: Jogador[];
   times: Time[];
-  timeChanges?: TimeChange[]; 
-  onAddTransfer: (transfer: Transferencia) => void;
+  timeChanges?: TimeChange[];
+  onAddTransfer: (transferencia: TransferenciaTemporada) => void 
 }
 
-export interface Transferencia {
-  jogadorId: number;
-  jogadorNome?: string;
-  timeOrigemId?: number;
-  timeOrigemNome?: string;
-  novoTimeId: number;
-  novoTimeNome?: string;
-  novaPosicao?: string
-  novosetor?: string
-  novoNumero?: number;
-  novaCamisa?: string;
-}
-
-export function PlayerTransferForm({ 
-  jogadores, 
-  times, 
-  timeChanges = [], 
-  onAddTransfer 
+export function PlayerTransferForm({
+  jogadores,
+  times,
+  timeChanges = [],
+  onAddTransfer
 }: PlayerTransferFormProps) {
   const [selectedJogador, setSelectedJogador] = useState<Jogador | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -70,19 +43,19 @@ export function PlayerTransferForm({
     if (!novoTime || selectedJogador.timeId === Number(selectedNovoTime)) return;
 
     const timeOrigem = times.find(t => t.id === selectedJogador.timeId);
-    
+
     const timeDestinoDados = timeChanges.find(tc => tc.timeId === Number(selectedNovoTime));
     const novoTimeNome = timeDestinoDados?.nome || novoTime.nome;
 
-    const transferencia: Transferencia = {
+    const transferencia: TransferenciaTemporada = {
       jogadorId: selectedJogador.id || 0,
       jogadorNome: selectedJogador.nome,
       timeOrigemId: selectedJogador.timeId,
       timeOrigemNome: timeOrigem?.nome,
-      novoTimeId: Number(selectedNovoTime),
-      novoTimeNome: novoTimeNome, 
+      timeDestinoId: Number(selectedNovoTime),        // ← TROCAR de novoTimeId
+      timeDestinoNome: novoTimeNome,                  // ← TROCAR de novoTimeNome
       novaPosicao: novaPosicao,
-      novosetor: novoSetor,
+      novoSetor: novoSetor,                           // ← CORRIGIR de novosetor
       novoNumero: novoNumero ? Number(novoNumero) : undefined,
       novaCamisa: novaCamisa
     };
@@ -176,10 +149,10 @@ export function PlayerTransferForm({
               .filter(time => !selectedJogador || time.id !== selectedJogador.timeId)
               .map((time) => {
                 const change = timeChanges.find(tc => tc.timeId === time.id && tc.nome);
-                const displayName = change 
+                const displayName = change
                   ? `${time.nome} → ${change.nome} (${change.sigla || time.sigla})`
                   : `${time.nome} (${time.sigla})`;
-                  
+
                 return (
                   <option key={time.id} value={time.id}>
                     {displayName}

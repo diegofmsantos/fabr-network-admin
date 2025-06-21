@@ -1,4 +1,3 @@
-// src/hooks/useNotifications.ts
 import { Notification } from '@/types'
 import { useState, useCallback } from 'react'
 
@@ -15,7 +14,6 @@ export function useNotifications() {
 
     setNotifications(prev => [...prev, newNotification])
 
-    // Auto-remover após o tempo especificado
     if (newNotification.duration > 0) {
       setTimeout(() => {
         removeNotification(newNotification.id)
@@ -33,7 +31,6 @@ export function useNotifications() {
     setNotifications([])
   }, [])
 
-  // Métodos de conveniência
   const success = useCallback((title: string, message?: string, duration?: number) => {
     return addNotification({ type: 'success', title, message, duration })
   }, [addNotification])
@@ -50,7 +47,6 @@ export function useNotifications() {
     return addNotification({ type: 'info', title, message, duration })
   }, [addNotification])
 
-  // Log no console para desenvolvimento
   const logNotification = useCallback((notification: Notification) => {
     const emoji = {
       success: '✅',
@@ -62,7 +58,6 @@ export function useNotifications() {
     console.log(`${emoji[notification.type]} ${notification.title}`, notification.message || '')
   }, [])
 
-  // Usar console.log como fallback simples por enquanto
   const successWithLog = useCallback((title: string, message?: string, duration?: number) => {
     console.log(`✅ ${title}`, message || '')
     return success(title, message, duration)

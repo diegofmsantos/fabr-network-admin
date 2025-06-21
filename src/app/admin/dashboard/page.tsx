@@ -12,7 +12,7 @@ import { ActivityTimeline } from '@/components/Admin/ActivityTimeline'
 export default function Dashboard() {
   const [selectedTemporada, setSelectedTemporada] = useState('2025')
   const [selectedPeriod, setSelectedPeriod] = useState('30d')
-  
+
   const { data: stats, isLoading, error } = useAdminStats({
     temporada: selectedTemporada,
     period: selectedPeriod
@@ -29,7 +29,6 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      {/* Header com Filtros */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-[#63E300]">Dashboard Executivo</h1>
@@ -37,7 +36,7 @@ export default function Dashboard() {
             Acompanhe as métricas e performance dos campeonatos em tempo real
           </p>
         </div>
-        
+
         <div className="mt-4 sm:mt-0 flex space-x-4">
           <select
             value={selectedPeriod}
@@ -49,7 +48,7 @@ export default function Dashboard() {
             <option value="90d">Últimos 90 dias</option>
             <option value="1y">Último ano</option>
           </select>
-          
+
           <select
             value={selectedTemporada}
             onChange={(e) => setSelectedTemporada(e.target.value)}
@@ -61,20 +60,14 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Stats Principais */}
       <QuickStats />
-
-      {/* Sistema de Alertas */}
       <ActionableAlerts />
 
-      {/* Grid de Componentes */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
-        {/* Status do Sistema */}
         <div className="lg:col-span-1">
           <SystemHealth />
         </div>
 
-        {/* Gráficos */}
         <div className="lg:col-span-3 grid grid-cols-1 lg:grid-cols-2 gap-6">
           <ChartCard
             title="Evolução de Campeonatos"
@@ -83,7 +76,7 @@ export default function Dashboard() {
             type="area"
             height={300}
           />
-          
+
           <ChartCard
             title="Status dos Jogos"
             subtitle="Distribuição atual"
@@ -94,7 +87,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Gráficos Secundários */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <ChartCard
           title="Performance por Tipo"
@@ -102,14 +94,14 @@ export default function Dashboard() {
           type="bar"
           height={250}
         />
-        
+
         <ChartCard
           title="Participação Regional"
           data={stats?.participacaoRegional || []}
           type="pie"
           height={250}
         />
-        
+
         <ChartCard
           title="Tendência Mensal"
           data={stats?.tendenciaMensal || []}
@@ -118,9 +110,7 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Timeline e Métricas Detalhadas */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Atividades Recentes */}
         <div className="lg:col-span-1">
           <div className="bg-white shadow rounded-lg p-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">
@@ -130,25 +120,24 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Métricas Detalhadas */}
         <div className="lg:col-span-2">
           <div className="bg-white shadow rounded-lg p-6">
             <h3 className="text-lg font-medium text-gray-900 mb-6">
               Métricas Detalhadas
             </h3>
-            
+
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <span className="text-sm font-medium text-gray-600">Média de Jogos/Campeonato</span>
                   <span className="text-lg font-bold text-gray-900">{stats?.mediaJogosPorCampeonato || 0}</span>
                 </div>
-                
+
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <span className="text-sm font-medium text-gray-600">Tempo Médio de Duração</span>
                   <span className="text-lg font-bold text-gray-900">{stats?.tempoMedioDuracao || '0'} dias</span>
                 </div>
-                
+
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <span className="text-sm font-medium text-gray-600">Taxa de Adiamentos</span>
                   <span className="text-lg font-bold text-gray-900">{stats?.taxaAdiamentos || 0}%</span>
@@ -160,12 +149,12 @@ export default function Dashboard() {
                   <span className="text-sm font-medium text-gray-600">Grupos por Campeonato</span>
                   <span className="text-lg font-bold text-gray-900">{stats?.mediaGruposPorCampeonato || 0}</span>
                 </div>
-                
+
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <span className="text-sm font-medium text-gray-600">Participação Média</span>
                   <span className="text-lg font-bold text-gray-900">{stats?.participacaoMedia || 0} times</span>
                 </div>
-                
+
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <span className="text-sm font-medium text-gray-600">Pontuação Média</span>
                   <span className="text-lg font-bold text-gray-900">{stats?.pontuacaoMedia || 0}</span>
@@ -176,10 +165,9 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Top Performers */}
       <div className="bg-white shadow rounded-lg p-6">
         <h3 className="text-lg font-medium text-gray-900 mb-6">Top Performers</h3>
-        
+
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div>
             <h4 className="text-sm font-medium text-gray-500 mb-3">Campeonatos Mais Ativos</h4>

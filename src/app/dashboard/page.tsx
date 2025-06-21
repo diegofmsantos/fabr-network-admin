@@ -1,4 +1,3 @@
-// src/app/dashboard/page.tsx - VERSÃO MIGRADA
 "use client"
 
 import React, { useState } from 'react'
@@ -19,20 +18,18 @@ export default function DashboardPage() {
     const [filtroAtivo, setFiltroAtivo] = useState<string | null>(null)
     const [resultados, setResultados] = useState<any>(null)
 
-    // 🚀 HOOKS DO TANSTACK QUERY - SUBSTITUI useEffect + useState + api calls
-    const { 
-        data: times = [], 
-        isLoading: loadingTimes, 
-        error: errorTimes 
+    const {
+        data: times = [],
+        isLoading: loadingTimes,
+        error: errorTimes
     } = useTimes(temporada)
 
-    const { 
-        data: jogadores = [], 
-        isLoading: loadingJogadores, 
-        error: errorJogadores 
+    const {
+        data: jogadores = [],
+        isLoading: loadingJogadores,
+        error: errorJogadores
     } = useJogadores(temporada)
 
-    // 🎯 LOADING STATE UNIFICADO
     const loading = loadingTimes || loadingJogadores
     const error = errorTimes || errorJogadores
 

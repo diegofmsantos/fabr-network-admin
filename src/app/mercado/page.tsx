@@ -1,24 +1,9 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-
-type Transferencia = {
-  id: number;
-  jogadorNome: string;
-  timeOrigemId?: number;
-  timeOrigemNome?: string;
-  timeOrigemSigla?: string;
-  timeDestinoId: number;
-  timeDestinoNome: string;
-  timeDestinoSigla: string;
-  novaPosicao?: string;
-  novoSetor?: string;
-  novoNumero?: number;
-  novaCamisa?: string;
-  data: string;
-}
+import { Transferencia } from '@/types'
 
 export default function MercadoPage() {
   const [transferencias, setTransferencias] = useState<Transferencia[]>([])
@@ -31,13 +16,13 @@ export default function MercadoPage() {
 
 
 
-  const filteredTransferencias = searchTerm 
-    ? transferencias.filter(t => 
-        t.jogadorNome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        t.timeOrigemNome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        t.timeDestinoNome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        t.novaPosicao?.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+  const filteredTransferencias = searchTerm
+    ? transferencias.filter(t =>
+      t.jogadorNome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      t.timeOrigemNome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      t.timeDestinoNome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      t.novaPosicao?.toLowerCase().includes(searchTerm.toLowerCase())
+    )
     : transferencias;
 
   return (
@@ -88,7 +73,7 @@ export default function MercadoPage() {
                 <option value="2023">2023</option>
               </select>
             </div>
-            
+
             <div>
               <label className="block text-white text-sm font-medium mb-2">
                 Temporada Destino
@@ -102,7 +87,7 @@ export default function MercadoPage() {
                 <option value="2024">2024</option>
               </select>
             </div>
-            
+
             <div>
               <label className="block text-white text-sm font-medium mb-2">
                 Buscar
@@ -123,11 +108,10 @@ export default function MercadoPage() {
               <div className="flex items-center gap-2 bg-[#1C1C24] p-1 rounded-lg">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded flex-1 flex justify-center ${
-                    viewMode === 'grid' 
-                      ? 'bg-[#63E300] text-black' 
-                      : 'text-gray-400 hover:text-white'
-                  }`}
+                  className={`p-2 rounded flex-1 flex justify-center ${viewMode === 'grid'
+                    ? 'bg-[#63E300] text-black'
+                    : 'text-gray-400 hover:text-white'
+                    }`}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
@@ -135,11 +119,10 @@ export default function MercadoPage() {
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-2 rounded flex-1 flex justify-center ${
-                    viewMode === 'list' 
-                      ? 'bg-[#63E300] text-black' 
-                      : 'text-gray-400 hover:text-white'
-                  }`}
+                  className={`p-2 rounded flex-1 flex justify-center ${viewMode === 'list'
+                    ? 'bg-[#63E300] text-black'
+                    : 'text-gray-400 hover:text-white'
+                    }`}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -201,7 +184,7 @@ export default function MercadoPage() {
                 </thead>
                 <tbody className="bg-[#272731] divide-y divide-gray-700">
                   {filteredTransferencias.map((transferencia) => (
-                    <tr 
+                    <tr
                       key={`${transferencia.id}-${transferencia.timeDestinoId}`}
                       className="hover:bg-[#2A2A35] transition-colors"
                     >
@@ -234,7 +217,7 @@ export default function MercadoPage() {
           ) : (
             <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredTransferencias.map((transferencia) => (
-                <div 
+                <div
                   key={`${transferencia.id}-${transferencia.timeDestinoId}`}
                   className="bg-[#1C1C24] rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
                 >
@@ -253,11 +236,11 @@ export default function MercadoPage() {
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="p-4">
                     <div className="flex items-center">
                       <div className="w-1/3 text-center">
-                        <div 
+                        <div
                           className="w-12 h-12 mx-auto rounded-full flex items-center justify-center"
                           style={{ backgroundColor: transferencia.timeOrigemId ? '#4A4A57' : '#333340' }}
                         >
@@ -269,15 +252,15 @@ export default function MercadoPage() {
                           {transferencia.timeOrigemNome || "Free Agent"}
                         </p>
                       </div>
-                      
+
                       <div className="w-1/3 flex justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#63E300]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                         </svg>
                       </div>
-                      
+
                       <div className="w-1/3 text-center">
-                        <div 
+                        <div
                           className="w-12 h-12 mx-auto rounded-full flex items-center justify-center"
                           style={{ backgroundColor: '#63E300' }}
                         >
@@ -291,7 +274,7 @@ export default function MercadoPage() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="bg-[#272731] text-xs text-gray-400 py-2 px-4 text-right">
                     {new Date(transferencia.data).toLocaleDateString('pt-BR')}
                   </div>

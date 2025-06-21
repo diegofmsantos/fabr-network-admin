@@ -1,9 +1,9 @@
 "use client"
 
 import { useState } from "react";
-import { api } from "@/api/api";
 import { fieldGroups } from "@/utils/campos";
 import { Time } from "@/types";
+import { useUpdateTime, useDeleteTime } from '@/hooks/useTimes'
 
 export default function ModalTime({
     time,
@@ -29,6 +29,11 @@ export default function ModalTime({
     const [activeTab, setActiveTab] = useState<'info' | 'jogadores'>('info');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const updateTimeMutation = useUpdateTime()
+    const deleteTimeMutation = useDeleteTime()
+
+    const isLoading = updateTimeMutation.isPending || deleteTimeMutation.isPending || isSubmitting
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
 
@@ -49,35 +54,30 @@ export default function ModalTime({
         }
     };
 
-    const handleSave = async () => {
-        setIsSubmitting(true);
-        try {
-            const payload = {
-                ...formData,
-                titulos: [formData.titulos],
-            };
-            await api.put(`/time/${time.id}`, payload);
-            updateTime(payload);
-            closeModal();
-        } catch (error) {
-            console.error("Erro ao atualizar time:", error);
-        } finally {
-            setIsSubmitting(false);
-        }
+    const handleSave = () => {
+        const payload = {
+            ...formData,
+            titulos: [formData.titulos],
+        };
+
+        updateTimeMutation.mutate({
+            id: time.id,
+            data: payload
+        }, {
+            onSuccess: (updatedTime) => {
+                updateTime(updatedTime);
+                closeModal();
+            }
+        });
     };
 
     const handleDelete = async () => {
         if (confirm("Tem certeza que deseja excluir este time?")) {
-            setIsSubmitting(true);
-            try {
-                await api.delete(`/time/${time.id}`);
-                closeModal();
-                window.location.reload();
-            } catch (error) {
-                console.error("Erro ao excluir time:", error);
-            } finally {
-                setIsSubmitting(false);
-            }
+            deleteTimeMutation.mutate(time.id, {
+                onSuccess: () => {
+                    closeModal();
+                }
+            });
         }
     };
 
@@ -90,7 +90,6 @@ export default function ModalTime({
             )
         );
     };
-
 
     return (
         <div className="fixed inset-0 z-50 overflow-hidden">
@@ -127,8 +126,8 @@ export default function ModalTime({
                         <button
                             onClick={() => setActiveTab('info')}
                             className={`px-4 py-3 text-sm font-medium transition-colors relative ${activeTab === 'info'
-                                    ? 'text-[#63E300]'
-                                    : 'text-gray-400 hover:text-white'
+                                ? 'text-[#63E300]'
+                                : 'text-gray-400 hover:text-white'
                                 }`}
                         >
                             Informações do Time
@@ -140,8 +139,8 @@ export default function ModalTime({
                         <button
                             onClick={() => setActiveTab('jogadores')}
                             className={`px-4 py-3 text-sm font-medium transition-colors relative ${activeTab === 'jogadores'
-                                    ? 'text-[#63E300]'
-                                    : 'text-gray-400 hover:text-white'
+                                ? 'text-[#63E300]'
+                                : 'text-gray-400 hover:text-white'
                                 }`}
                         >
                             Jogadores ({formData.jogadores.length})
@@ -168,7 +167,7 @@ export default function ModalTime({
                                                 </label>
                                                 <input
                                                     type="text"
-                                                    name={field.name} // @ts-ignore
+                                                    name={field.name} 
                                                     value={field.name.startsWith("titulos.") ? formData.titulos?.[field.name.split(".")[1]] || "" : formData[field.name] || ""}
                                                     onChange={handleChange}
                                                     placeholder={field.label}
@@ -254,7 +253,7 @@ export default function ModalTime({
                 <div className="bg-[#1C1C24] px-6 py-4 border-t border-gray-800 flex justify-between">
                     <button
                         onClick={handleDelete}
-                        disabled={isSubmitting}
+                        disabled={isLoading}
                         className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                     >
                         {isSubmitting ? (

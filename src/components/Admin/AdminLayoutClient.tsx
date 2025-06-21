@@ -16,23 +16,17 @@ export const AdminLayoutClient: React.FC<AdminLayoutClientProps> = ({ children }
       <HeaderGeneral label='CAMPEONATOS' />
       <AdminHeader />
       <div className="min-h-screen bg-[#272731]">
-        {/* Sidebar */}
         <AdminSidebar />
-        
-        {/* Main Content */}
+
         <div className="lg:pl-64">
-          {/* Header */}
-          
-          
-          {/* Page Content */}
+
           <main className="py-6">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
               {children}
             </div>
           </main>
         </div>
-        
-        {/* Sistema de Notificações */}
+
         <NotificationContainer />
       </div>
     </AdminErrorBoundary>

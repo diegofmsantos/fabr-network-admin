@@ -9,7 +9,6 @@ interface ProcessedGame {
   processado_em: string
 }
 
-// Service para jogos processados
 class JogosProcessadosService extends BaseService {
   static async getJogosProcessados(): Promise<{ jogos: ProcessedGame[] }> {
     const service = new JogosProcessadosService()
@@ -18,7 +17,6 @@ class JogosProcessadosService extends BaseService {
 }
 
 const ProcessedGamesList = () => {
-  // 🚀 HOOK DO TANSTACK QUERY - SUBSTITUI useEffect + useState + fetch
   const { 
     data, 
     isLoading, 
@@ -27,7 +25,7 @@ const ProcessedGamesList = () => {
   } = useQuery({
     queryKey: ['jogosProcessados'],
     queryFn: JogosProcessadosService.getJogosProcessados,
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    staleTime: 1000 * 60 * 5, 
     retry: 2,
   })
 
@@ -53,7 +51,6 @@ const ProcessedGamesList = () => {
   return (
     <div className="max-w-2xl mx-auto bg-[#1C1C24] p-6 rounded-lg shadow-md">
       
-      {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-[#63E300]">Jogos Processados</h2>
         <button
@@ -66,7 +63,6 @@ const ProcessedGamesList = () => {
         </button>
       </div>
 
-      {/* Error State */}
       {error && (
         <div className="bg-red-500/20 border border-red-500 text-red-100 px-4 py-3 rounded mb-4 flex items-center">
           <AlertTriangle size={20} className="mr-2" />
@@ -74,14 +70,12 @@ const ProcessedGamesList = () => {
         </div>
       )}
 
-      {/* Loading State */}
       {isLoading ? (
         <div className="flex items-center justify-center py-8 text-gray-400">
           <Loader2 className="w-6 h-6 animate-spin mr-2" />
           Carregando jogos processados...
         </div>
       ) : games.length === 0 ? (
-        // Empty State
         <div className="text-center py-8 text-gray-400">
           <ClipboardList size={48} className="mx-auto mb-4 opacity-50" />
           <p>Nenhum jogo processado encontrado</p>
@@ -93,7 +87,6 @@ const ProcessedGamesList = () => {
           </button>
         </div>
       ) : (
-        // Games List
         <div className="space-y-3">
           {games.map((game, index) => (
             <div

@@ -1,33 +1,30 @@
 import React, { useState } from 'react'
 import { Upload, FileText, Check, AlertTriangle, Loader2 } from 'lucide-react'
-import { useImportarTimes } from '@/hooks/useTimes'
-import { useAtualizarEstatisticas, useImportarJogadores } from '@/hooks/useJogadores'
+import { useImportarTimes, useImportarJogadores, useAtualizarEstatisticas } from '@/hooks/useImportacao'
 
 const AdminUploadForm = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [formData, setFormData] = useState({
     id_jogo: '',
     data_jogo: '',
-    tipo: 'times' 
+    tipo: 'times'
   })
 
-  // 🚀 HOOKS DO TANSTACK QUERY - SUBSTITUI fetch manual + loading states
   const importTimesMutation = useImportarTimes()
   const importJogadoresMutation = useImportarJogadores()
   const atualizarEstatisticasMutation = useAtualizarEstatisticas()
 
-  // 🎯 ESTADO UNIFICADO DOS MUTATIONS
-  const isUploading = importTimesMutation.isPending || 
-                     importJogadoresMutation.isPending || 
-                     atualizarEstatisticasMutation.isPending
+  const isUploading = importTimesMutation.isPending ||
+    importJogadoresMutation.isPending ||
+    atualizarEstatisticasMutation.isPending
 
-  const error = importTimesMutation.error || 
-                importJogadoresMutation.error || 
-                atualizarEstatisticasMutation.error
+  const error = importTimesMutation.error ||
+    importJogadoresMutation.error ||
+    atualizarEstatisticasMutation.error
 
-  const isSuccess = importTimesMutation.isSuccess || 
-                    importJogadoresMutation.isSuccess || 
-                    atualizarEstatisticasMutation.isSuccess
+  const isSuccess = importTimesMutation.isSuccess ||
+    importJogadoresMutation.isSuccess ||
+    atualizarEstatisticasMutation.isSuccess
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -42,13 +39,12 @@ const AdminUploadForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!selectedFile) {
       alert('Selecione um arquivo para upload')
       return
     }
 
-    // Validação para estatísticas
     if (formData.tipo === 'estatisticas') {
       if (!formData.id_jogo.trim() || !formData.data_jogo.trim()) {
         alert('ID do jogo e data são obrigatórios para estatísticas')
@@ -56,19 +52,22 @@ const AdminUploadForm = () => {
       }
     }
 
-    // 🎯 EXECUTA A MUTATION APROPRIADA
     try {
       switch (formData.tipo) {
         case 'times':
-          importTimesMutation.mutate(selectedFile)
+          await importTimesMutation.mutateAsync(selectedFile)
           break
-          
+
         case 'jogadores':
-          importJogadoresMutation.mutate(selectedFile)
+          await importJogadoresMutation.mutateAsync(selectedFile)
           break
-          
+
         case 'estatisticas':
-          atualizarEstatisticasMutation.mutate({
+          if (!formData.id_jogo || !formData.data_jogo) {
+            alert('Para estatísticas, preencha o ID do jogo e a data')
+            return
+          }
+          await atualizarEstatisticasMutation.mutateAsync({
             arquivo: selectedFile,
             idJogo: formData.id_jogo,
             dataJogo: formData.data_jogo
@@ -80,12 +79,10 @@ const AdminUploadForm = () => {
     }
   }
 
-  // 🧹 RESET FORM APÓS SUCESSO
   const resetForm = () => {
     setSelectedFile(null)
     setFormData({ id_jogo: '', data_jogo: '', tipo: 'times' })
-    
-    // Reset mutations
+
     importTimesMutation.reset()
     importJogadoresMutation.reset()
     atualizarEstatisticasMutation.reset()
@@ -94,8 +91,7 @@ const AdminUploadForm = () => {
   return (
     <div className="max-w-2xl mx-auto">
       <form onSubmit={handleSubmit} className="space-y-6">
-        
-        {/* Tipo de Upload */}
+
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">
             Tipo de Importação
@@ -113,7 +109,6 @@ const AdminUploadForm = () => {
           </select>
         </div>
 
-        {/* Campos extras para estatísticas */}
         {formData.tipo === 'estatisticas' && (
           <>
             <div>
@@ -131,7 +126,7 @@ const AdminUploadForm = () => {
                 required
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Data do Jogo
@@ -149,10 +144,8 @@ const AdminUploadForm = () => {
           </>
         )}
 
-        {/* Upload de Arquivo */}
-        <div className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-          selectedFile ? 'border-[#63E300] bg-[#272731]' : 'border-gray-600 bg-[#1C1C24]'
-        }`}>
+        <div className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${selectedFile ? 'border-[#63E300] bg-[#272731]' : 'border-gray-600 bg-[#1C1C24]'
+          }`}>
           <input
             id="file-input"
             type="file"
@@ -176,7 +169,6 @@ const AdminUploadForm = () => {
           </label>
         </div>
 
-        {/* Botão de Submit */}
         <button
           type="submit"
           disabled={isUploading || !selectedFile}
@@ -196,7 +188,6 @@ const AdminUploadForm = () => {
         </button>
       </form>
 
-      {/* 🎉 FEEDBACK VISUAL AUTOMÁTICO */}
       {isSuccess && (
         <div className="mt-6 p-4 bg-green-900/20 border border-green-500 rounded-lg">
           <div className="flex items-center text-green-400">
@@ -212,7 +203,6 @@ const AdminUploadForm = () => {
         </div>
       )}
 
-      {/* ❌ ERROR HANDLING AUTOMÁTICO */}
       {error && (
         <div className="mt-6 p-4 bg-red-900/20 border border-red-500 rounded-lg">
           <div className="flex items-center text-red-400">

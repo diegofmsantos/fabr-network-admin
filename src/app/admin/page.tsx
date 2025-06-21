@@ -32,7 +32,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8">
-      {/* Header com Filtros */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[#63E300]">Dashboard Administrativo</h1>
@@ -53,31 +52,23 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Stats Cards Principais */}
       <QuickStats />
-
-      {/* Alertas Críticos */}
       <ActionableAlerts />
 
-      {/* Grid Principal */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Ações Rápidas */}
         <div className="lg:col-span-1">
           <QuickActions />
         </div>
-        
-        {/* Status do Sistema */}
+
         <div className="lg:col-span-1">
           <SystemHealth />
         </div>
 
-        {/* Atividades Recentes */}
         <div className="lg:col-span-1">
           <RecentActivity activities={stats?.recentActivities || []} />
         </div>
       </div>
 
-      {/* Charts Row */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <ChartCard
           title="Campeonatos por Status"

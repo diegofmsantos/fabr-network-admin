@@ -6,7 +6,7 @@ import { useCampeonato } from '@/hooks/useCampeonatos'
 import { useTimes } from '@/hooks/queries'
 import { Loading } from '@/components/ui/Loading'
 import { NoDataFound } from '@/components/ui/NoDataFound'
-import {   ArrowLeft, Plus, Users, Shuffle, Download, Settings, AlertCircle } from 'lucide-react'
+import { ArrowLeft, Plus, Users, Shuffle, Download, Settings, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { GrupoManager } from '@/components/Admin/GrupoManager'
 
@@ -15,9 +15,9 @@ export default function AdminGrupos() {
   const router = useRouter()
   const [isReorganizing, setIsReorganizing] = useState(false)
   const [selectedGrupo, setSelectedGrupo] = useState<number | null>(null)
-  
+
   const campeonatoId = parseInt(params.id as string)
-  
+
   const { data: campeonato, isLoading, error } = useCampeonato(campeonatoId)
   const { data: todosOsTimes = [] } = useTimes(campeonato?.temporada || '2025')
 
@@ -33,8 +33,8 @@ export default function AdminGrupos() {
     )
   }
 
-  const timesDisponiveis = todosOsTimes.filter(time => 
-    !campeonato.grupos.some(grupo => 
+  const timesDisponiveis = todosOsTimes.filter(time =>
+    !campeonato.grupos.some(grupo =>
       grupo.times.some(gt => gt.timeId === time.id)
     )
   )
@@ -70,7 +70,7 @@ export default function AdminGrupos() {
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-3">
             <button
               onClick={handleExportarGrupos}
@@ -79,7 +79,7 @@ export default function AdminGrupos() {
               <Download className="h-4 w-4 mr-2" />
               Exportar
             </button>
-            
+
             <button
               onClick={handleDistribuirAutomatica}
               className="inline-flex items-center rounded-md bg-purple-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-purple-500"
@@ -87,14 +87,13 @@ export default function AdminGrupos() {
               <Shuffle className="h-4 w-4 mr-2" />
               Distribuir Auto
             </button>
-            
+
             <button
               onClick={() => setIsReorganizing(!isReorganizing)}
-              className={`inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold shadow-sm ${
-                isReorganizing 
-                  ? 'bg-red-600 text-white hover:bg-red-500' 
-                  : 'bg-blue-600 text-white hover:bg-blue-500'
-              }`}
+              className={`inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold shadow-sm ${isReorganizing
+                ? 'bg-red-600 text-white hover:bg-red-500'
+                : 'bg-blue-600 text-white hover:bg-blue-500'
+                }`}
             >
               <Settings className="h-4 w-4 mr-2" />
               {isReorganizing ? 'Finalizar' : 'Reorganizar'}
@@ -103,7 +102,6 @@ export default function AdminGrupos() {
         </div>
       </div>
 
-      {/* Times Disponíveis */}
       {timesDisponiveis.length > 0 && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
           <div className="flex items-start">
@@ -132,7 +130,6 @@ export default function AdminGrupos() {
         </div>
       )}
 
-      {/* Estatísticas dos Grupos */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         <div className="bg-[#272731] border border-gray-700 overflow-hidden shadow rounded-lg">
           <div className="p-5">
@@ -154,7 +151,7 @@ export default function AdminGrupos() {
           </div>
         </div>
 
-       <div className="bg-[#272731] border border-gray-700 overflow-hidden shadow rounded-lg">
+        <div className="bg-[#272731] border border-gray-700 overflow-hidden shadow rounded-lg">
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
@@ -174,7 +171,7 @@ export default function AdminGrupos() {
           </div>
         </div>
 
-       <div className="bg-[#272731] border border-gray-700 overflow-hidden shadow rounded-lg">
+        <div className="bg-[#272731] border border-gray-700 overflow-hidden shadow rounded-lg">
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
@@ -186,7 +183,7 @@ export default function AdminGrupos() {
                     Média por Grupo
                   </dt>
                   <dd className="text-lg font-medium text-gray-300">
-                    {campeonato.grupos.length > 0 
+                    {campeonato.grupos.length > 0
                       ? Math.round(campeonato.grupos.reduce((acc, grupo) => acc + grupo.times.length, 0) / campeonato.grupos.length)
                       : 0
                     }
@@ -197,7 +194,7 @@ export default function AdminGrupos() {
           </div>
         </div>
 
-       <div className="bg-[#272731] border border-gray-700 overflow-hidden shadow rounded-lg">
+        <div className="bg-[#272731] border border-gray-700 overflow-hidden shadow rounded-lg">
           <div className="p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0">
@@ -218,7 +215,6 @@ export default function AdminGrupos() {
         </div>
       </div>
 
-      {/* Grupos */}
       <div className="space-y-6 ">
         {campeonato.grupos.length === 0 ? (
           <div className="text-center py-12 bg-white shadow rounded-lg ">
@@ -231,7 +227,7 @@ export default function AdminGrupos() {
             </p>
             <div className="mt-6">
               <button
-                onClick={() => {/* Implementar criação de grupo */}}
+                onClick={() => {/* Implementar criação de grupo */ }}
                 className="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500"
               >
                 <Plus className="h-4 w-4 mr-2" />
@@ -256,7 +252,6 @@ export default function AdminGrupos() {
         )}
       </div>
 
-      {/* Ações em Lote */}
       {isReorganizing && (
         <div className="bg-white shadow rounded-lg p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">

@@ -1,39 +1,25 @@
 "use client"
 
-import { updateNoticia, deleteNoticia } from '@/api/api'
 import { useState } from 'react'
 import { Editor } from '../Editor/Editor'
 import Image from 'next/image'
-import { z } from 'zod'
 import { Materia } from '@/types'
+import { useUpdateMateria, useDeleteMateria } from '@/hooks/useMaterias'
 
 interface MateriaFormData extends Omit<Materia, 'createdAt' | 'updatedAt'> {
     createdAt: string;
     updatedAt: string;
 }
 
-const MateriaSchema = z.object({
-    id: z.number(),
-    titulo: z.string().min(1, 'Título é obrigatório'),
-    subtitulo: z.string().min(1, 'Subtítulo é obrigatório'),
-    imagem: z.string().min(1, 'Imagem é obrigatória'),
-    legenda: z.string().default(''),
-    texto: z.string().min(1, 'Texto é obrigatório'),
-    autor: z.string().min(1, 'Autor é obrigatório'),
-    autorImage: z.string().min(1, 'Foto do autor é obrigatória'),
-    createdAt: z.date(),
-    updatedAt: z.date()
-});
-
 interface ModalMateriaProps {
     materia: Materia
     closeModal: () => void
-    onUpdate: (updatedMateria: Materia) => void
+    onUpdate: () => void
 }
 
 export function ModalMateria({ materia, closeModal, onUpdate }: ModalMateriaProps) {
-    const formatDateForInput = (date: Date) => {
-        return new Date(date).toISOString().slice(0, 16);
+    const formatDateForInput = (dateString: string) => {
+        return new Date(dateString).toISOString().slice(0, 16);
     };
 
     const [formData, setFormData] = useState<MateriaFormData>({
@@ -42,7 +28,10 @@ export function ModalMateria({ materia, closeModal, onUpdate }: ModalMateriaProp
         updatedAt: formatDateForInput(materia.updatedAt)
     });
 
-    const [loading, setLoading] = useState(false)
+    const updateMateriaMutation = useUpdateMateria()
+    const deleteMateriaMutation = useDeleteMateria()
+
+    const isLoading = updateMateriaMutation.isPending || deleteMateriaMutation.isPending
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
@@ -55,7 +44,7 @@ export function ModalMateria({ materia, closeModal, onUpdate }: ModalMateriaProp
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
-            if (file.size > 5 * 1024 * 1024) { // 5MB
+            if (file.size > 5 * 1024 * 1024) { 
                 alert('A imagem deve ter no máximo 5MB')
                 return
             }
@@ -70,8 +59,8 @@ export function ModalMateria({ materia, closeModal, onUpdate }: ModalMateriaProp
     const handleAuthorImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
-            if (file.size > 2 * 1024 * 1024) { // 2MB
-                alert('A foto do autor deve ter no máximo 2MB')
+            if (file.size > 5 * 1024 * 1024) { 
+                alert('A foto do autor deve ter no máximo 5MB')
                 return
             }
             const reader = new FileReader()
@@ -82,54 +71,44 @@ export function ModalMateria({ materia, closeModal, onUpdate }: ModalMateriaProp
         }
     }
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault()
 
-        try {
-            const materiaData = {
-                ...formData,
-                createdAt: new Date(formData.createdAt),
-                updatedAt: new Date(formData.updatedAt)
-            };
-
-            const validatedData = MateriaSchema.parse(materiaData);
-            const updatedMateria = await updateNoticia(materia.id, validatedData);
-            onUpdate(updatedMateria);
-            closeModal();
-        } catch (error) {
-            if (error instanceof z.ZodError) {
-                const errors = error.errors.map(err => err.message).join('\n');
-                alert(`Erro de validação:\n${errors}`);
-            } else {
-                console.error('Erro ao atualizar:', error);
-                alert('Erro ao atualizar matéria');
-            }
-        } finally {
-            setLoading(false);
+        const materiaData = {
+            ...formData,
+            createdAt: new Date(formData.createdAt).toISOString(),
+            updatedAt: new Date().toISOString(), 
+            legenda: formData.legenda || null
         }
-    };
 
-    const handleDelete = async () => {
-        if (window.confirm('Tem certeza que deseja excluir esta matéria?')) {
-            try {
-                await deleteNoticia(materia.id)
+        updateMateriaMutation.mutate({
+            id: materia.id,
+            data: materiaData
+        }, {
+            onSuccess: () => {
+                onUpdate()
                 closeModal()
-                window.location.reload()
-            } catch (error) {
-                console.error('Erro ao deletar:', error)
-                alert('Erro ao deletar matéria')
             }
-        }
+        })
     }
 
+    const handleDelete = () => {
+        if (confirm('Tem certeza que deseja excluir esta matéria? Esta ação não pode ser desfeita.')) {
+            deleteMateriaMutation.mutate(materia.id, {
+                onSuccess: () => {
+                    closeModal()
+                }
+            })
+        }
+    }
 
     return (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
             <div className="bg-[#272731] p-6 rounded-lg w-2/3 h-[90vh] relative flex flex-col">
                 <button
-                    className="absolute top-4 right-4 text-gray-400 hover:text-white"
+                    className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
                     onClick={closeModal}
+                    disabled={isLoading}
                 >
                     ✖
                 </button>
@@ -145,6 +124,7 @@ export function ModalMateria({ materia, closeModal, onUpdate }: ModalMateriaProp
                                 value={formData.titulo}
                                 onChange={handleChange}
                                 className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
+                                disabled={isLoading}
                             />
                         </div>
 
@@ -155,6 +135,7 @@ export function ModalMateria({ materia, closeModal, onUpdate }: ModalMateriaProp
                                 value={formData.subtitulo}
                                 onChange={handleChange}
                                 className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
+                                disabled={isLoading}
                             />
                         </div>
 
@@ -162,43 +143,33 @@ export function ModalMateria({ materia, closeModal, onUpdate }: ModalMateriaProp
                             <label className="block text-white text-sm font-medium mb-2">Imagem</label>
                             <input
                                 type="file"
-                                onChange={handleImageChange}
                                 accept="image/*"
+                                onChange={handleImageChange}
                                 className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
+                                disabled={isLoading}
                             />
                             {formData.imagem && (
-                                <div className="mt-2 relative h-40 w-full">
+                                <div className="mt-2">
                                     <Image
                                         src={formData.imagem}
                                         alt="Preview"
-                                        fill
-                                        className="object-cover rounded-lg"
+                                        width={200}
+                                        height={100}
+                                        className="rounded object-cover"
                                     />
-                                    {formData.legenda && (
-                                        <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white p-2 text-sm">
-                                            {formData.legenda}
-                                        </div>
-                                    )}
                                 </div>
                             )}
                         </div>
 
                         <div>
-                            <label className="block text-white text-sm font-medium mb-2">Legenda</label>
+                            <label className="block text-white text-sm font-medium mb-2">Legenda da Imagem</label>
                             <input
                                 name="legenda"
-                                value={formData.legenda}
+                                value={formData.legenda || ''}
                                 onChange={handleChange}
-                                placeholder="Digite uma legenda para a imagem"
                                 className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-white text-sm font-medium mb-2">Texto</label>
-                            <Editor
-                                value={formData.texto}
-                                onChange={(content) => setFormData(prev => ({ ...prev, texto: content }))}
+                                disabled={isLoading}
+                                placeholder="Digite a legenda da imagem (opcional)"
                             />
                         </div>
 
@@ -209,6 +180,7 @@ export function ModalMateria({ materia, closeModal, onUpdate }: ModalMateriaProp
                                 value={formData.autor}
                                 onChange={handleChange}
                                 className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
+                                disabled={isLoading}
                             />
                         </div>
 
@@ -216,16 +188,18 @@ export function ModalMateria({ materia, closeModal, onUpdate }: ModalMateriaProp
                             <label className="block text-white text-sm font-medium mb-2">Foto do Autor</label>
                             <input
                                 type="file"
-                                onChange={handleAuthorImageChange}
                                 accept="image/*"
+                                onChange={handleAuthorImageChange}
                                 className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
+                                disabled={isLoading}
                             />
                             {formData.autorImage && (
-                                <div className="mt-2 relative h-20 w-20">
+                                <div className="mt-2">
                                     <Image
                                         src={formData.autorImage}
-                                        alt="Author Preview"
-                                        fill
+                                        alt="Preview do autor"
+                                        width={80}
+                                        height={80}
                                         className="rounded-full object-cover"
                                     />
                                 </div>
@@ -233,61 +207,104 @@ export function ModalMateria({ materia, closeModal, onUpdate }: ModalMateriaProp
                         </div>
 
                         <div>
-                            <label htmlFor="createdAt" className="block text-white text-sm font-medium mb-2">
-                                Data de Criação
-                            </label>
-                            <input
-                                id="createdAt"
-                                type="datetime-local"
-                                value={formData.createdAt}
-                                onChange={(e) => setFormData(prev => ({
-                                    ...prev,
-                                    createdAt: e.target.value
-                                }))}
-                                className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
-                            />
+                            <label className="block text-white text-sm font-medium mb-2">Conteúdo</label>
+                            <div className="bg-[#1C1C24] border border-gray-700 rounded-lg p-3">
+                                <Editor
+                                    value={formData.texto}
+                                    onChange={(value) => setFormData(prev => ({ ...prev, texto: value }))}
+                                />
+                            </div>
                         </div>
 
-                        <div>
-                            <label htmlFor="updatedAt" className="block text-white text-sm font-medium mb-2">
-                                Data de Atualização
-                            </label>
-                            <input
-                                id="updatedAt"
-                                type="datetime-local"
-                                value={formData.updatedAt}
-                                onChange={(e) => setFormData(prev => ({
-                                    ...prev,
-                                    updatedAt: e.target.value
-                                }))}
-                                className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
-                            />
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-white text-sm font-medium mb-2">Data de Criação</label>
+                                <input
+                                    type="datetime-local"
+                                    name="createdAt"
+                                    value={formData.createdAt}
+                                    onChange={handleChange}
+                                    className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
+                                    disabled={isLoading}
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-white text-sm font-medium mb-2">Data de Atualização</label>
+                                <input
+                                    type="datetime-local"
+                                    name="updatedAt"
+                                    value={formData.updatedAt}
+                                    onChange={handleChange}
+                                    className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
+                                    disabled={isLoading}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-between gap-4 mt-8 pt-4 border-t border-gray-700">
+                        <button
+                            type="button"
+                            onClick={handleDelete}
+                            disabled={isLoading}
+                            className={`px-6 py-2 bg-red-600 text-white rounded-lg font-medium transition-colors flex items-center
+                                ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-500'}`}
+                        >
+                            {deleteMateriaMutation.isPending ? (
+                                <>
+                                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Excluindo...
+                                </>
+                            ) : (
+                                <>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    Excluir
+                                </>
+                            )}
+                        </button>
+
+                        <div className="flex gap-4">
+                            <button
+                                type="button"
+                                onClick={closeModal}
+                                disabled={isLoading}
+                                className="px-6 py-2 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-500 transition-colors"
+                            >
+                                Cancelar
+                            </button>
+
+                            <button
+                                type="submit"
+                                disabled={isLoading}
+                                className={`px-6 py-2 bg-[#63E300] text-black rounded-lg font-medium transition-colors flex items-center
+                                    ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#50B800]'}`}
+                            >
+                                {updateMateriaMutation.isPending ? (
+                                    <>
+                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Salvando...
+                                    </>
+                                ) : (
+                                    <>
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        Salvar Alterações
+                                    </>
+                                )}
+                            </button>
                         </div>
                     </div>
                 </form>
-                <div className="mt-6 flex justify-between items-center">
-                    <button
-                        onClick={handleDelete}
-                        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-                    >
-                        Excluir
-                    </button>
-                    <div className="space-x-3">
-                        <button
-                            onClick={closeModal}
-                            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-                        >
-                            Fechar
-                        </button>
-                        <button
-                            onClick={handleSubmit}
-                            disabled={loading}
-                            className="px-4 py-2 bg-[#63E300] text-black rounded-lg hover:bg-[#50B800] transition-colors disabled:opacity-50"
-                        >
-                            {loading ? 'Salvando...' : 'Salvar'}
-                        </button>
-                    </div>
-                </div>
             </div>
         </div>
     )

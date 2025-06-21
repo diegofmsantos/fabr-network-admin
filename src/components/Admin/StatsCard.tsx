@@ -98,7 +98,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
               <Icon className={`h-6 w-6 ${colorClasses[color].icon}`} />
             </div>
           </div>
-          
+
           <div className="ml-5 w-0 flex-1">
             <dl>
               <dt className="text-sm font-medium text-gray-200 truncate">
@@ -108,7 +108,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
                 <div className="text-2xl font-semibold text-gray-200">
                   {typeof value === 'number' ? value.toLocaleString() : value}
                 </div>
-                
+
                 {change && (
                   <div className={`ml-2 flex items-baseline text-sm font-semibold ${changeTypeClasses[changeType]}`}>
                     {changeType === 'positive' && (
@@ -128,7 +128,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
                   </div>
                 )}
               </dd>
-              
+
               {subtitle && (
                 <dd className="text-sm text-gray-300 mt-1">
                   {subtitle}

@@ -1,12 +1,13 @@
 "use client"
 
 import { useQuery } from '@tanstack/react-query'
-import { Time } from '@/types/time'
-import { Jogador } from '@/types/jogador'
-import { Materia } from '@/types/materia'
 import { createSlug, findPlayerBySlug, getPlayerSlug, getTeamSlug } from '@/utils/helpers/formatUrl'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { queryKeys } from './queryKeys'
+import { Jogador, Materia, Time } from '@/types'
+import { TimesService } from '@/services/times.service'
+import { JogadoresService } from '@/services/jogadores.service'
+import { MateriasService } from '@/services/materias.service'
 
 const USE_LOCAL_DATA = process.env.NEXT_PUBLIC_USE_LOCAL_DATA === 'true'
 
@@ -28,23 +29,23 @@ const createNotFoundError = (temporada: string, entityName?: string): DataNotFou
 const fetchTimesLocal = async (temporada: string): Promise<Time[]> => {
     // Simula delay de rede
     await new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 300))
-    
+
     if (temporada === '2024') {
         const { Times } = await import('@/data/times')
         return Times
     } else if (temporada === '2025') {
         throw createNotFoundError(temporada)
     }
-    
+
     throw createNotFoundError(temporada)
 }
 
 const fetchJogadoresLocal = async (temporada: string): Promise<Jogador[]> => {
     await new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 300))
-    
+
     const times = await fetchTimesLocal(temporada)
     const jogadores: Jogador[] = []
-    
+
     times.forEach(time => {
         if (time.jogadores) {
             time.jogadores.forEach(jogador => {
@@ -55,13 +56,13 @@ const fetchJogadoresLocal = async (temporada: string): Promise<Jogador[]> => {
             })
         }
     })
-    
+
     return jogadores
 }
 
 const fetchNoticiasLocal = async (): Promise<Materia[]> => {
     await new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 300))
-    
+
     try {
         const { Noticias } = await import('@/data/noticias') // @ts-ignore
         return Noticias
@@ -71,23 +72,9 @@ const fetchNoticiasLocal = async (): Promise<Materia[]> => {
 }
 
 // Funções para API (sua implementação original)
-const fetchTimesAPI = async (temporada: string): Promise<Time[]> => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/times?temporada=${temporada}`)
-    if (!response.ok) throw new Error('Erro ao buscar times')
-    return response.json()
-}
-
-const fetchJogadoresAPI = async (temporada: string): Promise<Jogador[]> => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/jogadores?temporada=${temporada}`)
-    if (!response.ok) throw new Error('Erro ao buscar jogadores')
-    return response.json()
-}
-
-const fetchNoticiasAPI = async (): Promise<Materia[]> => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/materias`)
-    if (!response.ok) throw new Error('Erro ao buscar notícias')
-    return response.json()
-}
+const fetchTimesAPI = (temporada: string) => TimesService.getTimes(temporada)
+const fetchJogadoresAPI = (temporada: string) => JogadoresService.getJogadores(temporada)
+const fetchNoticiasAPI = () => MateriasService.getMaterias()
 
 // Hook para obter a temporada dos parâmetros da URL
 export function useTemporada(explicitTemporada?: string) {
@@ -109,7 +96,7 @@ export function useJogadores(temporada?: string) {
         queryKey: queryKeys.jogadores(currentTemporada),
         queryFn: async () => {
             try {
-                const jogadores = USE_LOCAL_DATA 
+                const jogadores = USE_LOCAL_DATA
                     ? await fetchJogadoresLocal(currentTemporada)
                     : await fetchJogadoresAPI(currentTemporada);
 
@@ -137,7 +124,7 @@ export function useTimes(temporada?: string) {
         queryKey: queryKeys.times(currentTemporada),
         queryFn: async () => {
             try {
-                const times = USE_LOCAL_DATA 
+                const times = USE_LOCAL_DATA
                     ? await fetchTimesLocal(currentTemporada)
                     : await fetchTimesAPI(currentTemporada);
 
@@ -162,7 +149,7 @@ export function useNoticias() {
     return useQuery({
         queryKey: queryKeys.noticias,
         queryFn: async () => {
-            return USE_LOCAL_DATA 
+            return USE_LOCAL_DATA
                 ? await fetchNoticiasLocal()
                 : await fetchNoticiasAPI();
         },

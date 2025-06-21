@@ -40,7 +40,7 @@ export const CampeonatoForm: React.FC<CampeonatoFormProps> = ({
       nome: campeonato.nome,
       temporada: campeonato.temporada,
       tipo: campeonato.tipo,
-      dataInicio: campeonato.dataInicio.split('T')[0], 
+      dataInicio: campeonato.dataInicio.split('T')[0],
       dataFim: campeonato.dataFim?.split('T')[0],
       descricao: campeonato.descricao,
       formato: campeonato.formato,
@@ -53,10 +53,10 @@ export const CampeonatoForm: React.FC<CampeonatoFormProps> = ({
 
   const grupos = dados.grupos || []
 
-const timesDisponiveis = useMemo(() => {
-  const timesUsados = grupos.flatMap(grupo => grupo.times || [])
-  return times.filter(time => !timesUsados.includes(time.id || 0))
-}, [times, grupos])
+  const timesDisponiveis = useMemo(() => {
+    const timesUsados = grupos.flatMap(grupo => grupo.times || [])
+    return times.filter(time => !timesUsados.includes(time.id || 0))
+  }, [times, grupos])
 
   const handleInputChange = (field: string, value: any) => {
     if (isEditMode) {

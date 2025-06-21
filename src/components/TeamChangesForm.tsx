@@ -1,25 +1,9 @@
-import { Time } from '@/types';
+import { Time, TimeChange } from '@/types';
 import { useState } from 'react';
 
 interface TeamChangesProps {
   times: Time[];
   onAddChange: (change: TimeChange) => void;
-}
-
-export interface TimeChange {
-  timeId: number;
-  nome?: string;
-  sigla?: string;
-  instagram?: string
-  instagram2?: string
-  cor?: string;
-  logo?: string;
-  capacete?: string;
-  presidente?: string;
-  head_coach?: string;
-  instagram_coach?: string
-  coord_ofen?: string;
-  coord_defen?: string;
 }
 
 export function TeamChangesForm({ times, onAddChange }: TeamChangesProps) {
@@ -59,7 +43,6 @@ export function TeamChangesForm({ times, onAddChange }: TeamChangesProps) {
     const timeExistente = times.find(t => t.id === Number(selectedTime));
     if (!timeExistente) return;
     
-    // Verificar alterações
     const alteracoes: Partial<TimeChange> = {};
     let temAlteracoes = false;
     

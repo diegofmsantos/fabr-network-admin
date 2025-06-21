@@ -4,14 +4,17 @@ import { useEffect, useState } from 'react'
 import { Editor } from './Editor'
 import { InputField } from './InputField'
 import { FormField } from './FormField'
-import { createNoticia, getNoticias } from '@/api/api'
 import Link from 'next/link'
 import { ModalMateria } from '../Modal/ModalMateria'
 import Image from 'next/image'
-import { motion } from 'framer-motion' 
+import { motion } from 'framer-motion'
 import { Materia } from '@/types'
+import { useMaterias, useCreateMateria } from '@/hooks/useMaterias'
 
 export const FormMateria = () => {
+  const { data: materias = [], isLoading: loadingMaterias } = useMaterias()
+  const createMateriaMutation = useCreateMateria()
+
   const [formData, setFormData] = useState({
     titulo: '',
     subtitulo: '',
@@ -24,27 +27,15 @@ export const FormMateria = () => {
     updatedAt: new Date().toISOString().slice(0, 16)
   })
 
-  const [materias, setMaterias] = useState<Materia[]>([])
   const [selectedMateria, setSelectedMateria] = useState<Materia | null>(null)
-
   const [activeView, setActiveView] = useState<'grid' | 'list'>('grid')
   const [isFormMinimized, setIsFormMinimized] = useState(false)
   const [previewImage, setPreviewImage] = useState<string | null>(null)
   const [previewAuthorImage, setPreviewAuthorImage] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
-  useEffect(() => {
-    const loadMaterias = async () => {
-      try {
-        const data = await getNoticias()
-        setMaterias(data)
-      } catch (error) {
-        console.error('Erro ao carregar notícias:', error)
-      }
-    }
-    loadMaterias()
-  }, [])
+  const isLoading = loadingMaterias || createMateriaMutation.isPending
+
 
   useEffect(() => {
     if (successMessage) {
@@ -67,50 +58,32 @@ export const FormMateria = () => {
     return `${ano}-${mes}-${dia}T${hora}:${minuto}`;
   };
 
-  const handleUpdateMateria = (updatedMateria: Materia) => {
-    setMaterias(prev => prev.map(m => m.id === updatedMateria.id ? updatedMateria : m))
-    setSuccessMessage('Matéria atualizada com sucesso!')
-  }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const materiaData = {
-        ...formData,
-        createdAt: new Date(new Date(formData.createdAt).toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' })),
-        updatedAt: new Date(new Date(formData.updatedAt).toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }))
-      };
-
-      await createNoticia(materiaData);
-      const noticiasAtualizadas = await getNoticias();
-      setMaterias(noticiasAtualizadas);
-
-      setSuccessMessage('Matéria criada com sucesso!')
-
-      setFormData({
-        titulo: '',
-        subtitulo: '',
-        imagem: '',
-        legenda: '',
-        texto: '',
-        autor: '',
-        autorImage: '',
-        createdAt: new Date().toISOString().slice(0, 16),
-        updatedAt: new Date().toISOString().slice(0, 16)
-      });
-
-      setPreviewImage(null);
-      setPreviewAuthorImage(null);
-
-    } catch (error) {
-      console.error('Erro ao salvar:', error);
-      setSuccessMessage('Erro ao salvar a matéria')
-    } finally {
-      setIsLoading(false);
+    const materiaData = {
+      ...formData,
+      createdAt: new Date(formData.createdAt).toISOString(),
+      updatedAt: new Date(formData.updatedAt).toISOString()
     }
-  };
+
+    createMateriaMutation.mutate(materiaData, {
+      onSuccess: () => {
+        setSuccessMessage('Matéria criada com sucesso!')
+        setFormData({
+          titulo: '',
+          subtitulo: '',
+          imagem: '',
+          legenda: '',
+          texto: '',
+          autor: '',
+          autorImage: '',
+          createdAt: new Date().toISOString().slice(0, 16),
+          updatedAt: new Date().toISOString().slice(0, 16)
+        })
+      }
+    })
+  }
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -137,6 +110,8 @@ export const FormMateria = () => {
       reader.readAsDataURL(file)
     }
   }
+
+
 
   return (
     <div className="min-h-screen bg-[#0F0F13]">
@@ -517,7 +492,10 @@ export const FormMateria = () => {
         <ModalMateria
           materia={selectedMateria}
           closeModal={() => setSelectedMateria(null)}
-          onUpdate={handleUpdateMateria}
+          onUpdate={() => {
+            setSuccessMessage('Matéria atualizada com sucesso!')
+            setSelectedMateria(null)
+          }}
         />
       )}
     </div>

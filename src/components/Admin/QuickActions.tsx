@@ -1,16 +1,6 @@
-// src/components/Admin/QuickActions.tsx
 import React from 'react'
 import Link from 'next/link'
-import { 
-  Plus, 
-  Calendar, 
-  Users, 
-  BarChart3, 
-  Settings, 
-  Download, 
-  Upload,
-  RefreshCw
-} from 'lucide-react'
+import { Plus, Calendar, Users, BarChart3, Settings, Download, Upload, RefreshCw } from 'lucide-react'
 
 interface QuickAction {
   id: string
@@ -109,11 +99,11 @@ export const QuickActions: React.FC = () => {
     <div className="bg-[#272731] shadow rounded-lg border border-gray-700">
       <div className="p-6">
         <h3 className="text-lg font-medium text-[#63E300] mb-4">Ações Rápidas</h3>
-        
+
         <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 hover:text-[#63E300]">
           {actions.map((action) => {
             const Icon = action.icon
-            
+
             const ActionContent = (
               <>
                 <div className={`inline-flex p-3 rounded-lg text-white ${action.color} transition-colors duration-200`}>
@@ -154,7 +144,7 @@ export const QuickActions: React.FC = () => {
           })}
         </div>
       </div>
-      
+
       <div className=" px-6 py-3 border-t border-[#63E300]">
         <div className="text-xs text-gray-300 text-center">
           Precisa de ajuda? <a href="#" className="text-[#63E300] hover:text-blue-800">Consulte a documentação</a>

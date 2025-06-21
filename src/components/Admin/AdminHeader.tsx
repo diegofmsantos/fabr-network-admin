@@ -61,7 +61,6 @@ export const AdminHeader: React.FC = () => {
   return (
     <div className="lg:pl-64">
       <div className="flex h-16 flex-shrink-0 border-b border-gray-700 bg-[#272731] lg:border-none">
-        {/* Mobile menu button */}
         <button
           type="button"
           className="border-r border-gray-700 px-4 text-gray-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#63E300] lg:hidden"
@@ -69,7 +68,6 @@ export const AdminHeader: React.FC = () => {
           <Menu className="h-6 w-6" />
         </button>
 
-        {/* Search section */}
         <div className="flex flex-1 justify-between px-4 sm:px-6 lg:mx-auto lg:px-8">
           <div className="flex flex-1 items-center">
             <h1 className="text-2xl font-semibold text-white">
@@ -78,7 +76,6 @@ export const AdminHeader: React.FC = () => {
           </div>
 
           <div className="ml-4 flex items-center md:ml-6">
-            {/* Search */}
             <div className="relative hidden md:block">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                 <Search className="h-5 w-5 text-gray-400" />
@@ -90,7 +87,6 @@ export const AdminHeader: React.FC = () => {
               />
             </div>
 
-            {/* Notifications */}
             <div className="relative ml-3">
               <button
                 type="button"
@@ -105,7 +101,6 @@ export const AdminHeader: React.FC = () => {
                 )}
               </button>
 
-              {/* Notifications dropdown */}
               {showNotifications && (
                 <div className="absolute right-0 z-10 mt-2 w-80 origin-top-right rounded-md bg-[#272731] py-1 shadow-lg ring-1 ring-gray-700 ring-opacity-50 focus:outline-none">
                   <div className="px-4 py-2 border-b border-gray-700">
@@ -159,7 +154,6 @@ export const AdminHeader: React.FC = () => {
               )}
             </div>
 
-            {/* User menu */}
             <div className="relative ml-3">
               <button
                 type="button"
@@ -170,7 +164,7 @@ export const AdminHeader: React.FC = () => {
                   <User className="h-5 w-5 text-black" />
                 </div>
               </button>
-              {/* User dropdown */}
+
               {showUserMenu && (
                 <div className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-[#272731] py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                   <a

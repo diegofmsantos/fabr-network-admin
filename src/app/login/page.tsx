@@ -18,7 +18,7 @@ export default function LoginPage() {
 
     if (username === 'fabrnetwork' && password === 'fabrnetwork321@@') {
       setTimeout(() => {
-        document.cookie = "fabr_auth_token=true; path=/; max-age=86400; samesite=strict" 
+        document.cookie = "fabr_auth_token=true; path=/; max-age=86400; samesite=strict"
         router.push('/')
       }, 1000)
     } else {
@@ -31,10 +31,10 @@ export default function LoginPage() {
     <div className="min-h-screen bg-[#1C1C24] flex flex-col justify-center items-center p-4">
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
-          <Image 
-            src="/logo-fabr-color.png" 
-            alt="FABR Network Logo" 
-            width={220} 
+          <Image
+            src="/logo-fabr-color.png"
+            alt="FABR Network Logo"
+            width={220}
             height={120}
             priority
           />
@@ -45,7 +45,7 @@ export default function LoginPage() {
             <h2 className="text-4xl text-[#63E300] font-extrabold italic leading-[55px] tracking-[-3px] text-center mb-6">
               PAINEL DE ADMINISTRAÇÃO
             </h2>
-            
+
             <p className="text-gray-400 text-center mb-8">
               Faça login para acessar o painel administrativo
             </p>
@@ -108,7 +108,7 @@ export default function LoginPage() {
               </div>
             </form>
           </div>
-          
+
           <div className="px-8 py-4 bg-[#1C1C24]">
             <p className="text-gray-500 text-center text-sm">
               © {new Date().getFullYear()} FABR Network - Todos os direitos reservados

@@ -2,13 +2,12 @@
 
 import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { useCampeonato } from '@/hooks/useCampeonatos'
+import { useCampeonato, useGerarJogos, useJogos } from '@/hooks/useCampeonatos'
 import { Loading } from '@/components/ui/Loading'
 import { NoDataFound } from '@/components/ui/NoDataFound'
 import { ArrowLeft, Plus, Calendar, Download, Filter, Search, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { JogoManager } from '@/components/Admin/JogoManager'
-import { useGerarJogos, useJogos } from '@/hooks/useJogos.ts'
 
 type FilterStatus = 'todos' | 'AGENDADO' | 'AO_VIVO' | 'FINALIZADO' | 'ADIADO'
 type ViewMode = 'calendar' | 'list' | 'table'
@@ -136,7 +135,6 @@ export default function AdminJogos() {
         </div>
       </div>
 
-      {/* Estatísticas */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-5">
         <div className="bg-[#272731] shadow rounded-lg border border-gray-700">
           <div className="p-5">
@@ -166,7 +164,7 @@ export default function AdminJogos() {
           </div>
         </div>
 
-       <div className="bg-[#272731] shadow rounded-lg border border-gray-700">
+        <div className="bg-[#272731] shadow rounded-lg border border-gray-700">
           <div className="p-5">
             <dt className="text-sm font-medium text-gray-300 truncate">Adiados</dt>
             <dd className="mt-1 text-3xl font-semibold text-yellow-600">{estadisticas.adiados}</dd>
@@ -174,10 +172,8 @@ export default function AdminJogos() {
         </div>
       </div>
 
-      {/* Filtros e Busca */}
       <div className="bg-[#272731] shadow rounded-lg border border-gray-700 p-4">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
-          {/* Search */}
           <div className="relative">
             <Search className="absolute inset-y-0 left-0 h-5 w-5 pl-3 text-gray-400" />
             <input
@@ -189,7 +185,6 @@ export default function AdminJogos() {
             />
           </div>
 
-          {/* Status Filter */}
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as FilterStatus)}
@@ -202,7 +197,6 @@ export default function AdminJogos() {
             <option value="ADIADO">Adiados</option>
           </select>
 
-          {/* Grupo Filter */}
           <select
             value={filterGrupo}
             onChange={(e) => setFilterGrupo(e.target.value === 'todos' ? 'todos' : parseInt(e.target.value))}
@@ -214,7 +208,6 @@ export default function AdminJogos() {
             ))}
           </select>
 
-          {/* Rodada Filter */}
           <select
             value={filterRodada}
             onChange={(e) => setFilterRodada(e.target.value === 'todas' ? 'todas' : parseInt(e.target.value))}
@@ -226,7 +219,6 @@ export default function AdminJogos() {
             ))}
           </select>
 
-          {/* View Mode */}
           <select
             value={viewMode}
             onChange={(e) => setViewMode(e.target.value as ViewMode)}
@@ -237,7 +229,6 @@ export default function AdminJogos() {
             <option value="table">Tabela</option>
           </select>
 
-          {/* Clear Filters */}
           <button
             onClick={() => {
               setSearchTerm('')
@@ -253,7 +244,6 @@ export default function AdminJogos() {
         </div>
       </div>
 
-      {/* Ações em Lote */}
       {selectedJogos.length > 0 && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-center justify-between">
@@ -292,7 +282,6 @@ export default function AdminJogos() {
         </div>
       )}
 
-      {/* Lista de Jogos */}
       <JogoManager
         jogos={jogosFiltrados}
         campeonato={campeonato}
@@ -302,7 +291,6 @@ export default function AdminJogos() {
         onRefresh={refetch}
       />
 
-      {/* Empty State */}
       {jogosFiltrados.length === 0 && (
         <div className="text-center py-12 bg-white shadow rounded-lg">
           <Calendar className="mx-auto h-12 w-12 text-gray-400" />

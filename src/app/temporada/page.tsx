@@ -1,40 +1,57 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { TeamChangesForm, TimeChange } from "@/components/TeamChangesForm"
-import { PlayerTransferForm, Transferencia } from "@/components/PlayerTransferForm"
+import { TeamChangesForm } from "@/components/TeamChangesForm"
+import { PlayerTransferForm } from "@/components/PlayerTransferForm"
 import Link from "next/link"
 import Image from "next/image"
-import { Time } from "@/types"
+import { TimeChange, Transferencia, TransferenciaTemporada } from "@/types"
 import { useIniciarTemporada } from '@/hooks/useTemporada'
 import { useTimes } from '@/hooks/useTimes'
 import { useJogadores } from '@/hooks/useJogadores'
+import { useTransferencias } from '@/hooks/useImportacao'
 
 export default function IniciarTemporadaPage() {
-  const [times, setTimes] = useState<Time[]>([]);
-  const [jogadores, setJogadores] = useState<any[]>([]);
   const [timeChanges, setTimeChanges] = useState<TimeChange[]>([]);
-  const [transferencias, setTransferencias] = useState<Transferencia[]>([]);
+  const [transferencias, setTransferencias] = useState<TransferenciaTemporada[]>([]);
   const [loading, setLoading] = useState(false);
-  const [loadingData, setLoadingData] = useState(true);
   const [message, setMessage] = useState("");
-
   const [currentSeason, setCurrentSeason] = useState("2024");
   const [targetSeason, setTargetSeason] = useState("2025");
+  const { data: times = [], isLoading: loadingTimes } = useTimes(currentSeason)
+  const { data: jogadores = [], isLoading: loadingJogadores } = useJogadores(currentSeason)
+  const iniciarTemporadaMutation = useIniciarTemporada()
+  const { data: transferenciasCarregadas, isLoading: loadingTransferencias } = useTransferencias(
+    currentSeason,
+    targetSeason
+  )
+
+  const isSubmitting = iniciarTemporadaMutation.isPending
+
+  useEffect(() => {
+    if (transferenciasCarregadas && transferenciasCarregadas.length > 0) {
+      setTransferencias(transferenciasCarregadas)
+    }
+  }, [transferenciasCarregadas])
 
 
-  const adicionarAlteracaoTime = (change: TimeChange) => {
+  const adicionarAlteracaoTime = (change: Omit<TimeChange, 'alteracoes'>) => {
+    const changeWithAlteracoes: TimeChange = {
+      ...change,
+      alteracoes: change
+    }
+
     const index = timeChanges.findIndex(tc => tc.timeId === change.timeId);
     if (index >= 0) {
       const updatedChanges = [...timeChanges];
-      updatedChanges[index] = { ...updatedChanges[index], ...change };
+      updatedChanges[index] = { ...updatedChanges[index], ...changeWithAlteracoes };
       setTimeChanges(updatedChanges);
     } else {
-      setTimeChanges([...timeChanges, change]);
+      setTimeChanges([...timeChanges, changeWithAlteracoes]);
     }
   };
 
-  const adicionarTransferencia = (transferencia: Transferencia) => {
+  const adicionarTransferencia = (transferencia: TransferenciaTemporada) => {
     const index = transferencias.findIndex(t => t.jogadorId === transferencia.jogadorId);
     if (index >= 0) {
       const updatedTransfers = [...transferencias];
@@ -57,18 +74,25 @@ export default function IniciarTemporadaPage() {
     setTransferencias(updatedTransfers);
   };
 
-  const { data: times = [] } = useTimes(currentSeason)
-  const { data: jogadores = [] } = useJogadores(currentSeason)
-  const iniciarTemporadaMutation = useIniciarTemporada()
+
 
   const handleSubmit = () => {
     iniciarTemporadaMutation.mutate({
       ano: targetSeason,
       alteracoes: { timeChanges, transferencias }
+    }, {
+      onSuccess: () => {
+        setMessage("Temporada iniciada com sucesso!")
+        setTimeChanges([])
+        setTransferencias([])
+      },
+      onError: (error) => {
+        setMessage(`Erro: ${error.message}`)
+      }
     })
   }
 
-  if (loadingData) {
+  if (loadingTimes || loadingJogadores) {
     return <div className="p-4 overflow-x-hidden bg-[#1C1C24] min-h-screen flex items-center justify-center">
       <p className="text-white text-xl">Carregando dados...</p>
     </div>;
@@ -197,7 +221,7 @@ export default function IniciarTemporadaPage() {
                   <div className="text-gray-400 text-sm mt-1">
                     {transfer.timeOrigemNome && (
                       <span>
-                        {transfer.timeOrigemNome} → {transfer.novoTimeNome}
+                        {transfer.timeOrigemNome} → {transfer.timeDestinoNome}
                       </span>
                     )}
                     {transfer.novoNumero && (
@@ -209,7 +233,7 @@ export default function IniciarTemporadaPage() {
                 </div>
                 <button
                   onClick={() => removerTransferencia(index)}
-                  className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition-colors"
+                  className="text-red-400 hover:text-red-300 text-sm"
                 >
                   Remover
                 </button>
@@ -222,10 +246,11 @@ export default function IniciarTemporadaPage() {
       <div className="flex justify-center mt-8">
         <button
           onClick={handleSubmit}
-          disabled={loading}
-          className="bg-[#63E300] text-black px-6 py-3 rounded-lg font-medium text-lg hover:bg-[#50B800] transition-colors disabled:bg-gray-600 disabled:text-gray-400"
+          disabled={isSubmitting || loadingTimes || loadingJogadores}
+          className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${isSubmitting ? 'bg-gray-600 cursor-not-allowed' : 'bg-[#63E300] hover:bg-[#50B800]'
+            }`}
         >
-          {loading ? "Processando..." : `Iniciar Temporada ${targetSeason}`}
+          {isSubmitting ? 'Processando...' : `Iniciar Temporada ${targetSeason}`}
         </button>
       </div>
     </div>

@@ -2,14 +2,13 @@
 
 import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { useCampeonato, useClassificacao, useDeleteCampeonato, useUpdateCampeonato } from '@/hooks/useCampeonatos'
+import { useCampeonato, useClassificacao, useDeleteCampeonato, useJogos, useUpdateCampeonato } from '@/hooks/useCampeonatos'
 import { Loading } from '@/components/ui/Loading'
 import { NoDataFound } from '@/components/ui/NoDataFound'
 import { ArrowLeft, Save, Trash2, Play, Pause, Settings, Calendar, Users, BarChart3, Trophy, CheckCircle, Clock } from 'lucide-react'
 import Link from 'next/link'
 import { CampeonatoForm } from '@/components/Admin/forms/CampeonatoForm'
 import { useTimes } from '@/hooks/queries'
-import { useJogos } from '@/hooks/useJogos.ts'
 
 type TabType = 'configuracoes' | 'grupos' | 'jogos' | 'classificacao'
 
@@ -33,9 +32,9 @@ export default function EditarCampeonato() {
     if (!campeonato) return
 
     try {
-      await updateMutation.mutateAsync({ 
-        id: campeonatoId, 
-        data: campeonato 
+      await updateMutation.mutateAsync({
+        id: campeonatoId,
+        data: campeonato
       })
       setIsEditing(false)
     } catch (error) {
@@ -117,7 +116,6 @@ export default function EditarCampeonato() {
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
       <div className="bg-[#272731] shadow-xl border-b border-gray-700">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-6">
@@ -144,7 +142,6 @@ export default function EditarCampeonato() {
             </div>
 
             <div className="flex items-center space-x-3">
-              {/* Status Actions */}
               {campeonato.status === 'NAO_INICIADO' && (
                 <button
                   onClick={() => handleStatusChange('EM_ANDAMENTO')}
@@ -165,7 +162,6 @@ export default function EditarCampeonato() {
                 </button>
               )}
 
-              {/* Edit/Save Toggle */}
               {activeTab === 'configuracoes' && (
                 <>
                   {isEditing ? (
@@ -197,7 +193,6 @@ export default function EditarCampeonato() {
                 </>
               )}
 
-              {/* Delete Button */}
               <button
                 onClick={handleDelete}
                 disabled={deleteMutation.isPending}
@@ -211,14 +206,13 @@ export default function EditarCampeonato() {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="bg-[#272731] shadow border-b border-gray-700">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <nav className="flex space-x-8" aria-label="Tabs">
             {tabs.map((tab) => {
               const Icon = tab.icon
               const isActive = activeTab === tab.id
-              
+
               if (tab.href && tab.id !== 'configuracoes') {
                 return (
                   <Link
@@ -241,11 +235,10 @@ export default function EditarCampeonato() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as TabType)}
-                  className={`${
-                    isActive
+                  className={`${isActive
                       ? 'border-[#63E300] text-[#63E300]'
                       : 'border-transparent text-gray-400 hover:text-white hover:border-gray-300'
-                  } whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium flex items-center transition-colors`}
+                    } whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium flex items-center transition-colors`}
                 >
                   <Icon className="h-5 w-5 mr-2" />
                   {tab.name}
@@ -261,7 +254,6 @@ export default function EditarCampeonato() {
         </div>
       </div>
 
-      {/* Content */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         {activeTab === 'configuracoes' && (
           <div className="space-y-6">
@@ -273,7 +265,6 @@ export default function EditarCampeonato() {
               times={times}
             />
 
-            {/* Informações Adicionais */}
             <div className="bg-[#272731] shadow rounded-lg border border-gray-700">
               <div className="px-4 py-5 sm:p-6">
                 <h3 className="text-lg leading-6 font-medium text-white mb-4">
@@ -342,7 +333,6 @@ export default function EditarCampeonato() {
                   </div>
                 </div>
 
-                {/* Histórico de Alterações */}
                 <div className="mt-6 pt-6 border-t border-gray-700">
                   <h4 className="text-md font-medium text-white mb-4">Histórico</h4>
                   <div className="space-y-3">
@@ -363,7 +353,7 @@ export default function EditarCampeonato() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-3 p-3 bg-[#1C1C24] rounded-lg">
                       <div className="p-2 bg-green-100 rounded-full">
                         <Settings className="w-4 h-4 text-green-600" />

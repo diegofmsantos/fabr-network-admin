@@ -10,7 +10,7 @@ interface NoDataFoundProps {
 
 export const NoDataFound: React.FC<NoDataFoundProps> = ({ type, temporada, entityName, onGoBack }) => {
   const isPlayer = type === 'player';
-  
+
   return (
     <div className="min-h-screen bg-[#ECECEC] flex items-center justify-center px-4">
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
@@ -22,7 +22,7 @@ export const NoDataFound: React.FC<NoDataFoundProps> = ({ type, temporada, entit
               <Users className="w-8 h-8 text-gray-400" />
             )}
           </div>
-          
+
           <div className="flex items-center justify-center gap-2 mb-2">
             <AlertCircle className="w-5 h-5 text-amber-500" />
             <h2 className="text-xl font-bold text-gray-900">
@@ -39,7 +39,7 @@ export const NoDataFound: React.FC<NoDataFoundProps> = ({ type, temporada, entit
             {isPlayer ? 'Este jogador' : 'Este time'} não está cadastrado na temporada{' '}
             <span className="font-semibold text-blue-600">{temporada}</span>.
           </p>
-          
+
           <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
             <Calendar className="w-4 h-4" />
             <span>Temporada {temporada}</span>

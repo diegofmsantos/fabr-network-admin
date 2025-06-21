@@ -137,7 +137,7 @@ export default function AdminClassificacao() {
         <div className="flex items-center gap-2">
           {trend && (
             <div className={`p-1 rounded ${trend === 'up' ? 'bg-green-100' :
-                trend === 'down' ? 'bg-red-100' : 'bg-gray-100'
+              trend === 'down' ? 'bg-red-100' : 'bg-gray-100'
               }`}>
               {trend === 'up' ? (
                 <TrendingUp className="w-3 h-3 text-green-600" />

@@ -49,7 +49,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-[#1C1C24] p-6">
-      {/* Header com botão de logout */}
       <header className="flex justify-center items-center mb-8">
         <h1 className="text-5xl text-[#63E300] font-extrabold italic leading-[55px] tracking-[-3px]">
           FABR NETWORK - FUTEBOL AMERICANO

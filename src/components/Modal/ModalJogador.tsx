@@ -1,11 +1,11 @@
 "use client"
 
 import { useState } from "react";
-import { atualizarJogador, deletarJogador } from "@/api/api";
 import { useRouter } from "next/navigation";
 import { estatisticasGroups } from "@/utils/stats";
 import { jogadorGroups } from "@/utils/jogador";
 import { Estatisticas, Jogador } from "@/types";
+import { useUpdateJogador, useDeleteJogador } from '@/hooks/useJogadores'
 
 export default function ModalJogador({
     jogador,
@@ -15,17 +15,21 @@ export default function ModalJogador({
     closeModal: () => void;
 }) {
     const router = useRouter();
-    
+
     const [formData, setFormData] = useState({
         ...jogador,
         altura: jogador.altura !== undefined ? String(jogador.altura).replace(".", ",") : "",
         temporada: jogador.times?.[0]?.temporada || "2025",
         estatisticas: jogador.estatisticas || {},
-        camisa: jogador.camisa 
+        camisa: jogador.camisa
     });
-    
+
     const [activeTab, setActiveTab] = useState<'info' | 'estatisticas'>('info');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const updateJogadorMutation = useUpdateJogador()
+    const deleteJogadorMutation = useDeleteJogador()
+
+    const isLoading = updateJogadorMutation.isPending || deleteJogadorMutation.isPending || isSubmitting
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -45,83 +49,77 @@ export default function ModalJogador({
         setFormData((prev) => {
             const estatisticas = { ...prev.estatisticas } as Estatisticas;
 
-            if (!estatisticas[groupKey]) { // @ts-ignore
+            if (!estatisticas[groupKey]) {
                 estatisticas[groupKey] = {};
-            }// @ts-ignore
-            estatisticas[groupKey][fieldKey] = value === "" 
-                ? 0 
+            }
+            estatisticas[groupKey][fieldKey] = value === ""
+                ? 0
                 : (fieldKey.startsWith("fg") ? value : Number(value));
 
             return { ...prev, estatisticas };
         });
     };
 
-    const handleSave = async () => {
-        setIsSubmitting(true);
-        try {
-            console.log("Iniciando atualização do jogador");
-            console.log("Valor da camisa antes do envio:", formData.camisa);
-            
-            const altura = formData.altura
-                ? Number(String(formData.altura).replace(',', '.'))
-                : jogador.altura;
+    const handleSave = () => {
+        const altura = formData.altura
+            ? Number(String(formData.altura).replace(',', '.'))
+            : jogador.altura;
 
-            const parsedValues = {
-                altura: altura,
-                peso: Number(formData.peso),
-                idade: Number(formData.idade),
-                experiencia: Number(formData.experiencia),
-                numero: Number(formData.numero)
-            };
+        const parsedValues = {
+            altura: altura,
+            peso: Number(formData.peso),
+            idade: Number(formData.idade),
+            experiencia: Number(formData.experiencia),
+            numero: Number(formData.numero)
+        };
 
-            const apiData = {
-                ...formData,         
-                ...parsedValues,   
-                timeId: jogador.timeId
-            };
-    
-            console.log("Dados completos enviados para API:", apiData);
+        const apiData = {
+            ...formData,
+            ...parsedValues,
+            timeId: jogador.timeId
+        };
 
-            const response = await atualizarJogador(apiData);
-            console.log("Resposta da API após atualização:", response);
-
-            closeModal();
-            router.refresh();
-        } catch (error) {
-            console.error("Erro ao atualizar jogador:", error);
-            alert("Ocorreu um erro ao atualizar o jogador. Verifique o console para mais detalhes.");
-        } finally {
-            setIsSubmitting(false);
-        }
+        updateJogadorMutation.mutate({
+            id: jogador.id,
+            data: apiData
+        }, {
+            onSuccess: () => {
+                closeModal();
+                router.refresh();
+            }
+        });
     };
 
     const handleDelete = async () => {
         if (confirm("Tem certeza que deseja excluir este jogador?")) {
-            setIsSubmitting(true);
-            try {
-                await deletarJogador(jogador.id);
-                closeModal();
-                router.refresh(); 
-            } catch (error) {
-                console.error("Erro ao excluir jogador:", error);
-            } finally {
-                setIsSubmitting(false);
-            }
+            deleteJogadorMutation.mutate(jogador.id, {
+                onSuccess: () => {
+                    closeModal(); if (confirm("Tem certeza que deseja excluir este jogador?")) {
+                        deleteJogadorMutation.mutate(jogador.id, {
+                            onSuccess: () => {
+                                closeModal();
+                                router.refresh();
+                            }
+                        });
+                    }
+                    router.refresh();
+                }
+            });
         }
     };
 
     return (
         <div className="fixed inset-0 z-50 overflow-hidden">
-            <div 
+            <div
                 className="fixed inset-0 bg-black/70 backdrop-blur-sm"
                 onClick={closeModal}
-                ></div>
+            ></div>
 
             <div className="absolute inset-12 bg-[#272731] rounded-xl shadow-lg overflow-hidden flex flex-col">
 
                 <div className="bg-[#1C1C24] px-6 py-4 flex justify-between items-center">
                     <div className="flex items-center">
-                        <div 
+                        <div
                             className="w-8 h-8 rounded-md mr-3 flex items-center justify-center bg-[#63E300]"
                         >
                             <span className="text-black font-bold">{formData.numero}</span>
@@ -130,7 +128,7 @@ export default function ModalJogador({
                             {formData.nome || 'Editar Jogador'}
                         </h2>
                     </div>
-                    
+
                     <button
                         className="text-gray-400 hover:text-white transition-colors"
                         onClick={closeModal}
@@ -145,25 +143,23 @@ export default function ModalJogador({
                     <div className="flex space-x-1">
                         <button
                             onClick={() => setActiveTab('info')}
-                            className={`px-4 py-3 text-sm font-medium transition-colors relative ${
-                                activeTab === 'info'
-                                    ? 'text-[#63E300]'
-                                    : 'text-gray-400 hover:text-white'
-                            }`}
+                            className={`px-4 py-3 text-sm font-medium transition-colors relative ${activeTab === 'info'
+                                ? 'text-[#63E300]'
+                                : 'text-gray-400 hover:text-white'
+                                }`}
                         >
                             Informações do Jogador
                             {activeTab === 'info' && (
                                 <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#63E300]"></span>
                             )}
                         </button>
-                        
+
                         <button
                             onClick={() => setActiveTab('estatisticas')}
-                            className={`px-4 py-3 text-sm font-medium transition-colors relative ${
-                                activeTab === 'estatisticas'
-                                    ? 'text-[#63E300]'
-                                    : 'text-gray-400 hover:text-white'
-                            }`}
+                            className={`px-4 py-3 text-sm font-medium transition-colors relative ${activeTab === 'estatisticas'
+                                ? 'text-[#63E300]'
+                                : 'text-gray-400 hover:text-white'
+                                }`}
                         >
                             Estatísticas
                             {activeTab === 'estatisticas' && (
@@ -244,14 +240,14 @@ export default function ModalJogador({
                                                         </div>
                                                     </div>
                                                     <div className="w-full bg-[#272731] rounded-full h-1.5">
-                                                        <div 
-                                                            className="bg-[#63E300] h-1.5 rounded-full" 
-                                                            style={{ 
+                                                        <div
+                                                            className="bg-[#63E300] h-1.5 rounded-full"
+                                                            style={{
                                                                 width: `${Math.min(
-                                                                    100, // @ts-ignore
-                                                                    (Number(formData.estatisticas[group.id as keyof Estatisticas]?.[field.id as any]) / 
-                                                                    (field.id.includes('jardasde') ? 500 : 100)) * 100
-                                                                )}%` 
+                                                                    100, 
+                                                                    (Number(formData.estatisticas[group.id as keyof Estatisticas]?.[field.id as any]) /
+                                                                        (field.id.includes('jardasde') ? 500 : 100)) * 100
+                                                                )}%`
                                                             }}
                                                         ></div>
                                                     </div>
@@ -268,7 +264,7 @@ export default function ModalJogador({
                 <div className="bg-[#1C1C24] px-6 py-4 border-t border-gray-800 flex justify-between">
                     <button
                         onClick={handleDelete}
-                        disabled={isSubmitting}
+                        disabled={isLoading}
                         className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                     >
                         {isSubmitting ? (
@@ -288,7 +284,7 @@ export default function ModalJogador({
                             </>
                         )}
                     </button>
-                    
+
                     <div className="space-x-3 flex">
                         <button
                             onClick={closeModal}
@@ -296,7 +292,7 @@ export default function ModalJogador({
                         >
                             Cancelar
                         </button>
-                        
+
                         <button
                             onClick={handleSave}
                             disabled={isSubmitting}
@@ -333,6 +329,6 @@ export default function ModalJogador({
                     to { opacity: 1; transform: translateY(0); }
                 }
             `}</style>
-            </div>
+        </div>
     );
 }

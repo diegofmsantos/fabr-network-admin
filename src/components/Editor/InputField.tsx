@@ -1,4 +1,4 @@
-interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {}
+interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> { }
 
 export const InputField = (props: InputFieldProps) => {
   return (

@@ -1,9 +1,10 @@
 "use client"
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Campeonato, Jogo, ClassificacaoGrupo, FiltroJogos, CriarCampeonatoRequest } from '@/types/campeonato'
 import { useNotifications } from '@/hooks/useNotifications'
 import { handleApiError } from '@/utils/errorHandler'
+import { FiltroJogos, Jogo } from '@/types'
+import { CampeonatosService } from '@/services/campeonatos.service'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
@@ -25,18 +26,7 @@ export function useGerarJogos() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (campeonatoId: number) => {
-      // ✅ CORRIGIR ROTA DE GERAR JOGOS:
-      const response = await fetch(`${API_BASE_URL}/campeonatos/campeonatos/${campeonatoId}/gerar-jogos`, {
-        method: 'POST',
-      })
-
-      if (!response.ok) {
-        throw new Error('Erro ao gerar jogos')
-      }
-
-      return response.json()
-    },
+    mutationFn: (campeonatoId: number) => CampeonatosService.gerarJogos(campeonatoId),
     onSuccess: (_, campeonatoId) => {
       queryClient.invalidateQueries({ queryKey: campeonatoQueryKeys.detail(campeonatoId) })
       queryClient.invalidateQueries({ queryKey: campeonatoQueryKeys.jogos({}) })
@@ -47,18 +37,7 @@ export function useGerarJogos() {
 export function useJogo(jogoId: number) {
   return useQuery({
     queryKey: [...campeonatoQueryKeys.all, 'jogo', jogoId] as const,
-    queryFn: async (): Promise<Jogo> => {
-      const response = await fetch(`${API_BASE_URL}/campeonatos/jogos/${jogoId}`)
-      
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error('Jogo não encontrado')
-        }
-        throw new Error('Erro ao buscar jogo')
-      }
-      
-      return response.json()
-    },
+    queryFn: () => CampeonatosService.getJogo(jogoId),
     enabled: !!jogoId,
     staleTime: 1000 * 60 * 2,
   })
@@ -113,23 +92,7 @@ export function useJogosRodada(campeonatoId: number, rodada: number) {
 export function useJogos(filters: FiltroJogos) {
   return useQuery({
     queryKey: campeonatoQueryKeys.jogos(filters),
-    queryFn: async (): Promise<Jogo[]> => {
-      const params = new URLSearchParams()
-      
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
-          params.append(key, String(value))
-        }
-      })
-
-      const response = await fetch(`${API_BASE_URL}/campeonatos/jogos?${params.toString()}`)
-      
-      if (!response.ok) {
-        throw new Error('Erro ao buscar jogos')
-      }
-      
-      return response.json()
-    },
+    queryFn: () => CampeonatosService.getJogos(filters),
     staleTime: 1000 * 60 * 2,
   })
 }
@@ -137,17 +100,7 @@ export function useJogos(filters: FiltroJogos) {
 export function useProximosJogos(campeonatoId: number, limit: number = 10) {
   return useQuery({
     queryKey: [...campeonatoQueryKeys.proximosJogos(campeonatoId), limit] as const,
-    queryFn: async (): Promise<Jogo[]> => {
-      const response = await fetch(
-        `${API_BASE_URL}/campeonatos/campeonatos/${campeonatoId}/proximos-jogos?limit=${limit}`
-      )
-      
-      if (!response.ok) {
-        throw new Error('Erro ao buscar próximos jogos')
-      }
-      
-      return response.json()
-    },
+    queryFn: () => CampeonatosService.getProximosJogos(campeonatoId, limit),
     enabled: !!campeonatoId,
     staleTime: 1000 * 60 * 5, 
   })
@@ -156,17 +109,7 @@ export function useProximosJogos(campeonatoId: number, limit: number = 10) {
 export function useUltimosResultados(campeonatoId: number, limit: number = 10) {
   return useQuery({
     queryKey: [...campeonatoQueryKeys.ultimosResultados(campeonatoId), limit] as const,
-    queryFn: async (): Promise<Jogo[]> => {
-      const response = await fetch(
-        `${API_BASE_URL}/campeonatos/campeonatos/${campeonatoId}/ultimos-resultados?limit=${limit}`
-      )
-      
-      if (!response.ok) {
-        throw new Error('Erro ao buscar últimos resultados')
-      }
-      
-      return response.json()
-    },
+    queryFn: () => CampeonatosService.getUltimosResultados(campeonatoId, limit),
     enabled: !!campeonatoId,
     staleTime: 1000 * 60 * 5, 
   })
@@ -177,20 +120,7 @@ export function useCreateJogo() {
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: async (data: Omit<Jogo, 'id'>): Promise<Jogo> => {
-      const response = await fetch(`${API_BASE_URL}/campeonatos/jogos`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      })
-
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({}))
-        throw handleApiError({ response, message: error.message })
-      }
-
-      return response.json()
-    },
+    mutationFn: (data: Omit<Jogo, 'id'>) => CampeonatosService.createJogo(data),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: campeonatoQueryKeys.jogos({}) })
       queryClient.invalidateQueries({ queryKey: campeonatoQueryKeys.detail(data.campeonatoId) })
@@ -215,25 +145,8 @@ export function useUpdateJogo() {
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: async ({ 
-      id, 
-      data 
-    }: { 
-      id: number; 
-      data: Partial<Jogo> 
-    }): Promise<Jogo> => {
-      const response = await fetch(`${API_BASE_URL}/campeonatos/jogos/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      })
-
-      if (!response.ok) {
-        throw handleApiError({ response })
-      }
-
-      return response.json()
-    },
+    mutationFn: ({ id, data }: { id: number; data: Partial<Jogo> }) =>
+      CampeonatosService.updateJogo(id, data),
     onSuccess: (data, { id }) => {
       // Atualizar cache do jogo específico
       queryClient.setQueryData([...campeonatoQueryKeys.all, 'jogo', id], data)
@@ -263,16 +176,7 @@ export function useDeleteJogo() {
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: async (jogoId: number): Promise<void> => {
-      const response = await fetch(`${API_BASE_URL}/campeonatos/jogos/${jogoId}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-      })
-
-      if (!response.ok) {
-        throw handleApiError({ response })
-      }
-    },
+    mutationFn: (jogoId: number) => CampeonatosService.deleteJogo(jogoId),
     onSuccess: (_, jogoId) => {
       queryClient.invalidateQueries({ queryKey: campeonatoQueryKeys.jogos({}) })
       queryClient.removeQueries({ queryKey: [...campeonatoQueryKeys.all, 'jogo', jogoId] })

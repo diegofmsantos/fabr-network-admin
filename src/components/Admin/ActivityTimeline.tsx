@@ -1,17 +1,7 @@
-// src/components/Admin/ActivityTimeline.tsx
 import React from 'react'
 import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { 
-  Trophy, 
-  Calendar, 
-  Users, 
-  BarChart3, 
-  AlertCircle, 
-  CheckCircle, 
-  Clock,
-  User
-} from 'lucide-react'
+import { Trophy, Calendar, Users, BarChart3, AlertCircle, CheckCircle, Clock, User } from 'lucide-react'
 
 interface Activity {
   id: string
@@ -27,9 +17,9 @@ interface ActivityTimelineProps {
   maxItems?: number
 }
 
-export const ActivityTimeline: React.FC<ActivityTimelineProps> = ({ 
-  activities, 
-  maxItems = 10 
+export const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
+  activities,
+  maxItems = 10
 }) => {
   const getActivityIcon = (tipo: string) => {
     switch (tipo) {
@@ -113,12 +103,12 @@ export const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
             <li key={activity.id}>
               <div className="relative pb-8">
                 {!isLast && (
-                  <span 
-                    className="absolute top-5 left-5 -ml-px h-full w-0.5 bg-gray-200" 
-                    aria-hidden="true" 
+                  <span
+                    className="absolute top-5 left-5 -ml-px h-full w-0.5 bg-gray-200"
+                    aria-hidden="true"
                   />
                 )}
-                
+
                 <div className="relative flex items-start space-x-3">
                   <div className="relative">
                     <div className={`flex h-10 w-10 items-center justify-center rounded-full ${colors.bg} ${colors.border} border-2`}>
@@ -127,7 +117,7 @@ export const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="min-w-0 flex-1">
                     <div>
                       <div className="text-sm">
@@ -140,9 +130,9 @@ export const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
                       </p>
                       <div className="mt-2 flex items-center space-x-2 text-xs text-gray-500">
                         <span>
-                          {formatDistanceToNow(new Date(activity.data), { 
-                            addSuffix: true, 
-                            locale: ptBR 
+                          {formatDistanceToNow(new Date(activity.data), {
+                            addSuffix: true,
+                            locale: ptBR
                           })}
                         </span>
                         {activity.usuario && (
@@ -163,7 +153,7 @@ export const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
           )
         })}
       </ul>
-      
+
       {activities.length > maxItems && (
         <div className="mt-4 text-center">
           <button className="text-sm text-blue-600 hover:text-blue-800">

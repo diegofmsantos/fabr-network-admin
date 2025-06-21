@@ -23,7 +23,7 @@ export const SystemHealth: React.FC = () => {
       <h3 className="text-lg font-medium text-[#63E300] mb-4">
         Status do Sistema
       </h3>
-      
+
       <div className="grid grid-cols-2 gap-4">
         {healthMetrics.map((metric) => {
           const Icon = metric.icon

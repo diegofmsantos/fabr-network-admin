@@ -4,16 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import Image from 'next/image'
-import { 
-  Trophy, 
-  Calendar, 
-  BarChart3, 
-  Settings, 
-  Users, 
-  Home,
-  ChevronDown,
-  ChevronRight
-} from 'lucide-react'
+import { Trophy, BarChart3, Home, ChevronDown, ChevronRight } from 'lucide-react'
 
 interface SidebarItem {
   id: string
@@ -63,8 +54,8 @@ export const AdminSidebar: React.FC = () => {
   const [expandedItems, setExpandedItems] = useState<string[]>(['campeonatos'])
 
   const toggleExpanded = (itemId: string) => {
-    setExpandedItems(prev => 
-      prev.includes(itemId) 
+    setExpandedItems(prev =>
+      prev.includes(itemId)
         ? prev.filter(id => id !== itemId)
         : [...prev, itemId]
     )
@@ -107,8 +98,8 @@ export const AdminSidebar: React.FC = () => {
           <Link
             href={item.href}
             className={`flex items-center px-3 py-2 text-md font-medium rounded-md transition-colors
-              ${active 
-                ? 'bg-[#373740] text-[#63E300]' 
+              ${active
+                ? 'bg-[#373740] text-[#63E300]'
                 : 'text-gray-300 hover:bg-[#373740] hover:text-[#63E300]'
               }`}
             style={{ paddingLeft: `${12 + level * 16}px` }}
@@ -130,7 +121,6 @@ export const AdminSidebar: React.FC = () => {
   return (
     <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 xl:pt-8">
       <div className="flex flex-col flex-grow bg-[#272731] border-r border-gray-700 pt-5 pb-4 overflow-y-auto">
-        {/* Logo */}
         <div className="flex items-center flex-shrink-0 px-4">
           <Link href="/admin" className="flex items-center">
             <Image
@@ -143,14 +133,12 @@ export const AdminSidebar: React.FC = () => {
           </Link>
         </div>
 
-        {/* Navigation */}
         <div className="mt-8 flex-grow flex flex-col">
           <nav className="flex-1 px-2 space-y-1">
             {sidebarItems.map(item => renderSidebarItem(item))}
           </nav>
         </div>
 
-        {/* Footer */}
         <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
           <div className="flex items-center">
             <div className="w-8 h-8 bg-[#1C1C24] rounded-full flex items-center justify-center">

@@ -1,34 +1,17 @@
-// src/components/Admin/RecentActivity.tsx
 import React from 'react'
 import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { 
-  Trophy, 
-  Calendar, 
-  Users, 
-  CheckCircle, 
-  AlertCircle, 
-  Clock, 
-  ExternalLink 
-} from 'lucide-react'
-
-interface RecentActivityItem {
-  id: string
-  type: string
-  message: string
-  timestamp: string
-  user?: string
-  link?: string
-}
+import { Trophy, Calendar, Users, CheckCircle, AlertCircle, Clock, ExternalLink } from 'lucide-react'
+import { RecentActivityItem } from '@/types'
 
 interface RecentActivityProps {
   activities: RecentActivityItem[]
   maxItems?: number
 }
 
-export const RecentActivity: React.FC<RecentActivityProps> = ({ 
-  activities, 
-  maxItems = 8 
+export const RecentActivity: React.FC<RecentActivityProps> = ({
+  activities,
+  maxItems = 8
 }) => {
   const getActivityIcon = (type: string) => {
     switch (type) {
@@ -87,7 +70,7 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
             Ver todas
           </button>
         </div>
-        
+
         {sortedActivities.length === 0 ? (
           <div className="text-center py-8">
             <Clock className="mx-auto h-8 w-8 text-gray-400 mb-3" />
@@ -96,27 +79,27 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
         ) : (
           <div className="space-y-3">
             {sortedActivities.map((activity) => (
-              <div 
-                key={activity.id} 
+              <div
+                key={activity.id}
                 className={`flex items-start space-x-3 p-3 rounded-lg ${getActivityBgColor(activity.type)} hover:shadow-sm transition-shadow duration-200`}
               >
                 <div className="flex-shrink-0 mt-0.5">
                   {getActivityIcon(activity.type)}
                 </div>
-                
+
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-gray-">
                     {activity.message}
                   </p>
-                  
+
                   <div className="mt-1 flex items-center space-x-2 text-xs text-gray-500">
                     <span>
-                      {formatDistanceToNow(new Date(activity.timestamp), { 
-                        addSuffix: true, 
-                        locale: ptBR 
+                      {formatDistanceToNow(new Date(activity.timestamp), {
+                        addSuffix: true,
+                        locale: ptBR
                       })}
                     </span>
-                    
+
                     {activity.user && (
                       <>
                         <span>•</span>
@@ -125,10 +108,10 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
                     )}
                   </div>
                 </div>
-                
+
                 {activity.link && (
                   <div className="flex-shrink-0">
-                    <a 
+                    <a
                       href={activity.link}
                       className="text-gray-400 hover:text-gray-600 transition-colors duration-200"
                     >
@@ -141,7 +124,7 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
           </div>
         )}
       </div>
-      
+
       {activities.length > maxItems && (
         <div className="bg-gray-50 px-6 py-3 border-t border-gray-200">
           <div className="text-center">

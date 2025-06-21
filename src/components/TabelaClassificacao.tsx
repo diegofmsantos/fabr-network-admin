@@ -2,18 +2,11 @@ import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ImageService } from '@/utils/services/ImageService'
-import { ClassificacaoGrupo } from '@/types'
+import { ClassificacaoGrupo, TabelaClassificacaoProps } from '@/types'
 
-interface TabelaClassificacaoProps {
-  classificacao: ClassificacaoGrupo[]
-  grupoNome?: string
-  showGroup?: boolean
-  compact?: boolean
-  temporada?: string
-}
 
-export const TabelaClassificacao: React.FC<TabelaClassificacaoProps> = ({ 
-  classificacao, 
+export const TabelaClassificacao: React.FC<TabelaClassificacaoProps> = ({
+  classificacao,
   grupoNome,
   showGroup = false,
   compact = false,
@@ -32,8 +25,8 @@ export const TabelaClassificacao: React.FC<TabelaClassificacaoProps> = ({
   }
 
   const getPositionColor = (posicao: number) => {
-    if (posicao <= 2) return 'text-green-600 font-bold' // Classificação direta
-    if (posicao <= 4) return 'text-blue-600 font-bold' // Repescagem
+    if (posicao <= 2) return 'text-green-600 font-bold'
+    if (posicao <= 4) return 'text-blue-600 font-bold'
     return 'text-gray-700'
   }
 
@@ -45,14 +38,12 @@ export const TabelaClassificacao: React.FC<TabelaClassificacaoProps> = ({
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
-      {/* Header da Tabela */}
       {grupoNome && (
         <div className="bg-gray-50 px-6 py-4 border-b">
           <h3 className="text-lg font-bold text-gray-900">{grupoNome}</h3>
         </div>
       )}
 
-      {/* Tabela */}
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-50">
@@ -101,20 +92,18 @@ export const TabelaClassificacao: React.FC<TabelaClassificacaoProps> = ({
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {classificacao.map((item, index) => (
-              <tr 
-                key={item.id} 
+              <tr
+                key={item.id}
                 className={`hover:bg-gray-50 transition-colors ${getPositionBg(item.posicao)}`}
               >
-                {/* Posição */}
                 <td className="px-4 py-4 whitespace-nowrap">
                   <span className={`text-sm font-medium ${getPositionColor(item.posicao)}`}>
                     {item.posicao}º
                   </span>
                 </td>
 
-                {/* Time */}
                 <td className="px-4 py-4 whitespace-nowrap">
-                  <Link 
+                  <Link
                     href={`/${item.time.nome}?temporada=${temporada}`}
                     className="flex items-center hover:text-blue-600 transition-colors"
                   >
@@ -139,14 +128,12 @@ export const TabelaClassificacao: React.FC<TabelaClassificacaoProps> = ({
                   </Link>
                 </td>
 
-                {/* Grupo (se showGroup) */}
                 {showGroup && (
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                     {item.grupo?.nome}
                   </td>
                 )}
 
-                {/* Estatísticas */}
                 <td className="px-4 py-4 whitespace-nowrap text-center text-sm text-gray-900">
                   {item.jogos}
                 </td>
@@ -173,8 +160,7 @@ export const TabelaClassificacao: React.FC<TabelaClassificacaoProps> = ({
                 <td className="px-4 py-4 whitespace-nowrap text-center text-sm font-bold text-gray-900">
                   {item.pontos}
                 </td>
-                
-                {/* Aproveitamento (se não compact) */}
+
                 {!compact && (
                   <td className="px-4 py-4 whitespace-nowrap text-center text-sm text-gray-600">
                     {formatAproveitamento(item.aproveitamento)}
@@ -186,7 +172,6 @@ export const TabelaClassificacao: React.FC<TabelaClassificacaoProps> = ({
         </table>
       </div>
 
-      {/* Legenda */}
       {!compact && (
         <div className="bg-gray-50 px-6 py-4 border-t">
           <div className="flex flex-wrap gap-4 text-xs text-gray-600">

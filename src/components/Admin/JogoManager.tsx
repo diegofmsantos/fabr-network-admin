@@ -105,7 +105,6 @@ export const JogoManager: React.FC<JogoManagerProps> = ({ jogos, campeonato, vie
     <div className={`bg-[#272731] rounded-lg border-4 border-gray-700 p-4 hover:shadow-md transition-shadow ${
       selectedJogos.includes(jogo.id) ? 'ring-2 ring-[#63E300]' : ''
     }`}>
-      {/* Header do Card */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <input
@@ -136,7 +135,6 @@ export const JogoManager: React.FC<JogoManagerProps> = ({ jogos, campeonato, vie
         </div>
       </div>
 
-      {/* Times */}
       <div className="space-y-3 mb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -173,7 +171,6 @@ export const JogoManager: React.FC<JogoManagerProps> = ({ jogos, campeonato, vie
         </div>
       </div>
 
-      {/* Informações */}
       <div className="space-y-2 text-sm text-gray-300">
         <div className="flex items-center gap-2">
           <Calendar className="w-4 h-4" />
@@ -187,7 +184,6 @@ export const JogoManager: React.FC<JogoManagerProps> = ({ jogos, campeonato, vie
         )}
       </div>
 
-      {/* Ações */}
       <div className="flex justify-end gap-2 mt-4 pt-3 border-t">
         <button
           onClick={() => setEditingJogo(jogo.id)}

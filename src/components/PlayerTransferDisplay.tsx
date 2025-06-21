@@ -1,5 +1,4 @@
-import { Time } from '@/types';
-import { Transferencia } from './PlayerTransferForm';
+import { Time, Transferencia } from '@/types';
 
 interface PlayerTransferDisplayProps {
   transferencias: Transferencia[];
@@ -7,13 +6,13 @@ interface PlayerTransferDisplayProps {
   onRemove: (index: number) => void;
 }
 
-export function PlayerTransferDisplay({ 
-  transferencias, 
-  times, 
-  onRemove 
+export function PlayerTransferDisplay({
+  transferencias,
+  times,
+  onRemove
 }: PlayerTransferDisplayProps) {
   if (transferencias.length === 0) return null;
-  
+
   return (
     <div className="mt-4 bg-[#272731] p-6 rounded-lg">
       <h3 className="text-lg font-bold text-white mb-2">Transferências Adicionadas</h3>

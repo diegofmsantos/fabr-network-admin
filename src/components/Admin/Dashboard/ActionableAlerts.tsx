@@ -6,7 +6,7 @@ export const ActionableAlerts: React.FC = () => {
   const { data: stats } = useAdminStats()
 
   const priorityAlerts = stats?.alertas?.filter(alert => alert.prioridade === 'alta') || []
-  
+
   if (priorityAlerts.length === 0) {
     return (
       <div className="bg-[#1C1C24] border border-[#63E300] rounded-lg p-6">
@@ -35,7 +35,7 @@ export const ActionableAlerts: React.FC = () => {
           </h3>
         </div>
       </div>
-      
+
       <div className="divide-y divide-gray-700">
         {priorityAlerts.map((alert) => (
           <div key={alert.id} className="p-6 hover:bg-[#1C1C24] transition-colors">

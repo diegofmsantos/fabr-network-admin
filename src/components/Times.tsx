@@ -3,10 +3,9 @@
 import { useForm, SubmitHandler, FieldError } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { TimeSchema } from "@/schemas/Time"
 import { JogadorSchema } from "@/schemas/Jogador"
-import { api, getTimes } from "@/api/api"
 import { FormField } from "@/components/Formulario/FormField"
 import get from "lodash/get"
 import ModalTime from "@/components/Modal/ModalTime";
@@ -18,7 +17,6 @@ import { HeaderGeneral } from "./HeaderGeneral"
 import { ImageService } from "@/utils/services/ImageService"
 import { Time } from "@/types"
 import { useTimes, useCreateTime, useUpdateTime, useDeleteTime } from '@/hooks/useTimes'
-
 
 type TimeFormData = z.infer<typeof TimeSchema>
 type JogadorFormData = z.infer<typeof JogadorSchema>
@@ -63,26 +61,24 @@ export const Times = () => {
     const [isJogadorModalOpen, setIsJogadorModalOpen] = useState(false)
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false)
     const [successMessage, setSuccessMessage] = useState("")
-    const [temporadaSelecionada, setTemporadaSelecionada] = useState("2024")
+    const [temporada, setTemporada] = useState("2024")
     const [jogadorTemporada, setJogadorTemporada] = useState("2024")
     const [activeTab, setActiveTab] = useState<'time' | 'jogador' | 'times-cadastrados'>('time')
     const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({})
+
     const { data: times = [], isLoading: loading, error } = useTimes(temporada)
     const createTimeMutation = useCreateTime()
     const updateTimeMutation = useUpdateTime()
     const deleteTimeMutation = useDeleteTime()
 
-    // Para criar time
     const handleCreateTime = (timeData: Omit<Time, 'id'>) => {
         createTimeMutation.mutate(timeData)
     }
 
-    // Para atualizar time
     const handleUpdateTime = (id: number, timeData: Partial<Time>) => {
         updateTimeMutation.mutate({ id, data: timeData })
     }
 
-    // Para deletar time
     const handleDeleteTime = (id: number) => {
         deleteTimeMutation.mutate(id)
     }
@@ -93,56 +89,37 @@ export const Times = () => {
         )
     }
 
-    const onSubmitTime: SubmitHandler<TimeFormData> = async (data) => {
-        try {
-            await api.post("/time", data)
-            setSuccessMessage("Time adicionado com sucesso!")
-            setIsSuccessModalOpen(true)
-            reset()
-            setIsSuccessModalOpen(false)
-        } catch (error) {
-            console.error("Erro ao adicionar time:", error)
-        }
+    const onSubmitTime: SubmitHandler<TimeFormData> = (data) => {
+        createTimeMutation.mutate(data, {
+            onSuccess: () => {
+                setSuccessMessage("Time adicionado com sucesso!")
+                setIsSuccessModalOpen(true)
+                reset()
+            }
+        })
     }
 
-    const onSubmitJogador: SubmitHandler<JogadorFormData> = async (data) => {
-        setIsSubmitting(true)
-
-        try {
-            const estatisticasFiltradas = Object.fromEntries(
-                Object.entries(data.estatisticas || {}).map(([group, stats]) => [
-                    group,
-                    removeEmptyFields(stats || {}),
-                ])
-            );
-
-            const jogadorData = {
-                ...data,
-                temporada: jogadorTemporada,
-                estatisticas: estatisticasFiltradas,
-            };
-
-            await api.post("/jogador", jogadorData);
-            setSuccessMessage("Jogador adicionado com sucesso!")
-            setIsSuccessModalOpen(true)
-            resetJogador()
-        } catch (error) {
-            console.error("Erro ao adicionar jogador:", error)
-        } finally {
-            setIsSubmitting(false)
-        }
-    }
-
-    const updateTime = (updatedTime: Time) => {
-        setTimes((prevTimes) =>
-            prevTimes.map((time) =>
-                time.id === updatedTime.id ? { ...time, ...updatedTime } : time
-            )
+    const onSubmitJogador: SubmitHandler<JogadorFormData> = (data) => {
+        const estatisticasFiltradas = Object.fromEntries(
+            Object.entries(data.estatisticas || {}).map(([group, stats]) => [
+                group,
+                removeEmptyFields(stats || {}),
+            ])
         )
-    }
 
-    const handleTemporadaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setTemporadaSelecionada(e.target.value);
+        const jogadorData = {
+            ...data,
+            temporada: jogadorTemporada,
+            estatisticas: estatisticasFiltradas,
+        }
+
+        createJogadorMutation.mutate(jogadorData, {
+            onSuccess: () => {
+                setSuccessMessage("Jogador adicionado com sucesso!")
+                setIsSuccessModalOpen(true)
+                resetJogador()
+            }
+        })
     }
 
     const toggleGroup = (groupId: string) => {
