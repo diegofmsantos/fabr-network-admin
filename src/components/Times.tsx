@@ -11,12 +11,13 @@ import get from "lodash/get"
 import ModalTime from "@/components/Modal/ModalTime";
 import ModalJogador from "@/components/Modal/ModalJogador";
 import ModalSucesso from "./Modal/ModalSucesso"
-import { camposJogador, camposNumericosJogador, camposTime, estatisticas } from "../utils/campos"
+import { camposJogador, camposTime, estatisticas } from "../utils/campos"
 import Image from "next/image"
 import { HeaderGeneral } from "./HeaderGeneral"
 import { ImageService } from "@/utils/services/ImageService"
-import { Time } from "@/types"
+import { Time, Estatisticas, Jogador } from "@/types"
 import { useTimes, useCreateTime, useUpdateTime, useDeleteTime } from '@/hooks/useTimes'
+import { useCreateJogador } from '@/hooks/useJogadores'
 
 type TimeFormData = z.infer<typeof TimeSchema>
 type JogadorFormData = z.infer<typeof JogadorSchema>
@@ -30,7 +31,7 @@ export const Times = () => {
     } = useForm<TimeFormData>({
         resolver: zodResolver(TimeSchema),
         defaultValues: {
-            temporada: "2024"
+            temporada: "2025"
         }
     })
 
@@ -54,34 +55,21 @@ export const Times = () => {
         },
     })
 
-    const [isSubmitting, setIsSubmitting] = useState(false)
     const [selectedTime, setSelectedTime] = useState<Time | null>(null)
-    const [selectedJogador, setSelectedJogador] = useState<any | null>(null)
+    const [selectedJogador, setSelectedJogador] = useState<Jogador | null>(null)
     const [isTimeModalOpen, setIsTimeModalOpen] = useState(false)
     const [isJogadorModalOpen, setIsJogadorModalOpen] = useState(false)
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false)
     const [successMessage, setSuccessMessage] = useState("")
-    const [temporada, setTemporada] = useState("2024")
-    const [jogadorTemporada, setJogadorTemporada] = useState("2024")
-    const [activeTab, setActiveTab] = useState<'time' | 'jogador' | 'times-cadastrados'>('time')
+    const [temporada, setTemporada] = useState("2025")
+    const [jogadorTemporada, setJogadorTemporada] = useState("2025")
+    const [activeTab, setActiveTab] = useState<'time' | 'jogador' | 'times-cadastrados'>('times-cadastrados')
     const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({})
 
+    // Hooks para operações
     const { data: times = [], isLoading: loading, error } = useTimes(temporada)
     const createTimeMutation = useCreateTime()
-    const updateTimeMutation = useUpdateTime()
-    const deleteTimeMutation = useDeleteTime()
-
-    const handleCreateTime = (timeData: Omit<Time, 'id'>) => {
-        createTimeMutation.mutate(timeData)
-    }
-
-    const handleUpdateTime = (id: number, timeData: Partial<Time>) => {
-        updateTimeMutation.mutate({ id, data: timeData })
-    }
-
-    const handleDeleteTime = (id: number) => {
-        deleteTimeMutation.mutate(id)
-    }
+    const createJogadorMutation = useCreateJogador()
 
     const removeEmptyFields = (obj: any) => {
         return Object.fromEntries(
@@ -90,7 +78,15 @@ export const Times = () => {
     }
 
     const onSubmitTime: SubmitHandler<TimeFormData> = (data) => {
-        createTimeMutation.mutate(data, {
+        // Criar dados compatíveis com Omit<Time, 'id'>
+        const timeData = {
+            ...data,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            titulos: data.titulos ? [data.titulos] : []
+        } as Omit<Time, 'id'>
+        
+        createTimeMutation.mutate(timeData, {
             onSuccess: () => {
                 setSuccessMessage("Time adicionado com sucesso!")
                 setIsSuccessModalOpen(true)
@@ -100,17 +96,95 @@ export const Times = () => {
     }
 
     const onSubmitJogador: SubmitHandler<JogadorFormData> = (data) => {
-        const estatisticasFiltradas = Object.fromEntries(
-            Object.entries(data.estatisticas || {}).map(([group, stats]) => [
-                group,
-                removeEmptyFields(stats || {}),
-            ])
-        )
+        // Criar estrutura de estatísticas com tipagem correta
+        const estatisticasCompletas: Estatisticas = {
+            passe: {
+                passes_completos: 0,
+                passes_tentados: 0,
+                jardas_de_passe: 0,
+                td_passados: 0,
+                interceptacoes_sofridas: 0,
+                sacks_sofridos: 0,
+                fumble_de_passador: 0
+            },
+            corrida: {
+                corridas: 0,
+                jardas_corridas: 0,
+                tds_corridos: 0,
+                fumble_de_corredor: 0
+            },
+            recepcao: {
+                recepcoes: 0,
+                alvo: 0,
+                jardas_recebidas: 0,
+                tds_recebidos: 0
+            },
+            retorno: {
+                retornos: 0,
+                jardas_retornadas: 0,
+                td_retornados: 0
+            },
+            defesa: {
+                tackles_totais: 0,
+                tackles_for_loss: 0,
+                sacks_forcado: 0,
+                fumble_forcado: 0,
+                interceptacao_forcada: 0,
+                passe_desviado: 0,
+                safety: 0,
+                td_defensivo: 0
+            },
+            kicker: {
+                xp_bons: 0,
+                tentativas_de_xp: 0,
+                fg_bons: 0,
+                tentativas_de_fg: 0,
+                fg_mais_longo: 0
+            },
+            punter: {
+                punts: 0,
+                jardas_de_punt: 0
+            }
+        }
 
-        const jogadorData = {
-            ...data,
-            temporada: jogadorTemporada,
-            estatisticas: estatisticasFiltradas,
+        // Preencher com dados do formulário
+        if (data.estatisticas) {
+            const grupos: Array<keyof Estatisticas> = ['passe', 'corrida', 'recepcao', 'retorno', 'defesa', 'kicker', 'punter']
+            
+            grupos.forEach(grupo => {
+                if (data.estatisticas![grupo]) {
+                    const estatisticasGrupo = data.estatisticas![grupo] as any
+                    const estatisticasCompleta = estatisticasCompletas[grupo] as any
+                    
+                    Object.keys(estatisticasGrupo).forEach(campo => {
+                        if (estatisticasGrupo[campo] !== undefined && estatisticasGrupo[campo] !== '') {
+                            estatisticasCompleta[campo] = Number(estatisticasGrupo[campo]) || 0
+                        }
+                    })
+                }
+            })
+        }
+
+        // Criar dados do jogador SEM classificacoes (será calculado pelo backend)
+        const jogadorData: Omit<Jogador, 'id'> = {
+            nome: data.nome || '',
+            posicao: data.posicao || '',
+            setor: data.setor || 'Ataque',
+            experiencia: data.experiencia || 0,
+            idade: data.idade || 0,
+            altura: data.altura || 0,
+            peso: data.peso || 0,
+            instagram: data.instagram || '',
+            instagram2: data.instagram2 || '',
+            cidade: data.cidade || '',
+            nacionalidade: data.nacionalidade || '',
+            timeFormador: data.timeFormador || '',
+            timeId: data.timeId,
+            numero: data.numero,
+            camisa: data.camisa || '',
+            estatisticas: estatisticasCompletas,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
         }
 
         createJogadorMutation.mutate(jogadorData, {
@@ -118,16 +192,26 @@ export const Times = () => {
                 setSuccessMessage("Jogador adicionado com sucesso!")
                 setIsSuccessModalOpen(true)
                 resetJogador()
+            },
+            onError: (error) => {
+                console.error('Erro ao criar jogador:', error)
+                setSuccessMessage("Erro ao adicionar jogador!")
+                setIsSuccessModalOpen(true)
             }
         })
+    }
+
+    const updateTime = (updatedTime: Time) => {
+        // Com TanStack Query, a atualização da lista é automática
+        setIsTimeModalOpen(false)
     }
 
     const toggleGroup = (groupId: string) => {
         setExpandedGroups(prev => ({
             ...prev,
             [groupId]: !prev[groupId]
-        }));
-    };
+        }))
+    }
 
     return (
         <div className="bg-[#1C1C24] min-h-screen">
@@ -138,36 +222,37 @@ export const Times = () => {
                     <nav className="flex justify-between">
                         <button
                             onClick={() => setActiveTab('time')}
-                            className={`px-4 py-4 text-xl font-extrabold italic leading-[55px] tracking-[-1px] transition-colors relative ${activeTab === 'time'
-                                ? 'text-[#63E300]'
-                                : 'text-gray-400 hover:text-white'
-                                }`}
+                            className={`px-4 py-4 text-xl font-extrabold italic leading-[55px] tracking-[-1px] transition-colors relative ${
+                                activeTab === 'time'
+                                    ? 'text-[#63E300]'
+                                    : 'text-gray-400 hover:text-white'
+                            }`}
                         >
                             ADICIONAR TIME
                             {activeTab === 'time' && (
                                 <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#63E300]"></span>
                             )}
                         </button>
-
                         <button
                             onClick={() => setActiveTab('jogador')}
-                            className={`px-4 py-4 text-xl font-extrabold italic leading-[55px] tracking-[-1px] transition-colors relative ${activeTab === 'jogador'
-                                ? 'text-[#63E300]'
-                                : 'text-gray-400 hover:text-white'
-                                }`}
+                            className={`px-4 py-4 text-xl font-extrabold italic leading-[55px] tracking-[-1px] transition-colors relative ${
+                                activeTab === 'jogador'
+                                    ? 'text-[#63E300]'
+                                    : 'text-gray-400 hover:text-white'
+                            }`}
                         >
                             ADICIONAR JOGADOR
                             {activeTab === 'jogador' && (
                                 <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#63E300]"></span>
                             )}
                         </button>
-
                         <button
                             onClick={() => setActiveTab('times-cadastrados')}
-                            className={`px-4 py-4 text-xl font-extrabold italic leading-[55px] tracking-[-1px] transition-colors relative ${activeTab === 'times-cadastrados'
-                                ? 'text-[#63E300]'
-                                : 'text-gray-400 hover:text-white'
-                                }`}
+                            className={`px-4 py-4 text-xl font-extrabold italic leading-[55px] tracking-[-1px] transition-colors relative ${
+                                activeTab === 'times-cadastrados'
+                                    ? 'text-[#63E300]'
+                                    : 'text-gray-400 hover:text-white'
+                            }`}
                         >
                             TIMES CADASTRADOS
                             {activeTab === 'times-cadastrados' && (
@@ -184,7 +269,7 @@ export const Times = () => {
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-2xl font-bold text-white">Adicionar Time</h2>
                             <span className="bg-[#272731] px-3 py-1 rounded-full text-xs text-gray-400">
-                                Temporada {temporadaSelecionada}
+                                Temporada {temporada}
                             </span>
                         </div>
 
@@ -202,39 +287,21 @@ export const Times = () => {
                                         error={errors[field.id as keyof TimeFormData] as FieldError | undefined}
                                     />
                                 ))}
-                                <FormField
-                                    label="Temporada"
-                                    id="temporada"
-                                    register={register("temporada")}
-                                    error={errors.temporada as FieldError | undefined}
-                                    type="select"
-                                    options={[
-                                        { value: "2024", label: "2024" },
-                                        { value: "2025", label: "2025" },
-                                    ]}
-                                />
-                                {(["nacionais", "conferencias", "estaduais"] as const).map((titulo) => (
-                                    <FormField
-                                        key={`titulos.0.${titulo}`}
-                                        label={`Títulos ${titulo.charAt(0).toUpperCase() + titulo.slice(1)}`}
-                                        id={`titulos.0.${titulo}`}
-                                        register={register(`titulos.0.${titulo}`)}
-                                        error={errors.titulos?.[0]?.[titulo]}
-                                    />
-                                ))}
                             </div>
 
                             <div className="bg-[#2C2C34] py-4 px-6 flex justify-end">
                                 <button
                                     type="submit"
-                                    className="bg-[#63E300] text-black px-6 py-2 rounded-lg font-medium hover:bg-[#50B800] transition-colors"
+                                    disabled={createTimeMutation.isPending}
+                                    className="bg-[#63E300] text-black px-6 py-2 rounded-lg font-medium hover:bg-[#50B800] transition-colors disabled:opacity-50"
                                 >
-                                    Adicionar Time
+                                    {createTimeMutation.isPending ? 'Criando...' : 'Adicionar Time'}
                                 </button>
                             </div>
                         </form>
                     </div>
                 )}
+
                 {activeTab === 'jogador' && (
                     <div className="animate-fadeIn">
                         <div className="flex justify-between items-center mb-6">
@@ -262,85 +329,62 @@ export const Times = () => {
                                             label="Time"
                                             id="timeId"
                                             register={registerJogador("timeId", {
-                                                setValueAs: (v) => (v === "" ? undefined : parseInt(v)),
+                                                setValueAs: (v) => (v === "" ? undefined : Number(v)),
                                             })}
                                             error={jogadorErrors.timeId as FieldError | undefined}
-                                            type="select"
-                                            options={times
-                                                .filter((time) => time.id !== undefined && time.nome !== undefined)
-                                                .map((time) => ({ value: time.id as number, label: time.nome as string }))}
+                                            isSelect={true}
+                                            options={[
+                                                { value: "", label: "Selecione um time" },
+                                                ...times.map((time) => ({
+                                                    value: time.id?.toString() || "",
+                                                    label: `${time.nome} (${time.sigla})`
+                                                }))
+                                            ]}
                                         />
-
-                                        <div className="mb-1">
-                                            <label className="block text-white text-sm font-medium mb-2">
-                                                Temporada
-                                            </label>
-                                            <select
-                                                value={jogadorTemporada}
-                                                onChange={(e) => setJogadorTemporada(e.target.value)}
-                                                className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
-                                            >
-                                                <option value="2024">2024</option>
-                                                <option value="2025">2025</option>
-                                            </select>
-                                        </div>
-
+                                        
                                         {camposJogador.map((field) => (
                                             <FormField
                                                 key={field.id}
                                                 label={field.label}
                                                 id={field.id}
-                                                register={registerJogador(field.id)}
-                                                error={jogadorErrors[field.id] as FieldError | undefined}
-                                                type={field.type === "number" || field.type === "select" ? field.type : "text"}
-                                                options={field.options}
-                                            />
-                                        ))}
-
-                                        {camposNumericosJogador.map((field) => (
-                                            <FormField
-                                                key={field.id}
-                                                label={field.label}
-                                                id={field.id}
-                                                register={registerJogador(field.id, {
-                                                    setValueAs: (v) => (v === "" ? undefined : parseFloat(v)),
-                                                })}
-                                                error={jogadorErrors[field.id] as FieldError | undefined}
-                                                type="number"
-                                                step={field.id === "altura" ? "0.01" : "1"}
+                                                register={registerJogador(field.id as keyof JogadorFormData)}
+                                                error={jogadorErrors[field.id as keyof JogadorFormData] as FieldError | undefined}
+                                                isSelect={field.options ? true : false}
+                                                options={field.options?.map(option => ({
+                                                    value: option,
+                                                    label: option
+                                                }))}
                                             />
                                         ))}
                                     </div>
 
-                                    <div className="border-t border-gray-700 pt-6 pb-2">
-                                        <h3 className="text-xl font-bold text-white mb-4">Estatísticas do Jogador</h3>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-5">
+                                    <div className="space-y-6">
+                                        <h3 className="text-lg font-semibold text-white">Estatísticas</h3>
                                         {estatisticas.map((grupo) => (
-                                            <div key={grupo.group} className="bg-[#1C1C24] p-4 rounded-lg">
+                                            <div key={grupo.group} className="border border-gray-600 rounded-lg overflow-hidden">
                                                 <button
                                                     type="button"
                                                     onClick={() => toggleGroup(grupo.group)}
-                                                    className="w-full text-left flex justify-between items-center text-lg font-bold mb-2 text-[#63E300]"
+                                                    className="w-full flex items-center justify-between p-4 bg-[#2C2C34] hover:bg-[#3C3C44] transition-colors"
                                                 >
-                                                    <span>{grupo.group.toUpperCase()}</span>
+                                                    <span className="text-white font-medium">{grupo.title}</span>
                                                     <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        className={`h-5 w-5 transition-transform ${expandedGroups[grupo.group] ? 'transform rotate-180' : ''}`}
+                                                        className={`w-5 h-5 text-gray-400 transition-transform ${
+                                                            expandedGroups[grupo.group] ? 'rotate-180' : ''
+                                                        }`}
                                                         fill="none"
-                                                        viewBox="0 0 24 24"
                                                         stroke="currentColor"
+                                                        viewBox="0 0 24 24"
                                                     >
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                                     </svg>
                                                 </button>
-
                                                 <div
-                                                    className={`transition-all duration-300 overflow-hidden ${expandedGroups[grupo.group]
-                                                        ? 'max-h-[1000px] opacity-100'
-                                                        : 'max-h-0 opacity-0'
-                                                        }`}
+                                                    className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                                                        expandedGroups[grupo.group]
+                                                            ? 'max-h-[1000px] opacity-100'
+                                                            : 'max-h-0 opacity-0'
+                                                    }`}
                                                 >
                                                     {grupo.fields.map((field) => (
                                                         <FormField
@@ -366,20 +410,10 @@ export const Times = () => {
                                 <div className="bg-[#2C2C34] py-4 px-6 flex justify-end">
                                     <button
                                         type="submit"
-                                        disabled={isSubmitting}
+                                        disabled={createJogadorMutation.isPending}
                                         className="bg-[#63E300] text-black px-6 py-2 rounded-lg font-medium hover:bg-[#50B800] transition-colors disabled:bg-gray-600 disabled:text-gray-400"
                                     >
-                                        {isSubmitting ? (
-                                            <span className="flex items-center">
-                                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                </svg>
-                                                Adicionando...
-                                            </span>
-                                        ) : (
-                                            "Adicionar Jogador"
-                                        )}
+                                        {createJogadorMutation.isPending ? 'Criando...' : 'Adicionar Jogador'}
                                     </button>
                                 </div>
                             </form>
@@ -391,9 +425,16 @@ export const Times = () => {
                     <div className="animate-fadeIn">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-2xl font-bold text-white">Times Cadastrados</h2>
-                            <span className="bg-[#272731] px-3 py-1 rounded-full text-xs text-gray-400">
-                                Temporada {temporadaSelecionada}
-                            </span>
+                            <div className="flex items-center gap-4">
+                                <select
+                                    value={temporada}
+                                    onChange={(e) => setTemporada(e.target.value)}
+                                    className="bg-[#272731] border border-gray-600 rounded-lg text-white px-3 py-2"
+                                >
+                                    <option value="2024">Temporada 2024</option>
+                                    <option value="2025">Temporada 2025</option>
+                                </select>
+                            </div>
                         </div>
 
                         {loading ? (
@@ -403,75 +444,56 @@ export const Times = () => {
                                     <p className="text-gray-400">Carregando times...</p>
                                 </div>
                             </div>
-                        ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 py-10 gap-5">
+                        ) : times.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                 {times.map((time) => (
                                     <div
                                         key={time.id}
+                                        className="bg-[#272731] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105"
                                         onClick={() => {
                                             setSelectedTime(time);
                                             setIsTimeModalOpen(true);
                                         }}
-                                        className="bg-[#272731] hover:border hover:border-[#63E300] rounded-xl shadow-lg overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1 group"
-                                        style={{
-                                            borderLeft: `4px solid ${time.cor || '#63E300'}`
-                                        }}
                                     >
-                                        <div className="p-3">
-                                            <div className="flex justify-between items-start mb-4">
-                                                <Image
-                                                    src={ImageService.getTeamLogo(time.nome || '')}
-                                                    alt={`Logo ${time.nome}`}
-                                                    width={40}
-                                                    height={40}
-                                                    className="rounded"
-                                                    onError={(e) => ImageService.handleTeamLogoError(e, time.nome || '')}
-                                                />
-                                                <h3 className="text-xl font-bold text-white group-hover:text-[#63E300] transition-colors">
-                                                    {time.nome}
-                                                </h3>
-                                                <span className="text-xs font-medium bg-[#1C1C24] text-gray-400 px-2 py-1 rounded">
-                                                    {time.sigla}
+                                        <div className="p-6">
+                                            <div className="flex items-center justify-between mb-4">
+                                                <div
+                                                    className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-lg"
+                                                    style={{ backgroundColor: time.cor || '#63E300' }}
+                                                >
+                                                    {time.sigla?.substring(0, 2) || 'T'}
+                                                </div>
+                                                <span className="text-xs text-gray-400 bg-[#1C1C24] px-2 py-1 rounded">
+                                                    {time.temporada}
                                                 </span>
                                             </div>
-
-                                            <div className="space-y-2 text-gray-400 text-sm">
-                                                <div className="flex items-center">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                    </svg>
-                                                    {time.cidade}
+                                            
+                                            <h3 className="text-white font-bold text-lg mb-2 line-clamp-2">
+                                                {time.nome}
+                                            </h3>
+                                            
+                                            <div className="space-y-2 text-sm text-gray-400">
+                                                <div className="flex justify-between">
+                                                    <span>Sigla:</span>
+                                                    <span className="text-white">{time.sigla}</span>
                                                 </div>
-                                                <div className="flex items-center">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                    </svg>
-                                                    {time.temporada}
+                                                <div className="flex justify-between">
+                                                    <span>Cidade:</span>
+                                                    <span className="text-white">{time.cidade}</span>
                                                 </div>
-                                                <div className="flex items-center">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                                    </svg>
-                                                    {time.jogadores?.length || 0} jogadores
+                                                <div className="flex justify-between">
+                                                    <span>Jogadores:</span>
+                                                    <span className="text-white">{time._count?.jogadores || 0}</span>
                                                 </div>
                                             </div>
-                                        </div>
-
-                                        <div className="bg-[#1C1C24] px-5 py-3 flex justify-end">
-                                            <button className="text-xs text-[#63E300] font-medium hover:text-white transition-colors">
-                                                Ver detalhes
-                                            </button>
                                         </div>
                                     </div>
                                 ))}
                             </div>
-                        )}
-
-                        {times.length === 0 && !loading && (
-                            <div className="bg-[#272731] rounded-xl p-10 text-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-gray-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        ) : (
+                            <div className="bg-[#272731] rounded-xl p-12 text-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-gray-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 <p className="text-gray-400 mb-4">Nenhum time cadastrado para esta temporada</p>
                                 <button
@@ -508,7 +530,7 @@ export const Times = () => {
             {isSuccessModalOpen && (
                 <ModalSucesso
                     mensagem={successMessage}
-                    onClose={() => setIsSuccessModalOpen(true)}
+                    onClose={() => setIsSuccessModalOpen(false)}
                 />
             )}
 
@@ -520,6 +542,13 @@ export const Times = () => {
                 @keyframes fadeIn {
                     from { opacity: 0; transform: translateY(10px); }
                     to { opacity: 1; transform: translateY(0); }
+                }
+                
+                .line-clamp-2 {
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
                 }
             `}</style>
         </div>

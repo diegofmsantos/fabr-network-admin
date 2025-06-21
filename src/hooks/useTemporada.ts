@@ -1,4 +1,3 @@
-// src/hooks/useTemporada.ts
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { BaseService } from '@/services/base.service'
 import { queryKeys } from './queryKeys'

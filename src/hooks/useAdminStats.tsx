@@ -1,4 +1,3 @@
-// src/hooks/useAdminStats.ts
 import { useQuery } from '@tanstack/react-query'
 import { BaseService } from '@/services/base.service'
 import { queryKeys } from './queryKeys'
@@ -12,21 +11,18 @@ class AdminStatsService extends BaseService {
 }
 
 export function useAdminStats(params?: AdminStatsParams | string) {
-  // Suporte para ambos os formatos: objeto ou string (temporada)
   const queryParams = typeof params === 'string' ? { temporada: params } : params || {}
 
   return useQuery({
     queryKey: queryKeys.admin.stats(queryParams),
     queryFn: () => AdminStatsService.getAdminStats(queryParams),
-    staleTime: 1000 * 60 * 5, // 5 minutos
-    gcTime: 1000 * 60 * 10,   // 10 minutos
+    staleTime: 1000 * 60 * 5, 
+    gcTime: 1000 * 60 * 10,   
     retry: 2,
     refetchOnWindowFocus: false,
     
-    // Tratamento de erro: se não houver rota implementada, retorna dados vazios
     throwOnError: false,
     
-    // Se der erro 404, considera como dados não disponíveis
     meta: {
       errorHandler: (error: any) => {
         if (error.message?.includes('404') || error.message?.includes('não encontrado')) {

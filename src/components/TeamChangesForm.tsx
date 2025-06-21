@@ -13,7 +13,7 @@ export function TeamChangesForm({ times, onAddChange }: TeamChangesProps) {
   const handleSelectTime = (id: string) => {
     const timeId = id ? Number(id) : "";
     setSelectedTime(timeId);
-    
+
     if (timeId) {
       const time = times.find(t => t.id === Number(timeId));
       if (time) {
@@ -38,24 +38,25 @@ export function TeamChangesForm({ times, onAddChange }: TeamChangesProps) {
   };
 
   const handleSubmit = () => {
+
     if (!selectedTime) return;
-    
+
     const timeExistente = times.find(t => t.id === Number(selectedTime));
     if (!timeExistente) return;
-    
+
     const alteracoes: Partial<TimeChange> = {};
     let temAlteracoes = false;
-    
+
     if (timeForm.nome && timeForm.nome !== timeExistente.nome) {
       alteracoes.nome = timeForm.nome;
       temAlteracoes = true;
     }
-    
+
     if (timeForm.sigla && timeForm.sigla !== timeExistente.sigla) {
       alteracoes.sigla = timeForm.sigla;
       temAlteracoes = true;
     }
-    
+
     if (timeForm.cor && timeForm.cor !== timeExistente.cor) {
       alteracoes.cor = timeForm.cor;
       temAlteracoes = true;
@@ -80,38 +81,34 @@ export function TeamChangesForm({ times, onAddChange }: TeamChangesProps) {
       alteracoes.capacete = timeForm.capacete;
       temAlteracoes = true;
     }
-    
+
     if (timeForm.presidente && timeForm.presidente !== timeExistente.presidente) {
       alteracoes.presidente = timeForm.presidente;
       temAlteracoes = true;
     }
-    
+
     if (timeForm.head_coach && timeForm.head_coach !== timeExistente.head_coach) {
       alteracoes.head_coach = timeForm.head_coach;
       temAlteracoes = true;
     }
 
-    if (timeForm.instagram_coach && timeForm.instagram_coach !== timeExistente.instagram_coach) {
-      alteracoes.instagram_coach = timeForm.instagram_coach;
-      temAlteracoes = true;
-    }
-    
     if (timeForm.coord_ofen && timeForm.coord_ofen !== timeExistente.coord_ofen) {
       alteracoes.coord_ofen = timeForm.coord_ofen;
       temAlteracoes = true;
     }
-    
+
     if (timeForm.coord_defen && timeForm.coord_defen !== timeExistente.coord_defen) {
       alteracoes.coord_defen = timeForm.coord_defen;
       temAlteracoes = true;
     }
-    
+
     if (temAlteracoes) {
       const novaAlteracao: TimeChange = {
         timeId: Number(selectedTime),
-        ...alteracoes
+        alteracoes: { ...alteracoes },
+        ...alteracoes  
       };
-      
+
       onAddChange(novaAlteracao);
       setSelectedTime("");
       setTimeForm({});
@@ -121,7 +118,7 @@ export function TeamChangesForm({ times, onAddChange }: TeamChangesProps) {
   return (
     <div className="mb-8 bg-[#272731] p-6 rounded-lg">
       <h2 className="text-2xl font-bold text-white mb-4">Times com Alterações</h2>
-      
+
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>
           <label className="block text-white text-sm font-medium mb-2">
@@ -141,7 +138,7 @@ export function TeamChangesForm({ times, onAddChange }: TeamChangesProps) {
           </select>
         </div>
       </div>
-      
+
       {selectedTime && (
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
@@ -155,7 +152,7 @@ export function TeamChangesForm({ times, onAddChange }: TeamChangesProps) {
               className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
             />
           </div>
-          
+
           <div>
             <label className="block text-white text-sm font-medium mb-2">
               Sigla
@@ -167,7 +164,7 @@ export function TeamChangesForm({ times, onAddChange }: TeamChangesProps) {
               className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
             />
           </div>
-          
+
           <div>
             <label className="block text-white text-sm font-medium mb-2">
               Cor
@@ -223,7 +220,7 @@ export function TeamChangesForm({ times, onAddChange }: TeamChangesProps) {
               className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
             />
           </div>
-          
+
           <div>
             <label className="block text-white text-sm font-medium mb-2">
               Presidente
@@ -235,7 +232,7 @@ export function TeamChangesForm({ times, onAddChange }: TeamChangesProps) {
               className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
             />
           </div>
-          
+
           <div>
             <label className="block text-white text-sm font-medium mb-2">
               Head Coach
@@ -259,7 +256,7 @@ export function TeamChangesForm({ times, onAddChange }: TeamChangesProps) {
               className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
             />
           </div>
-          
+
           <div>
             <label className="block text-white text-sm font-medium mb-2">
               Coordenador Ofensivo
@@ -271,7 +268,7 @@ export function TeamChangesForm({ times, onAddChange }: TeamChangesProps) {
               className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
             />
           </div>
-          
+
           <div>
             <label className="block text-white text-sm font-medium mb-2">
               Coordenador Defensivo
@@ -283,7 +280,7 @@ export function TeamChangesForm({ times, onAddChange }: TeamChangesProps) {
               className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
             />
           </div>
-          
+
           <div className="col-span-2 flex justify-end">
             <button
               onClick={handleSubmit}

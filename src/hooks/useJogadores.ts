@@ -1,4 +1,3 @@
-// src/hooks/useJogadores.ts
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { JogadoresService } from '@/services/jogadores.service'
 import { queryKeys } from './queryKeys'

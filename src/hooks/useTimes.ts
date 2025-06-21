@@ -1,4 +1,3 @@
-// src/hooks/useTimes.ts
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { TimesService } from '@/services/times.service'
 import { queryKeys } from './queryKeys'
@@ -10,8 +9,8 @@ export function useTimes(temporada: string = '2025') {
   return useQuery({
     queryKey: queryKeys.times.list(temporada),
     queryFn: () => TimesService.getTimes(temporada),
-    staleTime: 1000 * 60 * 5, // 5 minutos
-    gcTime: 1000 * 60 * 10,   // 10 minutos
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
     retry: 2,
     refetchOnWindowFocus: false,
   })

@@ -5,11 +5,9 @@ import { createSlug, findPlayerBySlug, getPlayerSlug, getTeamSlug } from '@/util
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { queryKeys } from './queryKeys'
 import { Jogador, Materia, Time } from '@/types'
-import { TimesService } from '@/services/times.service'
-import { JogadoresService } from '@/services/jogadores.service'
 import { MateriasService } from '@/services/materias.service'
-
-const USE_LOCAL_DATA = process.env.NEXT_PUBLIC_USE_LOCAL_DATA === 'true'
+import { useTimes } from '@/hooks/useTimes'
+import { useJogadores } from '@/hooks/useJogadores'
 
 interface DataNotFoundError extends Error {
     code: 'NOT_FOUND';
@@ -25,150 +23,39 @@ const createNotFoundError = (temporada: string, entityName?: string): DataNotFou
     return error;
 };
 
-// Funções para buscar dados - LOCAL ou API
-const fetchTimesLocal = async (temporada: string): Promise<Time[]> => {
-    // Simula delay de rede
-    await new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 300))
-
-    if (temporada === '2024') {
-        const { Times } = await import('@/data/times')
-        return Times
-    } else if (temporada === '2025') {
-        throw createNotFoundError(temporada)
-    }
-
-    throw createNotFoundError(temporada)
-}
-
-const fetchJogadoresLocal = async (temporada: string): Promise<Jogador[]> => {
-    await new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 300))
-
-    const times = await fetchTimesLocal(temporada)
-    const jogadores: Jogador[] = []
-
-    times.forEach(time => {
-        if (time.jogadores) {
-            time.jogadores.forEach(jogador => {
-                jogadores.push({
-                    ...jogador,
-                    timeId: time.id || 0
-                })
-            })
-        }
-    })
-
-    return jogadores
-}
-
-const fetchNoticiasLocal = async (): Promise<Materia[]> => {
-    await new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 300))
-
-    try {
-        const { Noticias } = await import('@/data/noticias') // @ts-ignore
-        return Noticias
-    } catch (error) {
-        return []
-    }
-}
-
-// Funções para API (sua implementação original)
-const fetchTimesAPI = (temporada: string) => TimesService.getTimes(temporada)
-const fetchJogadoresAPI = (temporada: string) => JogadoresService.getJogadores(temporada)
-const fetchNoticiasAPI = () => MateriasService.getMaterias()
-
 // Hook para obter a temporada dos parâmetros da URL
 export function useTemporada(explicitTemporada?: string) {
     const searchParams = useSearchParams();
-    let temporada = explicitTemporada || searchParams?.get('temporada') || '2024';
+    let temporada = explicitTemporada || searchParams?.get('temporada') || '2025';
 
     if (temporada !== '2024' && temporada !== '2025') {
-        console.warn(`Temporada inválida: ${temporada}, usando 2024`);
-        temporada = '2024';
+        console.warn(`Temporada inválida: ${temporada}, usando 2025`);
+        temporada = '2025';
     }
 
     return temporada;
 }
 
-export function useJogadores(temporada?: string) {
-    const currentTemporada = useTemporada(temporada);
-
-    return useQuery({
-        queryKey: queryKeys.jogadores(currentTemporada),
-        queryFn: async () => {
-            try {
-                const jogadores = USE_LOCAL_DATA
-                    ? await fetchJogadoresLocal(currentTemporada)
-                    : await fetchJogadoresAPI(currentTemporada);
-
-                if (!jogadores || jogadores.length === 0) {
-                    throw createNotFoundError(currentTemporada);
-                }
-
-                return jogadores;
-            } catch (error: any) {
-                if (error.code === 'NOT_FOUND') throw error;
-                console.error('Erro ao buscar jogadores:', error);
-                throw createNotFoundError(currentTemporada);
-            }
-        },
-        staleTime: 1000 * 60 * 5,
-        gcTime: 1000 * 60 * 30,
-        retry: false,
-    });
-}
-
-export function useTimes(temporada?: string) {
-    const currentTemporada = useTemporada(temporada);
-
-    return useQuery({
-        queryKey: queryKeys.times(currentTemporada),
-        queryFn: async () => {
-            try {
-                const times = USE_LOCAL_DATA
-                    ? await fetchTimesLocal(currentTemporada)
-                    : await fetchTimesAPI(currentTemporada);
-
-                if (!times || times.length === 0) {
-                    throw createNotFoundError(currentTemporada);
-                }
-
-                return times;
-            } catch (error: any) {
-                if (error.code === 'NOT_FOUND') throw error;
-                console.error('Erro ao buscar times:', error);
-                throw createNotFoundError(currentTemporada);
-            }
-        },
-        staleTime: 1000 * 60 * 5,
-        gcTime: 1000 * 60 * 30,
-        retry: false,
-    });
-}
-
+// Hook para notícias/matérias
 export function useNoticias() {
     return useQuery({
-        queryKey: queryKeys.noticias,
-        queryFn: async () => {
-            return USE_LOCAL_DATA
-                ? await fetchNoticiasLocal()
-                : await fetchNoticiasAPI();
-        },
+        queryKey: queryKeys.materias.lists(),
+        queryFn: () => MateriasService.getMaterias(),
         staleTime: 1000 * 60 * 5,
         gcTime: 1000 * 60 * 30,
     })
 }
 
-
+// Hook para buscar time por nome/slug
 export function useTeam(teamName: string | undefined, explicitTemporada?: string) {
     const temporada = useTemporada(explicitTemporada);
     const router = useRouter();
-    const pathname = usePathname();
     const searchParams = useSearchParams();
 
     const { data: times = [], isLoading: timesLoading, error: timesError } = useTimes(temporada);
 
     return useQuery({
-        queryKey: [...queryKeys.times(temporada), teamName],
+        queryKey: [...queryKeys.times.list(temporada), teamName],
         queryFn: async () => {
             if (!teamName) throw new Error("Nome do time não encontrado.");
 
@@ -193,6 +80,7 @@ export function useTeam(teamName: string | undefined, explicitTemporada?: string
                 return timeEncontrado;
             }
 
+            // Lógica especial para mudanças de nome entre temporadas
             if (temporada === '2025' && teamSlug === 'Parana-HP') {
                 timeEncontrado = times.find(t =>
                     getTeamSlug(t.nome || '') === 'Calvary-Cavaliers'
@@ -240,6 +128,7 @@ export function useTeam(teamName: string | undefined, explicitTemporada?: string
     });
 }
 
+// Hook para detalhes de jogador específico
 export function usePlayerDetails(
     timeSlug: string | undefined,
     jogadorSlug: string | undefined,
@@ -253,7 +142,7 @@ export function usePlayerDetails(
     const { data: times = [], isLoading: timesLoading, error: timesError } = useTimes(currentTemporada);
 
     return useQuery({
-        queryKey: [...queryKeys.jogadores(currentTemporada), timeSlug, jogadorSlug],
+        queryKey: [...queryKeys.jogadores.list(currentTemporada), timeSlug, jogadorSlug],
         queryFn: async () => {
             if (jogadoresError && (jogadoresError as DataNotFoundError).code === 'NOT_FOUND') {
                 throw createNotFoundError(currentTemporada, jogadorSlug);
@@ -301,47 +190,8 @@ export function usePlayerDetails(
             console.log(`Jogador ${jogadorSlug} não encontrado na temporada ${currentTemporada}`);
             throw createNotFoundError(currentTemporada, jogadorSlug);
         },
-        enabled: !!timeSlug && !!jogadorSlug,
+        enabled: !!timeSlug && !!jogadorSlug && !jogadoresLoading && !timesLoading,
         retry: false,
         staleTime: 1000 * 60 * 5,
     });
-}
-
-export function useNoticiaDetalhes(noticiaId: number) {
-    const { data: noticias = [], isLoading } = useNoticias()
-
-    function shuffleAndFilterNews(allNews: Materia[], currentNewsId: number, limit: number = 6) {
-        return allNews
-            .filter(news => news.id !== currentNewsId)
-            .sort(() => Math.random() - 0.5)
-            .slice(0, limit)
-    }
-
-    return {
-        noticia: noticias.find(n => n.id === noticiaId),
-        noticiasRelacionadas: isLoading ? [] : shuffleAndFilterNews(noticias, noticiaId),
-        isLoading,
-        noticias
-    }
-}
-
-export const prefetchQueries = async (queryClient: any, temporada: string = '2024') => {
-    console.log(`Pré-carregando dados para temporada: ${temporada}`);
-
-    await Promise.all([
-        queryClient.prefetchQuery({
-            queryKey: queryKeys.times(temporada),
-            queryFn: () => USE_LOCAL_DATA ? fetchTimesLocal(temporada) : fetchTimesAPI(temporada),
-        }),
-        queryClient.prefetchQuery({
-            queryKey: queryKeys.jogadores(temporada),
-            queryFn: () => USE_LOCAL_DATA ? fetchJogadoresLocal(temporada) : fetchJogadoresAPI(temporada),
-        }),
-        queryClient.prefetchQuery({
-            queryKey: queryKeys.noticias,
-            queryFn: () => USE_LOCAL_DATA ? fetchNoticiasLocal() : fetchNoticiasAPI(),
-        }),
-    ]);
-
-    console.log(`Dados pré-carregados com sucesso para temporada: ${temporada}`);
 }

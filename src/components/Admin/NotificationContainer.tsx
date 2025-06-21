@@ -2,12 +2,13 @@
 
 import React from 'react'
 import { CheckCircle, XCircle, AlertTriangle, Info, X } from 'lucide-react'
-import { useNotificationStore } from '@/hooks/useNotifications'
+import { useNotifications } from '@/hooks/useNotifications'
+import { Notification } from '@/types'
 
 export const NotificationContainer: React.FC = () => {
-  const { notifications, removeNotification } = useNotificationStore()
+  const { notifications, removeNotification } = useNotifications()
 
-  const getIcon = (type: string) => {
+  const getIcon = (type: Notification['type']) => {
     switch (type) {
       case 'success': return <CheckCircle className="w-5 h-5 text-green-600" />
       case 'error': return <XCircle className="w-5 h-5 text-red-600" />
@@ -17,7 +18,7 @@ export const NotificationContainer: React.FC = () => {
     }
   }
 
-  const getColorClasses = (type: string) => {
+  const getColorClasses = (type: Notification['type']) => {
     switch (type) {
       case 'success': return 'bg-green-50 border-green-200'
       case 'error': return 'bg-red-50 border-red-200'
@@ -31,7 +32,7 @@ export const NotificationContainer: React.FC = () => {
 
   return (
     <div className="fixed top-4 right-4 z-50 space-y-2 max-w-sm">
-      {notifications.map((notification) => (
+      {notifications.map((notification: Notification) => (
         <div
           key={notification.id}
           className={`p-4 rounded-lg border shadow-lg transition-all duration-300 ${getColorClasses(notification.type)}`}
@@ -44,21 +45,16 @@ export const NotificationContainer: React.FC = () => {
               <h4 className="text-sm font-medium text-gray-900">
                 {notification.title}
               </h4>
-              <p className="text-sm text-gray-600 mt-1">
-                {notification.message}
-              </p>
-              {notification.action && (
-                <button
-                  onClick={notification.action.onClick}
-                  className="mt-2 text-sm font-medium text-blue-600 hover:text-blue-500"
-                >
-                  {notification.action.label}
-                </button>
+              {notification.message && (
+                <p className="text-sm text-gray-600 mt-1">
+                  {notification.message}
+                </p>
               )}
             </div>
             <button
               onClick={() => removeNotification(notification.id)}
-              className="ml-4 text-gray-400 hover:text-gray-600"
+              className="ml-4 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="Fechar notificação"
             >
               <X className="w-4 h-4" />
             </button>

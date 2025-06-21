@@ -22,7 +22,6 @@ export const JogoManager: React.FC<JogoManagerProps> = ({ jogos, campeonato, vie
   const [filterStatus, setFilterStatus] = useState<string>('todos')
   const [filterGrupo, setFilterGrupo] = useState<number | 'todos'>('todos')
 
-  // Filtrar jogos
   const jogosFiltrados = useMemo(() => {
     let filtered = jogos
 
@@ -37,7 +36,6 @@ export const JogoManager: React.FC<JogoManagerProps> = ({ jogos, campeonato, vie
     return filtered
   }, [jogos, filterStatus, filterGrupo])
 
-  // Agrupar jogos por data (para modo calendar)
   const jogosPorData = useMemo(() => {
     const grupos = new Map<string, Jogo[]>()
     

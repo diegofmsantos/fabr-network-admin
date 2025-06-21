@@ -1,4 +1,3 @@
-// src/hooks/useCampeonatos.ts
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { CampeonatosService } from '@/services/campeonatos.service'
 import { queryKeys } from './queryKeys'

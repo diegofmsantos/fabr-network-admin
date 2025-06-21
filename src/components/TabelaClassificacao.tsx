@@ -2,7 +2,7 @@ import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ImageService } from '@/utils/services/ImageService'
-import { ClassificacaoGrupo, TabelaClassificacaoProps } from '@/types'
+import { TabelaClassificacaoProps } from '@/types'
 
 
 export const TabelaClassificacao: React.FC<TabelaClassificacaoProps> = ({

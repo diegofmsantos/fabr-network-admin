@@ -113,4 +113,102 @@ export class CampeonatosService extends BaseService {
     const service = new CampeonatosService()
     return service.post(`/campeonatos/jogos/${jogoId}/estatisticas`, data)
   }
+
+  // ==================== MÉTODOS PARA GRUPOS ====================
+
+// Buscar um grupo específico
+static async getGrupo(id: number): Promise<Grupo> {
+  const service = new CampeonatosService()
+  return service.get<Grupo>(`/campeonatos/grupos/${id}`)
 }
+
+// Adicionar time ao grupo
+static async adicionarTimeAoGrupo(grupoId: number, timeId: number): Promise<any> {
+  const service = new CampeonatosService()
+  return service.post(`/campeonatos/grupos/${grupoId}/times`, { timeId })
+}
+
+// Remover time do grupo
+static async removerTimeDoGrupo(grupoId: number, timeId: number): Promise<any> {
+  const service = new CampeonatosService()
+  return service.delete(`/campeonatos/grupos/${grupoId}/times/${timeId}`)
+}
+
+// Mover times entre grupos
+static async moverTimesEntreGrupos(
+  timesIds: number[], 
+  grupoOrigemId: number, 
+  grupoDestinoId: number
+): Promise<any> {
+  const service = new CampeonatosService()
+  return service.post(`/campeonatos/grupos/mover-times`, {
+    timesIds,
+    grupoOrigemId,
+    grupoDestinoId
+  })
+}
+
+// Esvaziar grupo (remover todos os times)
+static async esvaziarGrupo(grupoId: number): Promise<any> {
+  const service = new CampeonatosService()
+  return service.post(`/campeonatos/grupos/${grupoId}/esvaziar`)
+}
+
+// Misturar times no grupo (alterar ordem aleatoriamente)
+static async misturarTimesGrupo(grupoId: number): Promise<any> {
+  const service = new CampeonatosService()
+  return service.post(`/campeonatos/grupos/${grupoId}/misturar`)
+}
+
+// Distribuir times automaticamente entre grupos
+static async distribuirTimesAutomaticamente(campeonatoId: number): Promise<any> {
+  const service = new CampeonatosService()
+  return service.post(`/campeonatos/campeonatos/${campeonatoId}/distribuir-times`)
+}
+
+// ==================== MÉTODOS UTILITÁRIOS ====================
+
+// Gerar todos os jogos do campeonato
+static async gerarTodosJogos(campeonatoId: number): Promise<any> {
+  const service = new CampeonatosService()
+  return service.post(`/campeonatos/campeonatos/${campeonatoId}/gerar-todos-jogos`)
+}
+
+// Finalizar fase de grupos
+static async finalizarFaseGrupos(campeonatoId: number): Promise<any> {
+  const service = new CampeonatosService()
+  return service.post(`/campeonatos/campeonatos/${campeonatoId}/finalizar-fase-grupos`)
+}
+
+// Gerar playoffs
+static async gerarPlayoffs(campeonatoId: number): Promise<any> {
+  const service = new CampeonatosService()
+  return service.post(`/campeonatos/campeonatos/${campeonatoId}/gerar-playoffs`)
+}
+
+// Atualizar resultado do jogo
+static async atualizarResultadoJogo(
+  jogoId: number, 
+  placarCasa: number, 
+  placarVisitante: number
+): Promise<Jogo> {
+  const service = new CampeonatosService()
+  return service.put<Jogo>(`/campeonatos/jogos/${jogoId}/resultado`, {
+    placarCasa,
+    placarVisitante
+  })
+}
+
+// Marcar jogo como finalizado
+static async finalizarJogo(jogoId: number): Promise<Jogo> {
+  const service = new CampeonatosService()
+  return service.post<Jogo>(`/campeonatos/jogos/${jogoId}/finalizar`)
+}
+
+// Adiar jogo
+static async adiarJogo(jogoId: number, novaData?: string): Promise<Jogo> {
+  const service = new CampeonatosService()
+  return service.post<Jogo>(`/campeonatos/jogos/${jogoId}/adiar`, { novaData })
+}
+}
+

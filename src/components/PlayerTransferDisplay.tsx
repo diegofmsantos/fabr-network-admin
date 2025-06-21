@@ -24,7 +24,7 @@ export function PlayerTransferDisplay({
               <div className="text-gray-400 text-sm mt-1">
                 {transfer.timeOrigemNome && (
                   <span>
-                    {transfer.timeOrigemNome} → {transfer.novoTimeNome}
+                    {transfer.timeOrigemNome} → {transfer.timeDestinoNome}
                   </span>
                 )}
                 {transfer.novoNumero && (

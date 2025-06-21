@@ -3,11 +3,11 @@
 import { useState, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCreateCampeonato } from '@/hooks/useCampeonatos'
-import { useTimes } from '@/hooks/queries'
 import { ArrowLeft, Save, Eye } from 'lucide-react'
 import Link from 'next/link'
 import { CampeonatoForm } from '@/components/Admin/forms/CampeonatoForm'
 import { CriarCampeonatoRequest } from '@/types'
+import { useTimes } from '@/hooks/useTimes'
 
 function CriarCampeonatoContent() {
   const router = useRouter()

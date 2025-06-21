@@ -14,14 +14,14 @@ export function useNotifications() {
 
     setNotifications(prev => [...prev, newNotification])
 
-    if (newNotification.duration > 0) {
+    if (newNotification.duration && newNotification.duration > 0) {
       setTimeout(() => {
-        removeNotification(newNotification.id)
+        setNotifications(prev => prev.filter(notif => notif.id !== newNotification.id))
       }, newNotification.duration)
     }
 
     return newNotification.id
-  }, [])
+  }, [])  // ← Agora não depende de removeNotification
 
   const removeNotification = useCallback((id: string) => {
     setNotifications(prev => prev.filter(notification => notification.id !== id))

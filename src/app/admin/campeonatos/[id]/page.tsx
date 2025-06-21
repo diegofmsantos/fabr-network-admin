@@ -8,7 +8,7 @@ import { NoDataFound } from '@/components/ui/NoDataFound'
 import { ArrowLeft, Save, Trash2, Play, Pause, Settings, Calendar, Users, BarChart3, Trophy, CheckCircle, Clock } from 'lucide-react'
 import Link from 'next/link'
 import { CampeonatoForm } from '@/components/Admin/forms/CampeonatoForm'
-import { useTimes } from '@/hooks/queries'
+import { useTimes } from '@/hooks/useTimes'
 
 type TabType = 'configuracoes' | 'grupos' | 'jogos' | 'classificacao'
 

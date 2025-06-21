@@ -5,7 +5,7 @@ import { TeamChangesForm } from "@/components/TeamChangesForm"
 import { PlayerTransferForm } from "@/components/PlayerTransferForm"
 import Link from "next/link"
 import Image from "next/image"
-import { TimeChange, Transferencia, TransferenciaTemporada } from "@/types"
+import { TimeChange, TransferenciaTemporada } from "@/types"
 import { useIniciarTemporada } from '@/hooks/useTemporada'
 import { useTimes } from '@/hooks/useTimes'
 import { useJogadores } from '@/hooks/useJogadores'

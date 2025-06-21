@@ -5,7 +5,7 @@ interface PlayerTransferFormProps {
   jogadores: Jogador[];
   times: Time[];
   timeChanges?: TimeChange[];
-  onAddTransfer: (transferencia: TransferenciaTemporada) => void 
+  onAddTransfer: (transferencia: TransferenciaTemporada) => void
 }
 
 export function PlayerTransferForm({
@@ -50,14 +50,14 @@ export function PlayerTransferForm({
     const transferencia: TransferenciaTemporada = {
       jogadorId: selectedJogador.id || 0,
       jogadorNome: selectedJogador.nome,
-      timeOrigemId: selectedJogador.timeId,
+      timeOrigemId: selectedJogador.timeId || 0,
       timeOrigemNome: timeOrigem?.nome,
-      timeDestinoId: Number(selectedNovoTime),        // ← TROCAR de novoTimeId
-      timeDestinoNome: novoTimeNome,                  // ← TROCAR de novoTimeNome
-      novaPosicao: novaPosicao,
-      novoSetor: novoSetor,                           // ← CORRIGIR de novosetor
+      timeDestinoId: Number(selectedNovoTime),
+      timeDestinoNome: novoTimeNome,
+      novaPosicao: novaPosicao || undefined,
+      novoSetor: novoSetor || undefined,
       novoNumero: novoNumero ? Number(novoNumero) : undefined,
-      novaCamisa: novaCamisa
+      novaCamisa: novaCamisa || undefined
     };
 
     onAddTransfer(transferencia);

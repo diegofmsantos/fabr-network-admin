@@ -2,50 +2,39 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNotifications } from '@/hooks/useNotifications'
-import { handleApiError } from '@/utils/errorHandler'
+import { queryKeys } from './queryKeys'
 import { FiltroJogos, Jogo } from '@/types'
 import { CampeonatosService } from '@/services/campeonatos.service'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
-// Query Keys
-export const campeonatoQueryKeys = {
-  all: ['campeonatos'] as const,
-  lists: () => [...campeonatoQueryKeys.all, 'list'] as const,
-  list: (filters: Record<string, any>) => [...campeonatoQueryKeys.lists(), filters] as const,
-  details: () => [...campeonatoQueryKeys.all, 'detail'] as const,
-  detail: (id: number) => [...campeonatoQueryKeys.details(), id] as const,
-  jogos: (filters: FiltroJogos) => [...campeonatoQueryKeys.all, 'jogos', filters] as const,
-  classificacao: (campeonatoId: number) => [...campeonatoQueryKeys.all, 'classificacao', campeonatoId] as const,
-  proximosJogos: (campeonatoId: number) => [...campeonatoQueryKeys.all, 'proximos', campeonatoId] as const,
-  ultimosResultados: (campeonatoId: number) => [...campeonatoQueryKeys.all, 'resultados', campeonatoId] as const,
-}
+// ==================== HOOKS DE QUERY ====================
 
-// ===== CORREÇÃO 6: useGerarJogos =====
-export function useGerarJogos() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: (campeonatoId: number) => CampeonatosService.gerarJogos(campeonatoId),
-    onSuccess: (_, campeonatoId) => {
-      queryClient.invalidateQueries({ queryKey: campeonatoQueryKeys.detail(campeonatoId) })
-      queryClient.invalidateQueries({ queryKey: campeonatoQueryKeys.jogos({}) })
-    },
+// Hook para buscar jogos com filtros
+export function useJogos(filters: FiltroJogos) {
+  return useQuery({
+    queryKey: queryKeys.jogos.list(filters),
+    queryFn: () => CampeonatosService.getJogos(filters),
+    staleTime: 1000 * 60 * 2, // Jogos mudam mais frequentemente
+    gcTime: 1000 * 60 * 5,
+    retry: 2,
   })
 }
 
+// Hook para buscar um jogo específico
 export function useJogo(jogoId: number) {
   return useQuery({
-    queryKey: [...campeonatoQueryKeys.all, 'jogo', jogoId] as const,
+    queryKey: queryKeys.jogos.detail(jogoId),
     queryFn: () => CampeonatosService.getJogo(jogoId),
     enabled: !!jogoId,
     staleTime: 1000 * 60 * 2,
   })
 }
 
+// Hook para buscar jogos de um time específico
 export function useJogosTime(timeId: number, campeonatoId?: number, limit: number = 20) {
   return useQuery({
-    queryKey: [...campeonatoQueryKeys.all, 'jogos-time', timeId, campeonatoId, limit] as const,
+    queryKey: [...queryKeys.jogos.all, 'jogos-time', timeId, campeonatoId, limit] as const,
     queryFn: async (): Promise<Jogo[]> => {
       const params = new URLSearchParams()
       params.append('timeId', String(timeId))
@@ -64,177 +53,235 @@ export function useJogosTime(timeId: number, campeonatoId?: number, limit: numbe
       return response.json()
     },
     enabled: !!timeId,
-    staleTime: 1000 * 60 * 3, // 3 minutos
+    staleTime: 1000 * 60 * 3,
   })
 }
 
-// Hook para jogos de uma rodada específica
-export function useJogosRodada(campeonatoId: number, rodada: number) {
-  return useQuery({
-    queryKey: [...campeonatoQueryKeys.all, 'rodada', campeonatoId, rodada] as const,
-    queryFn: async (): Promise<Jogo[]> => {
-      const response = await fetch(
-        `${API_BASE_URL}/campeonatos/jogos?campeonatoId=${campeonatoId}&rodada=${rodada}`
-      )
-      
-      if (!response.ok) {
-        throw new Error('Erro ao buscar jogos da rodada')
-      }
-      
-      return response.json()
-    },
-    enabled: !!campeonatoId && !!rodada,
-    staleTime: 1000 * 60 * 5, // 5 minutos
-  })
-}
+// ==================== HOOKS DE MUTATION ====================
 
-
-export function useJogos(filters: FiltroJogos) {
-  return useQuery({
-    queryKey: campeonatoQueryKeys.jogos(filters),
-    queryFn: () => CampeonatosService.getJogos(filters),
-    staleTime: 1000 * 60 * 2,
-  })
-}
-
-export function useProximosJogos(campeonatoId: number, limit: number = 10) {
-  return useQuery({
-    queryKey: [...campeonatoQueryKeys.proximosJogos(campeonatoId), limit] as const,
-    queryFn: () => CampeonatosService.getProximosJogos(campeonatoId, limit),
-    enabled: !!campeonatoId,
-    staleTime: 1000 * 60 * 5, 
-  })
-}
-
-export function useUltimosResultados(campeonatoId: number, limit: number = 10) {
-  return useQuery({
-    queryKey: [...campeonatoQueryKeys.ultimosResultados(campeonatoId), limit] as const,
-    queryFn: () => CampeonatosService.getUltimosResultados(campeonatoId, limit),
-    enabled: !!campeonatoId,
-    staleTime: 1000 * 60 * 5, 
-  })
-}
-
+// Hook para criar jogo
 export function useCreateJogo() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: (data: Omit<Jogo, 'id'>) => CampeonatosService.createJogo(data),
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: campeonatoQueryKeys.jogos({}) })
-      queryClient.invalidateQueries({ queryKey: campeonatoQueryKeys.detail(data.campeonatoId) })
+    mutationFn: (data: any) => CampeonatosService.createJogo(data),
+    onSuccess: (newJogo) => {
+      // Invalidar lista de jogos
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.jogos.lists() 
+      })
       
-      notifications.success(
-        'Jogo criado!',
-        'O jogo foi agendado com sucesso'
-      )
+      // Invalidar dados do campeonato
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.campeonatos.detail(newJogo.campeonatoId) 
+      })
+      
+      // Adicionar ao cache
+      queryClient.setQueryData(queryKeys.jogos.detail(newJogo.id), newJogo)
+      
+      notifications.success('Jogo criado!', 'Jogo foi criado com sucesso')
     },
-    onError: (error) => {
-      notifications.error(
-        'Erro ao criar jogo',
-        error.message || 'Verifique os dados e tente novamente'
-      )
+    onError: (error: any) => {
+      notifications.error('Erro ao criar jogo', error.message || 'Tente novamente')
     },
   })
 }
 
-// Atualizar jogo (placar, status, etc.)
+// Hook para atualizar jogo
 export function useUpdateJogo() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<Jogo> }) =>
+    mutationFn: ({ id, data }: { id: number; data: any }) =>
       CampeonatosService.updateJogo(id, data),
-    onSuccess: (data, { id }) => {
-      // Atualizar cache do jogo específico
-      queryClient.setQueryData([...campeonatoQueryKeys.all, 'jogo', id], data)
+    onSuccess: (updatedJogo, { id }) => {
+      // Atualizar cache específico
+      queryClient.setQueryData(queryKeys.jogos.detail(id), updatedJogo)
       
-      // Invalidar listas relacionadas
-      queryClient.invalidateQueries({ queryKey: campeonatoQueryKeys.jogos({}) })
-      queryClient.invalidateQueries({ queryKey: campeonatoQueryKeys.detail(data.campeonatoId) })
-      queryClient.invalidateQueries({ queryKey: campeonatoQueryKeys.classificacao(data.campeonatoId) })
+      // Invalidar lista de jogos
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.jogos.lists() 
+      })
       
-      notifications.success(
-        'Jogo atualizado!',
-        'As informações do jogo foram atualizadas'
-      )
+      // Invalidar dados do campeonato se necessário
+      if (updatedJogo.campeonatoId) {
+        queryClient.invalidateQueries({ 
+          queryKey: queryKeys.campeonatos.detail(updatedJogo.campeonatoId) 
+        })
+      }
+      
+      notifications.success('Jogo atualizado!', 'Jogo foi atualizado com sucesso')
     },
-    onError: (error) => {
-      notifications.error(
-        'Erro ao atualizar jogo',
-        error.message || 'Tente novamente'
-      )
-    }
+    onError: (error: any) => {
+      notifications.error('Erro ao atualizar jogo', error.message || 'Tente novamente')
+    },
   })
 }
 
-// Deletar jogo
+// Hook para deletar jogo
 export function useDeleteJogo() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: (jogoId: number) => CampeonatosService.deleteJogo(jogoId),
-    onSuccess: (_, jogoId) => {
-      queryClient.invalidateQueries({ queryKey: campeonatoQueryKeys.jogos({}) })
-      queryClient.removeQueries({ queryKey: [...campeonatoQueryKeys.all, 'jogo', jogoId] })
+    mutationFn: (id: number) => CampeonatosService.deleteJogo(id),
+    onSuccess: (_, id) => {
+      // Remover do cache
+      queryClient.removeQueries({ 
+        queryKey: queryKeys.jogos.detail(id) 
+      })
       
-      notifications.success(
-        'Jogo excluído!',
-        'O jogo foi removido do campeonato'
-      )
+      // Invalidar lista de jogos
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.jogos.lists() 
+      })
+      
+      // Invalidar dados dos campeonatos
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.campeonatos.lists() 
+      })
+      
+      notifications.success('Jogo removido!', 'Jogo foi excluído com sucesso')
     },
-    onError: (error) => {
-      notifications.error(
-        'Erro ao excluir jogo',
-        error.message || 'Verifique se o jogo não possui estatísticas processadas'
-      )
-    }
+    onError: (error: any) => {
+      notifications.error('Erro ao remover jogo', error.message || 'Tente novamente')
+    },
   })
 }
 
-// Bulk delete jogos
-export function useBulkDeleteJogos() {
+// Hook para gerar jogos automaticamente
+export function useGerarJogos() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: async (jogoIds: number[]): Promise<void> => {
-      const response = await fetch(`${API_BASE_URL}/admin/jogos/bulk-delete`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ids: jogoIds })
+    mutationFn: (campeonatoId: number) => CampeonatosService.gerarJogos(campeonatoId),
+    onSuccess: (result, campeonatoId) => {
+      // Invalidar dados do campeonato
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.campeonatos.detail(campeonatoId) 
       })
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.message || 'Erro ao excluir jogos')
-      }
-
-      return response.json()
-    },
-    onSuccess: (_, jogoIds) => {
-      queryClient.invalidateQueries({ queryKey: campeonatoQueryKeys.jogos({}) })
       
-      // Remover cada jogo do cache
-      jogoIds.forEach(id => {
-        queryClient.removeQueries({ queryKey: [...campeonatoQueryKeys.all, 'jogo', id] })
+      // Invalidar lista de jogos
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.jogos.lists() 
       })
-
+      
       notifications.success(
-        'Jogos excluídos!',
-        `${jogoIds.length} jogos foram removidos`
+        'Jogos gerados!', 
+        `${result.jogosGerados || 0} jogos foram criados automaticamente`
       )
     },
-    onError: (error) => {
-      notifications.error(
-        'Erro ao excluir jogos',
-        error.message || 'Alguns jogos podem ter estatísticas processadas'
-      )
-    }
+    onError: (error: any) => {
+      notifications.error('Erro ao gerar jogos', error.message || 'Tente novamente')
+    },
+  })
+}
+
+// Hook para atualizar resultado do jogo
+export function useAtualizarResultado() {
+  const queryClient = useQueryClient()
+  const notifications = useNotifications()
+
+  return useMutation({
+    mutationFn: ({ 
+      jogoId, 
+      placarCasa, 
+      placarVisitante 
+    }: { 
+      jogoId: number
+      placarCasa: number
+      placarVisitante: number 
+    }) => CampeonatosService.atualizarResultadoJogo(jogoId, placarCasa, placarVisitante),
+    onSuccess: (updatedJogo) => {
+      // Atualizar cache do jogo
+      queryClient.setQueryData(queryKeys.jogos.detail(updatedJogo.id), updatedJogo)
+      
+      // Invalidar dados relacionados
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.jogos.lists() 
+      })
+      
+      if (updatedJogo.campeonatoId) {
+        queryClient.invalidateQueries({ 
+          queryKey: queryKeys.campeonatos.detail(updatedJogo.campeonatoId) 
+        })
+        
+        // Invalidar classificação se for jogo de grupo
+        if (updatedJogo.grupoId) {
+          queryClient.invalidateQueries({ 
+            queryKey: queryKeys.classificacao.grupo(updatedJogo.grupoId) 
+          })
+        }
+      }
+      
+      notifications.success('Resultado atualizado!', 'Placar do jogo foi atualizado')
+    },
+    onError: (error: any) => {
+      notifications.error('Erro ao atualizar resultado', error.message || 'Tente novamente')
+    },
+  })
+}
+
+// Hook para finalizar jogo
+export function useFinalizarJogo() {
+  const queryClient = useQueryClient()
+  const notifications = useNotifications()
+
+  return useMutation({
+    mutationFn: (jogoId: number) => CampeonatosService.finalizarJogo(jogoId),
+    onSuccess: (updatedJogo) => {
+      // Atualizar cache do jogo
+      queryClient.setQueryData(queryKeys.jogos.detail(updatedJogo.id), updatedJogo)
+      
+      // Invalidar listas e dados relacionados
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.jogos.lists() 
+      })
+      
+      if (updatedJogo.campeonatoId) {
+        queryClient.invalidateQueries({ 
+          queryKey: queryKeys.campeonatos.detail(updatedJogo.campeonatoId) 
+        })
+      }
+      
+      notifications.success('Jogo finalizado!', 'Jogo foi marcado como finalizado')
+    },
+    onError: (error: any) => {
+      notifications.error('Erro ao finalizar jogo', error.message || 'Tente novamente')
+    },
+  })
+}
+
+// Hook para adiar jogo
+export function useAdiarJogo() {
+  const queryClient = useQueryClient()
+  const notifications = useNotifications()
+
+  return useMutation({
+    mutationFn: ({ jogoId, novaData }: { jogoId: number; novaData?: string }) =>
+      CampeonatosService.adiarJogo(jogoId, novaData),
+    onSuccess: (updatedJogo) => {
+      // Atualizar cache do jogo
+      queryClient.setQueryData(queryKeys.jogos.detail(updatedJogo.id), updatedJogo)
+      
+      // Invalidar listas
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.jogos.lists() 
+      })
+      
+      if (updatedJogo.campeonatoId) {
+        queryClient.invalidateQueries({ 
+          queryKey: queryKeys.campeonatos.detail(updatedJogo.campeonatoId) 
+        })
+      }
+      
+      notifications.success('Jogo adiado!', 'Jogo foi adiado com sucesso')
+    },
+    onError: (error: any) => {
+      notifications.error('Erro ao adiar jogo', error.message || 'Tente novamente')
+    },
   })
 }

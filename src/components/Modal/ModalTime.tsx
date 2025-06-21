@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { fieldGroups } from "@/utils/campos";
 import { Time } from "@/types";
 import { useUpdateTime, useDeleteTime } from '@/hooks/useTimes'
@@ -19,7 +19,9 @@ export default function ModalTime({
 
     const initialFormData = {
         ...time,
-        titulos: time.titulos?.[0] || { nacionais: "", conferencias: "", estaduais: "" },
+        titulos: (time.titulos && time.titulos.length > 0)
+            ? time.titulos[0]
+            : { nacionais: "", conferencias: "", estaduais: "" },
         jogadores: time.jogadores || [],
     };
 
@@ -28,6 +30,10 @@ export default function ModalTime({
     const [filteredJogadores, setFilteredJogadores] = useState(time.jogadores || []);
     const [activeTab, setActiveTab] = useState<'info' | 'jogadores'>('info');
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    useEffect(() => {
+        setFilteredJogadores(formData.jogadores || []);
+    }, [formData.jogadores]);
 
     const updateTimeMutation = useUpdateTime()
     const deleteTimeMutation = useDeleteTime()
@@ -85,9 +91,9 @@ export default function ModalTime({
         const value = e.target.value.toLowerCase();
         setFilter(value);
         setFilteredJogadores(
-            formData.jogadores.filter((jogador) =>
-                jogador.nome.toLowerCase().includes(value)
-            )
+            formData.jogadores?.filter((jogadorTime) =>
+                jogadorTime.jogador?.nome.toLowerCase().includes(value)
+            ) || []
         );
     };
 
@@ -167,8 +173,11 @@ export default function ModalTime({
                                                 </label>
                                                 <input
                                                     type="text"
-                                                    name={field.name} 
-                                                    value={field.name.startsWith("titulos.") ? formData.titulos?.[field.name.split(".")[1]] || "" : formData[field.name] || ""}
+                                                    name={field.name}
+                                                    value={field.name.startsWith("titulos.")
+                                                        ? (formData.titulos as any)?.[field.name.split(".")[1]] || ""
+                                                        : (formData as any)[field.name] || ""
+                                                    }
                                                     onChange={handleChange}
                                                     placeholder={field.label}
                                                     className="w-full px-3 py-2 bg-[#272731] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
@@ -202,34 +211,25 @@ export default function ModalTime({
 
                             {filteredJogadores.length > 0 ? (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    {filteredJogadores.map((jogador) => (
-                                        <div
-                                            key={jogador.id}
-                                            onClick={() => openJogadorModal(jogador)}
-                                            className="bg-[#1C1C24] rounded-lg overflow-hidden flex items-center border border-gray-800 hover:border-[#63E300] transition-colors cursor-pointer"
-                                        >
-                                            <div
-                                                className="w-10 flex-shrink-0 h-full flex items-center justify-center"
-                                                style={{ backgroundColor: formData.cor || '#63E300' }}
-                                            >
-                                                <span className="text-white font-bold">{jogador.numero}</span>
-                                            </div>
+                                    {filteredJogadores.map((jogadorTime, index) => (
+                                        <div key={jogadorTime.id || index} className="bg-[#1C1C24] rounded-lg p-3 flex items-center hover:bg-[#2C2C34] transition-colors cursor-pointer"
+                                            onClick={() => openJogadorModal(jogadorTime.jogador)}>
                                             <div className="p-3 flex-grow">
-                                                <h4 className="text-white font-medium">{jogador.nome}</h4>
+                                                <h4 className="text-white font-medium">{jogadorTime.jogador?.nome}</h4>
                                                 <div className="flex items-center mt-1">
                                                     <span className="text-xs text-gray-400 bg-[#272731] px-2 py-0.5 rounded">
-                                                        {jogador.posicao}
+                                                        {jogadorTime.jogador?.posicao}
                                                     </span>
                                                     <span className="mx-2 text-gray-600">•</span>
                                                     <span className="text-xs text-gray-400">
-                                                        {jogador.setor}
+                                                        {jogadorTime.jogador?.setor}
                                                     </span>
                                                 </div>
-                                            </div>
-                                            <div className="p-3 text-gray-400">
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                                </svg>
+                                                <div className="flex items-center mt-1">
+                                                    <span className="text-xs text-[#63E300]">
+                                                        #{jogadorTime.numero} • {jogadorTime.camisa}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                     ))}

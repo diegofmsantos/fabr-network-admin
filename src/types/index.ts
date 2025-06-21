@@ -1025,7 +1025,7 @@ export interface UseMutationResult<TData, TVariables> {
 
 export interface TimeChange {
   timeId: number
-  alteracoes: Record<string, any>  // ← Este campo é obrigatório
+  alteracoes: Record<string, any>  
   nome?: string
   sigla?: string
   cor?: string
@@ -1041,13 +1041,13 @@ export interface TimeChange {
 
 export interface TransferenciaTemporada {
   jogadorId: number
-  jogadorNome?: string        // ← ADICIONAR
-  timeOrigemId: number
-  timeOrigemNome?: string     // ← VERIFICAR se existe
-  timeOrigemSigla?: string    // ← ADICIONAR se necessário
+  jogadorNome?: string 
+  timeOrigemId?: number
+  timeOrigemNome?: string 
+  timeOrigemSigla?: string    
   timeDestinoId: number
-  timeDestinoNome?: string    // ← TROCAR de novoTimeNome para timeDestinoNome
-  timeDestinoSigla?: string   // ← ADICIONAR se necessário
+  timeDestinoNome?: string 
+  timeDestinoSigla?: string 
   novaPosicao?: string
   novoSetor?: string
   novoNumero?: number

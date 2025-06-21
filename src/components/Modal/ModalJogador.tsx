@@ -20,7 +20,15 @@ export default function ModalJogador({
         ...jogador,
         altura: jogador.altura !== undefined ? String(jogador.altura).replace(".", ",") : "",
         temporada: jogador.times?.[0]?.temporada || "2025",
-        estatisticas: jogador.estatisticas || {},
+        estatisticas: jogador.estatisticas || {
+            passe: {},
+            corrida: {},
+            recepcao: {},
+            retorno: {},
+            defesa: {},
+            kicker: {},
+            punter: {}
+        },
         camisa: jogador.camisa
     });
 
@@ -50,9 +58,10 @@ export default function ModalJogador({
             const estatisticas = { ...prev.estatisticas } as Estatisticas;
 
             if (!estatisticas[groupKey]) {
-                estatisticas[groupKey] = {};
+                estatisticas[groupKey] = {} as any;
             }
-            estatisticas[groupKey][fieldKey] = value === ""
+
+            (estatisticas[groupKey] as any)[fieldKey] = value === ""
                 ? 0
                 : (fieldKey.startsWith("fg") ? value : Number(value));
 
@@ -81,7 +90,10 @@ export default function ModalJogador({
 
         updateJogadorMutation.mutate({
             id: jogador.id,
-            data: apiData
+            data: {
+                ...apiData,
+                estatisticas: formData.estatisticas as Estatisticas
+            }
         }, {
             onSuccess: () => {
                 closeModal();
@@ -232,8 +244,8 @@ export default function ModalJogador({
                                                         <div className="flex items-center bg-[#272731] px-2 py-0.5 rounded text-xs">
                                                             <input
                                                                 type="text"
-                                                                name={`${group.id}.${field.id}`} // @ts-ignore
-                                                                value={formData.estatisticas[group.id as keyof Estatisticas]?.[field.id as any] ?? 0}
+                                                                name={`${group.id}.${field.id}`}
+                                                                value={(formData.estatisticas as any)?.[group.id]?.[field.id] ?? 0}
                                                                 onChange={handleStatisticChange}
                                                                 className="w-16 bg-transparent text-right border-none focus:outline-none text-white"
                                                             />
@@ -244,8 +256,8 @@ export default function ModalJogador({
                                                             className="bg-[#63E300] h-1.5 rounded-full"
                                                             style={{
                                                                 width: `${Math.min(
-                                                                    100, 
-                                                                    (Number(formData.estatisticas[group.id as keyof Estatisticas]?.[field.id as any]) /
+                                                                    100,
+                                                                    (Number((formData.estatisticas as any)?.[group.id]?.[field.id] || 0) /
                                                                         (field.id.includes('jardasde') ? 500 : 100)) * 100
                                                                 )}%`
                                                             }}
