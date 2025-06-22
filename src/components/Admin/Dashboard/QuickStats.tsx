@@ -14,8 +14,8 @@ export const QuickStats: React.FC = () => {
       value: stats?.campeonatosAtivos || 0,
       icon: Trophy,
       color: 'blue' as const,
-      change: '+2 este mês',
-      changeType: 'positive' as const
+      change: stats?.crescimentoCampeonatos ? `${stats.crescimentoCampeonatos > 0 ? '+' : ''}${stats.crescimentoCampeonatos}% este mês` : undefined,
+      changeType: (stats?.crescimentoCampeonatos || 0) >= 0 ? 'positive' as const : 'negative' as const
     },
     {
       title: 'Jogos Esta Semana',
@@ -29,7 +29,7 @@ export const QuickStats: React.FC = () => {
       value: stats?.timesParticipantes || 0,
       icon: Users,
       color: 'purple' as const,
-      change: `${stats?.novosTimes || 0} novos`,
+      change: stats?.novosTimes ? `${stats.novosTimes} novos` : undefined,
       changeType: 'positive' as const
     },
     {

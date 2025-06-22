@@ -6,8 +6,6 @@ import { queryKeys } from './queryKeys'
 import { FiltroJogos, Jogo } from '@/types'
 import { CampeonatosService } from '@/services/campeonatos.service'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
-
 // ==================== HOOKS DE QUERY ====================
 
 // Hook para buscar jogos com filtros
@@ -35,23 +33,11 @@ export function useJogo(jogoId: number) {
 export function useJogosTime(timeId: number, campeonatoId?: number, limit: number = 20) {
   return useQuery({
     queryKey: [...queryKeys.jogos.all, 'jogos-time', timeId, campeonatoId, limit] as const,
-    queryFn: async (): Promise<Jogo[]> => {
-      const params = new URLSearchParams()
-      params.append('timeId', String(timeId))
-      params.append('limit', String(limit))
-      
-      if (campeonatoId) {
-        params.append('campeonatoId', String(campeonatoId))
-      }
-
-      const response = await fetch(`${API_BASE_URL}/campeonatos/jogos?${params.toString()}`)
-      
-      if (!response.ok) {
-        throw new Error('Erro ao buscar jogos do time')
-      }
-      
-      return response.json()
-    },
+    queryFn: () => CampeonatosService.getJogos({
+      timeId,
+      campeonatoId,
+      limit
+    }),
     enabled: !!timeId,
     staleTime: 1000 * 60 * 3,
   })
