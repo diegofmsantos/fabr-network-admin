@@ -1298,3 +1298,317 @@ export type {
   StatCategory as Category,
   StatKey as Key
 }
+
+// ==================== TIPOS PARA SUPERLIGA ====================
+
+export type TipoConferencia = 'SUDESTE' | 'SUL' | 'NORDESTE' | 'CENTRO_NORTE'
+
+export type TipoRegional = 
+  | 'SERRAMAR' | 'CANASTRA' | 'CANTAREIRA' // Sudeste
+  | 'ARAUCARIA' | 'PAMPA' // Sul  
+  | 'ATLANTICO' // Nordeste
+  | 'CERRADO' | 'AMAZONIA' // Centro-Norte
+
+export interface ConferenciaConfig {
+  tipo: TipoConferencia
+  nome: string
+  icone: string
+  totalTimes: number
+  regionais: RegionalConfig[]
+  playoffConfig: PlayoffConfig
+}
+
+export interface RegionalConfig {
+  tipo: TipoRegional
+  nome: string
+  conferencia: TipoConferencia
+  timesPorRegional: number
+  times: number[]
+}
+
+export interface PlayoffConfig {
+  semifinalDireta: number // quantos times vão direto
+  wildcardVagas: number // quantas vagas de wild card
+  estrutura: 'CONFERENCIA' | 'REGIONAL' | 'GERAL'
+}
+
+// ==================== CONFIGURAÇÃO DA SUPERLIGA ====================
+
+export const SUPERLIGA_CONFIG: ConferenciaConfig[] = [
+  {
+    tipo: 'SUDESTE',
+    nome: 'Conferência Sudeste',
+    icone: '🏭',
+    totalTimes: 12,
+    regionais: [
+      {
+        tipo: 'SERRAMAR',
+        nome: 'Regional Serramar',
+        conferencia: 'SUDESTE',
+        timesPorRegional: 4,
+        times: [] // IDs dos times
+      },
+      {
+        tipo: 'CANASTRA', 
+        nome: 'Regional Canastra',
+        conferencia: 'SUDESTE',
+        timesPorRegional: 4,
+        times: []
+      },
+      {
+        tipo: 'CANTAREIRA',
+        nome: 'Regional Cantareira', 
+        conferencia: 'SUDESTE',
+        timesPorRegional: 4,
+        times: []
+      }
+    ],
+    playoffConfig: {
+      semifinalDireta: 2, // 2 melhores 1º colocados
+      wildcardVagas: 4, // 4 vagas de wild card
+      estrutura: 'REGIONAL'
+    }
+  },
+  {
+    tipo: 'SUL',
+    nome: 'Conferência Sul',
+    icone: '🧊',
+    totalTimes: 8,
+    regionais: [
+      {
+        tipo: 'ARAUCARIA',
+        nome: 'Regional Araucária',
+        conferencia: 'SUL',
+        timesPorRegional: 4,
+        times: []
+      },
+      {
+        tipo: 'PAMPA',
+        nome: 'Regional Pampa',
+        conferencia: 'SUL', 
+        timesPorRegional: 4,
+        times: []
+      }
+    ],
+    playoffConfig: {
+      semifinalDireta: 2, // 1º de cada regional
+      wildcardVagas: 4, // 2º e 3º de cada
+      estrutura: 'REGIONAL'
+    }
+  },
+  {
+    tipo: 'NORDESTE',
+    nome: 'Conferência Nordeste',
+    icone: '🌵',
+    totalTimes: 6,
+    regionais: [
+      {
+        tipo: 'ATLANTICO',
+        nome: 'Regional Atlântico',
+        conferencia: 'NORDESTE',
+        timesPorRegional: 6,
+        times: []
+      }
+    ],
+    playoffConfig: {
+      semifinalDireta: 2, // 1º e 2º colocados
+      wildcardVagas: 4, // 3º, 4º, 5º e 6º
+      estrutura: 'GERAL'
+    }
+  },
+  {
+    tipo: 'CENTRO_NORTE',
+    nome: 'Conferência Centro-Norte',
+    icone: '🌲',
+    totalTimes: 6,
+    regionais: [
+      {
+        tipo: 'CERRADO',
+        nome: 'Regional Cerrado',
+        conferencia: 'CENTRO_NORTE',
+        timesPorRegional: 3,
+        times: []
+      },
+      {
+        tipo: 'AMAZONIA', 
+        nome: 'Regional Amazônia',
+        conferencia: 'CENTRO_NORTE',
+        timesPorRegional: 3,
+        times: []
+      }
+    ],
+    playoffConfig: {
+      semifinalDireta: 0, // Nenhum vai direto
+      wildcardVagas: 4, // 1º e 2º de cada regional
+      estrutura: 'REGIONAL'
+    }
+  }
+]
+
+// ==================== TIMES DA SUPERLIGA ====================
+
+export const TIMES_SUPERLIGA = {
+  // Conferência Sudeste - Regional Serramar
+  SERRAMAR: [
+    'Vasco Almirantes',
+    'Flamengo Imperadores', 
+    'Locomotiva FA',
+    'Tritões FA'
+  ],
+  
+  // Conferência Sudeste - Regional Canastra
+  CANASTRA: [
+    'Galo FA',
+    'Moura Lacerda Dragons',
+    'Rio Preto Weilers', 
+    'Spartans FA'
+  ],
+  
+  // Conferência Sudeste - Regional Cantareira
+  CANTAREIRA: [
+    'Corinthians Steamrollers',
+    'Cruzeiro FA',
+    'Guarulhos Rhynos',
+    'Ocelots FA'
+  ],
+  
+  // Conferência Sul - Regional Araucária  
+  ARAUCARIA: [
+    'Timbó Rex',
+    'Coritiba Crocodiles',
+    'Calvary Cavaliers',
+    'Brown Spiders'
+  ],
+  
+  // Conferência Sul - Regional Pampa
+  PAMPA: [
+    'Santa Maria Soldiers',
+    'Juventude FA', 
+    'Bravos FA',
+    'Istepôs FA'
+  ],
+  
+  // Conferência Nordeste - Regional Atlântico
+  ATLANTICO: [
+    'Fortaleza Tritões',
+    'Ceará Sabres',
+    'João Pessoa Espectros',
+    'Recife Mariners',
+    'Cavalaria 2 de Julho',
+    'Caruaru Wolves'
+  ],
+  
+  // Conferência Centro-Norte - Regional Cerrado
+  CERRADO: [
+    'Rondonópolis Hawks',
+    'Cuiabá Arsenal', 
+    'Tubarões do Cerrado'
+  ],
+  
+  // Conferência Centro-Norte - Regional Amazônia
+  AMAZONIA: [
+    'Porto Velho Miners',
+    'Manaus FA',
+    'Manaus Cavaliers'
+  ]
+}
+
+// ==================== TIPOS PARA PLAYOFFS ====================
+
+export interface PlayoffBracket {
+  conferencia: TipoConferencia
+  wildcards: WildCardGame[]
+  semifinais: SemifinalGame[]
+  final: FinalGame
+}
+
+export interface WildCardGame {
+  id: string
+  nome: string
+  time1: PlayoffTeam
+  time2: PlayoffTeam
+  vencedor?: PlayoffTeam
+}
+
+export interface SemifinalGame {
+  id: string
+  nome: string
+  time1: PlayoffTeam | 'VencedorWC'
+  time2: PlayoffTeam | 'VencedorWC'
+  vencedor?: PlayoffTeam
+}
+
+export interface FinalGame {
+  id: string
+  nome: string
+  time1: PlayoffTeam | 'VencedorSF'
+  time2: PlayoffTeam | 'VencedorSF'
+  vencedor?: PlayoffTeam
+}
+
+export interface PlayoffTeam {
+  timeId: number
+  nome: string
+  sigla: string
+  regional: TipoRegional
+  posicaoRegional: number
+  classificacao: 'DIRETO' | 'WILD_CARD'
+}
+
+// ==================== FASE NACIONAL ====================
+
+export interface SemifinalNacional {
+  id: string
+  nome: string
+  time1: {
+    conferencia: TipoConferencia
+    campeao: PlayoffTeam
+  }
+  time2: {
+    conferencia: TipoConferencia  
+    campeao: PlayoffTeam
+  }
+  vencedor?: PlayoffTeam
+}
+
+export interface FinalNacional {
+  id: string
+  nome: 'Grande Decisão Nacional'
+  semifinal1: SemifinalNacional
+  semifinal2: SemifinalNacional
+  vencedor?: PlayoffTeam
+}
+
+export interface SuperligaBracket {
+  temporada: string
+  status: 'CONFIGURANDO' | 'FASE_GRUPOS' | 'PLAYOFFS' | 'FINALIZADO'
+  
+  // Playoffs por conferência
+  playoffsSudeste: PlayoffBracket
+  playoffsSul: PlayoffBracket
+  playoffsNordeste: PlayoffBracket
+  playoffsCentroNorte: PlayoffBracket
+  
+  // Fase Nacional
+  semifinalNacional1: SemifinalNacional
+  semifinalNacional2: SemifinalNacional
+  finalNacional: FinalNacional
+}
+
+// ==================== UTILITÁRIOS ====================
+
+export function getConferenciaConfig(tipo: TipoConferencia): ConferenciaConfig {
+  return SUPERLIGA_CONFIG.find(c => c.tipo === tipo)!
+}
+
+export function getRegionalConfig(tipo: TipoRegional): RegionalConfig {
+  for (const conf of SUPERLIGA_CONFIG) {
+    const regional = conf.regionais.find(r => r.tipo === tipo)
+    if (regional) return regional
+  }
+  throw new Error(`Regional ${tipo} não encontrada`)
+}
+
+export function getTimesByRegional(regional: TipoRegional): string[] {
+  return TIMES_SUPERLIGA[regional] || []
+}

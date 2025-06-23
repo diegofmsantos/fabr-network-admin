@@ -9,13 +9,12 @@ import { Plus, Filter, Search, Download } from 'lucide-react'
 import { CampeonatoCard } from '@/components/Admin/CampeonatoCard'
 
 type FilterStatus = 'todos' | 'NAO_INICIADO' | 'EM_ANDAMENTO' | 'FINALIZADO'
-type FilterTipo = 'todos' | 'REGULAR' | 'PLAYOFFS' | 'COPA'
 
 export default function AdminCampeonatos() {
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('todos')
-  const [filterTipo, setFilterTipo] = useState<FilterTipo>('todos')
+  const [filterTipo, setFilterTipo] = useState('todos')
   const [filterTemporada, setFilterTemporada] = useState('2025')
 
   const { data: campeonatos = [], isLoading, refetch } = useCampeonatos({
@@ -103,7 +102,7 @@ export default function AdminCampeonatos() {
 
           <select
             value={filterTipo}
-            onChange={(e) => setFilterTipo(e.target.value as FilterTipo)}
+            onChange={(e) => setFilterTipo(e.target.value)}
             className="block p-1 w-full rounded-md bg-[#1C1C24] border-gray-700 text-white focus:border-[#63E300] focus:ring-[#63E300]"
           >
             <option value="todos">Todos os Tipos</option>

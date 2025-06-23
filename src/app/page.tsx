@@ -16,10 +16,10 @@ export default function HomePage() {
       route: '/times'
     },
     {
-      title: 'Campeonatos',
-      description: 'Gerencie campeonatos',
+      title: 'Superliga',
+      description: 'Gerencie a Superliga de Futebol Americano',
       icon: '/window.svg',
-      route: '/admin'
+      route: '/admin/superliga'
     },
     {
       title: 'Matérias',
