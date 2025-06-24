@@ -19,7 +19,7 @@ export default function HomePage() {
       title: 'Superliga',
       description: 'Gerencie a Superliga de Futebol Americano',
       icon: '/window.svg',
-      route: '/admin/superliga'
+      route: '/superliga'
     },
     {
       title: 'Matérias',

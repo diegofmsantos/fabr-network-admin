@@ -2,9 +2,8 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { createSlug, findPlayerBySlug, getPlayerSlug, getTeamSlug } from '@/utils/helpers/formatUrl'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { queryKeys } from './queryKeys'
-import { Jogador, Materia, Time } from '@/types'
 import { MateriasService } from '@/services/materias.service'
 import { useTimes } from '@/hooks/useTimes'
 import { useJogadores } from '@/hooks/useJogadores'

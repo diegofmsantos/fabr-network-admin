@@ -12,11 +12,9 @@ import ModalTime from "@/components/Modal/ModalTime";
 import ModalJogador from "@/components/Modal/ModalJogador";
 import ModalSucesso from "./Modal/ModalSucesso"
 import { camposJogador, camposTime, estatisticas } from "../utils/campos"
-import Image from "next/image"
 import { HeaderGeneral } from "./HeaderGeneral"
-import { ImageService } from "@/utils/services/ImageService"
 import { Time, Estatisticas, Jogador } from "@/types"
-import { useTimes, useCreateTime, useUpdateTime, useDeleteTime } from '@/hooks/useTimes'
+import { useTimes, useCreateTime } from '@/hooks/useTimes'
 import { useCreateJogador } from '@/hooks/useJogadores'
 
 type TimeFormData = z.infer<typeof TimeSchema>

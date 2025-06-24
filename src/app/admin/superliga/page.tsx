@@ -1,24 +1,12 @@
-// src/app/admin/superliga/page.tsx
 "use client"
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { 
-  Trophy, 
-  Plus, 
-  Calendar, 
-  Users, 
-  Play, 
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  Filter,
-  Search
-} from 'lucide-react'
-import { useCampeonatos } from '@/hooks/useCampeonatos'
+import { Trophy, Plus, Calendar, Users, Play, Clock, CheckCircle, AlertCircle } from 'lucide-react'
 import { Loading } from '@/components/ui/Loading'
 import { useCriarSuperliga } from '@/hooks/useSuperliga'
+import { useCampeonatos } from '@/hooks/useCampeonatos'
 
 export default function SuperligaPage() {
   const router = useRouter()

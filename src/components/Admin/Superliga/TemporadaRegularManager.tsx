@@ -1,4 +1,3 @@
-// src/components/Admin/Superliga/TemporadaRegularManager.tsx
 "use client"
 
 import React, { useState } from 'react'
@@ -6,8 +5,7 @@ import { Calendar, Play, Pause, CheckCircle, Clock, AlertTriangle, Users, Eye, E
 import { Loading } from '@/components/ui/Loading'
 import Image from 'next/image'
 import { ImageService } from '@/utils/services/ImageService'
-import { useJogos } from '@/hooks/useCampeonatos'
-import { useUpdateJogo } from '@/hooks/useJogos'
+import { useJogos, useUpdateJogo } from '@/hooks/useJogos'
 import { useGerarJogosTemporadaRegular } from '@/hooks/useSuperliga'
 
 interface TemporadaRegularManagerProps {

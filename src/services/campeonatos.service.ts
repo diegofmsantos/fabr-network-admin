@@ -1,4 +1,3 @@
-// src/services/campeonatos.service.ts
 import { Campeonato, ClassificacaoGrupo, CriarCampeonatoRequest, FiltroJogos, Grupo, Jogo } from '@/types';
 import { BaseService } from './base.service'
 

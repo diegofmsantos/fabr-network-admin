@@ -1,25 +1,12 @@
-// src/components/Admin/Superliga/ConferenciasManager.tsx
 "use client"
 
 import React, { useState } from 'react'
-import { 
-  Users, 
-  MapPin, 
-  Trophy,
-  Settings,
-  Eye,
-  EyeOff,
-  ChevronDown,
-  ChevronUp,
-  Shuffle,
-  AlertCircle,
-  CheckCircle
-} from 'lucide-react'
-import { useGrupos, useClassificacao } from '@/hooks/useCampeonatos'
+import { Users, MapPin, Trophy, Settings, Eye, EyeOff, ChevronDown, ChevronUp, Shuffle, AlertCircle, CheckCircle } from 'lucide-react'
 import { useTimes } from '@/hooks/useTimes'
 import { Loading } from '@/components/ui/Loading'
 import Image from 'next/image'
 import { ImageService } from '@/utils/services/ImageService'
+import { useClassificacao, useGrupos } from '@/hooks/useCampeonatos'
 
 interface ConferenciasManagerProps {
   superligaId: number

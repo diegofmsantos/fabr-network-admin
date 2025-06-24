@@ -317,7 +317,6 @@ export interface Campeonato extends BaseEntity {
   formato: FormatoCampeonato
   
   // Relacionamentos
-  grupos: Grupo[]
   jogos?: Jogo[]
   
   // Contadores
@@ -327,26 +326,6 @@ export interface Campeonato extends BaseEntity {
   }
 }
 
-export interface Grupo extends BaseEntity {
-  nome: string
-  campeonatoId: number
-  ordem: number
-  
-  // Relacionamentos
-  campeonato?: Campeonato
-  times: GrupoTime[]
-  classificacoes: ClassificacaoGrupo[]
-  jogos?: Jogo[]
-}
-
-export interface GrupoTime extends BaseEntity {
-  grupoId: number
-  timeId: number
-  
-  // Relacionamentos
-  grupo?: Grupo
-  time: Time
-}
 
 export interface Jogo extends BaseEntity {
   campeonatoId: number
@@ -378,28 +357,7 @@ export interface Jogo extends BaseEntity {
   estatisticas?: EstatisticaJogo[]
 }
 
-export interface ClassificacaoGrupo extends BaseEntity {
-  grupoId: number
-  timeId: number
-  posicao: number
-  jogos: number
-  vitorias: number
-  empates: number
-  derrotas: number
-  pontosPro: number
-  pontosContra: number
-  saldoPontos: number
-  pontos: number // Pontos na tabela (vitória = 3, empate = 1)
-  aproveitamento: number
-  
-  // Relacionamentos
-  time: Time
-  grupo?: {
-    id: number
-    nome: string
-    ordem: number
-  }
-}
+
 
 export interface EstatisticaJogo extends BaseEntity {
   jogoId: number
@@ -991,7 +949,6 @@ export interface JogoCardProps {
 }
 
 export interface TabelaClassificacaoProps {
-  classificacao: ClassificacaoGrupo[]
   grupoNome?: string
   showGroup?: boolean
   compact?: boolean

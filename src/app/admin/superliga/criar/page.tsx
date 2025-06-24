@@ -1,18 +1,9 @@
-// src/app/admin/superliga/criar/page.tsx
 "use client"
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { 
-  ArrowLeft, 
-  Trophy, 
-  Calendar, 
-  Users, 
-  CheckCircle,
-  AlertCircle,
-  Info
-} from 'lucide-react'
+import { ArrowLeft, Trophy, CheckCircle, AlertCircle, Info } from 'lucide-react'
 import { SUPERLIGA_CONFIG } from '@/types'
 import { useConfigurarConferencias, useCriarSuperliga, useDistribuirTimes } from '@/hooks/useSuperliga'
 

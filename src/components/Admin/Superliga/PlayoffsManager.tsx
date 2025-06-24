@@ -1,4 +1,3 @@
-// src/components/Admin/Superliga/PlayoffsManager.tsx
 "use client"
 
 import React, { useState } from 'react'
