@@ -4,9 +4,6 @@ import { queryKeys } from './queryKeys'
 import { useNotifications } from './useNotifications'
 import { Campeonato, CriarCampeonatoRequest, FiltroJogos } from '@/types';
 
-// ==================== CAMPEONATOS ====================
-
-// Hook para buscar campeonatos
 export function useCampeonatos(filters?: { temporada?: string; tipo?: string; status?: string }) {
   return useQuery({
     queryKey: queryKeys.campeonatos.list(filters || {}),
@@ -18,7 +15,6 @@ export function useCampeonatos(filters?: { temporada?: string; tipo?: string; st
   })
 }
 
-// Hook para buscar um campeonato específico
 export function useCampeonato(id: number) {
   return useQuery({
     queryKey: queryKeys.campeonatos.detail(id),
@@ -29,7 +25,6 @@ export function useCampeonato(id: number) {
   })
 }
 
-// Hook para criar campeonato
 export function useCreateCampeonato() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -37,12 +32,10 @@ export function useCreateCampeonato() {
   return useMutation({
     mutationFn: (data: CriarCampeonatoRequest) => CampeonatosService.createCampeonato(data),
     onSuccess: (newCampeonato) => {
-      // Invalidar lista de campeonatos
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.campeonatos.lists() 
       })
       
-      // Adicionar ao cache
       queryClient.setQueryData(queryKeys.campeonatos.detail(newCampeonato.id), newCampeonato)
       
       notifications.success('Campeonato criado!', `${newCampeonato.nome} foi criado com sucesso`)
@@ -53,7 +46,6 @@ export function useCreateCampeonato() {
   })
 }
 
-// Hook para atualizar campeonato
 export function useUpdateCampeonato() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -62,10 +54,8 @@ export function useUpdateCampeonato() {
     mutationFn: ({ id, data }: { id: number; data: Partial<Campeonato> }) =>
       CampeonatosService.updateCampeonato(id, data),
     onSuccess: (updatedCampeonato, { id }) => {
-      // Atualizar cache específico
       queryClient.setQueryData(queryKeys.campeonatos.detail(id), updatedCampeonato)
       
-      // Invalidar lista de campeonatos
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.campeonatos.lists() 
       })
@@ -78,7 +68,6 @@ export function useUpdateCampeonato() {
   })
 }
 
-// Hook para deletar campeonato
 export function useDeleteCampeonato() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -86,12 +75,10 @@ export function useDeleteCampeonato() {
   return useMutation({
     mutationFn: CampeonatosService.deleteCampeonato,
     onSuccess: (_, id) => {
-      // Remover do cache
       queryClient.removeQueries({ 
         queryKey: queryKeys.campeonatos.detail(id) 
       })
       
-      // Invalidar listas
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.campeonatos.lists() 
       })
@@ -104,9 +91,6 @@ export function useDeleteCampeonato() {
   })
 }
 
-// ==================== GRUPOS ====================
-
-// Hook para buscar grupos do campeonato
 export function useGrupos(campeonatoId: number) {
   return useQuery({
     queryKey: queryKeys.campeonatos.grupos(campeonatoId),
@@ -116,20 +100,16 @@ export function useGrupos(campeonatoId: number) {
   })
 }
 
-// ==================== JOGOS ====================
-
-// Hook para buscar jogos
 export function useJogos(filters: FiltroJogos) {
   return useQuery({
     queryKey: queryKeys.jogos.list(filters),
     queryFn: () => CampeonatosService.getJogos(filters),
-    staleTime: 1000 * 60 * 2, // Jogos mudam mais frequentemente
+    staleTime: 1000 * 60 * 2, 
     gcTime: 1000 * 60 * 5,
     retry: 2,
   })
 }
 
-// Hook para buscar um jogo específico
 export function useJogo(id: number) {
   return useQuery({
     queryKey: queryKeys.jogos.detail(id),
@@ -139,17 +119,15 @@ export function useJogo(id: number) {
   })
 }
 
-// Hook para próximos jogos
 export function useProximosJogos(campeonatoId: number, limit?: number) {
   return useQuery({
     queryKey: queryKeys.campeonatos.proximosJogos(campeonatoId, limit),
     queryFn: () => CampeonatosService.getProximosJogos(campeonatoId, limit),
     enabled: !!campeonatoId,
-    staleTime: 1000 * 60 * 1, // 1 minuto para próximos jogos
+    staleTime: 1000 * 60 * 1,
   })
 }
 
-// Hook para últimos resultados
 export function useUltimosResultados(campeonatoId: number, limit?: number) {
   return useQuery({
     queryKey: queryKeys.campeonatos.ultimosResultados(campeonatoId, limit),
@@ -159,9 +137,6 @@ export function useUltimosResultados(campeonatoId: number, limit?: number) {
   })
 }
 
-// ==================== CLASSIFICAÇÃO ====================
-
-// Hook para buscar classificação do campeonato
 export function useClassificacao(campeonatoId: number) {
   return useQuery({
     queryKey: queryKeys.classificacao.campeonato(campeonatoId),
@@ -171,7 +146,6 @@ export function useClassificacao(campeonatoId: number) {
   })
 }
 
-// Hook para classificação de um grupo específico
 export function useClassificacaoGrupo(grupoId: number) {
   return useQuery({
     queryKey: queryKeys.classificacao.grupo(grupoId),
@@ -181,9 +155,6 @@ export function useClassificacaoGrupo(grupoId: number) {
   })
 }
 
-// ==================== MUTATIONS UTILITÁRIAS ====================
-
-// Hook para gerar jogos
 export function useGerarJogos() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -191,7 +162,6 @@ export function useGerarJogos() {
   return useMutation({
     mutationFn: (campeonatoId: number) => CampeonatosService.gerarJogos(campeonatoId),
     onSuccess: (result, campeonatoId) => {
-      // Invalidar dados relacionados ao campeonato
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.campeonatos.detail(campeonatoId) 
       })
@@ -210,7 +180,6 @@ export function useGerarJogos() {
   })
 }
 
-// Hook para recalcular classificação
 export function useRecalcularClassificacao() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -218,7 +187,6 @@ export function useRecalcularClassificacao() {
   return useMutation({
     mutationFn: (grupoId: number) => CampeonatosService.recalcularClassificacao(grupoId),
     onSuccess: (_, grupoId) => {
-      // Invalidar classificações
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.classificacao.grupo(grupoId) 
       })

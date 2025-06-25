@@ -1,4 +1,3 @@
-// src/utils/errorHandler.ts
 export class AdminError extends Error {
   constructor(
     message: string,

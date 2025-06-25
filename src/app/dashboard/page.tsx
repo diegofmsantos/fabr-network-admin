@@ -165,14 +165,11 @@ export default function DashboardPage() {
             titulo: "Top 10 Jogadores por Estatística",
             descricao: "Exibe os jogadores com melhores estatísticas em diversas categorias",
             executar: (times, jogadores) => {
-                // Função auxiliar para obter o valor da estatística
                 const getEstatistica = (jogador: Jogador, grupo: string, campo: string) => {
                     if (!jogador.estatisticas) return 0
-                    // @ts-ignore
                     return jogador.estatisticas[grupo]?.[campo] || 0
                 }
 
-                // Categorias de estatísticas para analisar
                 const categorias = [
                     { grupo: 'passe', campo: 'jardas_de_passe', titulo: 'Jardas de Passe' },
                     { grupo: 'passe', campo: 'td_passados', titulo: 'Touchdowns Passados' },

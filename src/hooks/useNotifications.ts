@@ -21,7 +21,7 @@ export function useNotifications() {
     }
 
     return newNotification.id
-  }, [])  // ← Agora não depende de removeNotification
+  }, [])  
 
   const removeNotification = useCallback((id: string) => {
     setNotifications(prev => prev.filter(notification => notification.id !== id))

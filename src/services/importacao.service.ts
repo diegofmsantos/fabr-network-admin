@@ -1,37 +1,31 @@
-import { EstatisticasResponse, ImportacaoResponse, TransferenciasResponse } from '@/types'
 import { BaseService } from './base.service'
 
-
 export class ImportacaoService extends BaseService {
-  
-  // ==================== IMPORTAÇÃO DE TIMES ====================
-  static async importarTimes(arquivo: File): Promise<ImportacaoResponse> {
+
+  static async importarTimes(arquivo: File) {
     const service = new ImportacaoService()
-    return service.upload<ImportacaoResponse>('/admin/importar-times', arquivo)
+    return service.upload('/admin/importar-times', arquivo)
   }
 
-  // ==================== IMPORTAÇÃO DE JOGADORES ====================
-  static async importarJogadores(arquivo: File): Promise<ImportacaoResponse> {
+  static async importarJogadores(arquivo: File) {
     const service = new ImportacaoService()
-    return service.upload<ImportacaoResponse>('/admin/importar-jogadores', arquivo)
+    return service.upload('/admin/importar-jogadores', arquivo)
   }
 
-  // ==================== ATUALIZAÇÃO DE ESTATÍSTICAS ====================
   static async atualizarEstatisticas(
-    arquivo: File, 
-    idJogo: string, 
+    arquivo: File,
+    idJogo: string,
     dataJogo: string
-  ): Promise<EstatisticasResponse> {
+  ) {
     const service = new ImportacaoService()
-    return service.upload<EstatisticasResponse>('/admin/atualizar-estatisticas', arquivo, {
+    return service.upload('/admin/atualizar-estatisticas', arquivo, {
       id_jogo: idJogo,
       data_jogo: dataJogo
     })
   }
 
-  // ==================== INICIAR NOVA TEMPORADA ====================
   static async iniciarTemporada(
-    ano: string, 
+    ano: string,
     alteracoes: {
       timeChanges?: Array<{
         timeId: number
@@ -61,14 +55,13 @@ export class ImportacaoService extends BaseService {
         novaCamisa?: string
       }>
     }
-  ): Promise<TransferenciasResponse> {
+  ) {
     const service = new ImportacaoService()
-    return service.post<TransferenciasResponse>(`/admin/iniciar-temporada/${ano}`, alteracoes)
+    return service.post(`/admin/iniciar-temporada/${ano}`, alteracoes)
   }
 
-  // ==================== BUSCAR TRANSFERÊNCIAS SALVAS ====================
   static async getTransferencias(
-    temporadaOrigem: string, 
+    temporadaOrigem: string,
     temporadaDestino: string
   ): Promise<any> {
     const service = new ImportacaoService()
@@ -78,7 +71,6 @@ export class ImportacaoService extends BaseService {
     })
   }
 
-  // ==================== VALIDAR PLANILHA (OPCIONAL) ====================
   static async validarPlanilhaTimes(arquivo: File): Promise<any> {
     const service = new ImportacaoService()
     return service.upload('/admin/validar-times', arquivo)
@@ -89,9 +81,6 @@ export class ImportacaoService extends BaseService {
     return service.upload('/admin/validar-jogadores', arquivo)
   }
 
-  // ==================== MÉTODOS AUXILIARES ====================
-  
-  // Verificar se uma temporada existe
   static async verificarTemporada(temporada: string): Promise<boolean> {
     const service = new ImportacaoService()
     try {
@@ -102,7 +91,6 @@ export class ImportacaoService extends BaseService {
     }
   }
 
-  // Obter estatísticas de importação
   static async getEstatisticasImportacao(temporada: string): Promise<{
     times: number
     jogadores: number

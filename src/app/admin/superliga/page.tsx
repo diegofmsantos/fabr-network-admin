@@ -13,20 +13,17 @@ export default function SuperligaPage() {
   const [filtroTemporada, setFiltroTemporada] = useState<string>('todas')
   const [isCreating, setIsCreating] = useState(false)
 
-  // Buscar apenas Superligas (isSuperliga: true)
   const { data: superligas = [], isLoading, refetch } = useCampeonatos({
     filters: { isSuperliga: true }
   })
 
   const { mutate: criarSuperliga, isPending } = useCriarSuperliga()
 
-  // Filtrar por temporada
   const superligasFiltradas = superligas.filter(superliga => {
     if (filtroTemporada === 'todas') return true
     return superliga.temporada === filtroTemporada
   })
 
-  // Temporadas disponíveis
   const temporadas = [...new Set(superligas.map(s => s.temporada))].sort((a, b) => b.localeCompare(a))
 
   const handleCriarSuperliga = () => {
@@ -90,7 +87,6 @@ export default function SuperligaPage() {
 
   return (
     <div className="min-h-screen bg-[#1C1C24] p-6">
-      {/* Header */}
       <div className="mb-8">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
@@ -113,7 +109,6 @@ export default function SuperligaPage() {
         </div>
       </div>
 
-      {/* Filtros */}
       <div className="bg-[#272731] rounded-lg p-4 mb-6 border border-gray-700">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
@@ -136,7 +131,6 @@ export default function SuperligaPage() {
         </div>
       </div>
 
-      {/* Lista de Superligas */}
       {superligasFiltradas.length === 0 ? (
         <div className="bg-[#272731] rounded-lg border border-gray-700 p-12 text-center">
           <Trophy className="w-16 h-16 text-gray-500 mx-auto mb-4" />
@@ -189,7 +183,6 @@ export default function SuperligaPage() {
                   </span>
                 </div>
 
-                {/* Informações das Conferências */}
                 <div className="mb-4">
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="flex items-center text-gray-400">
@@ -211,7 +204,6 @@ export default function SuperligaPage() {
                   </div>
                 </div>
 
-                {/* Estatísticas */}
                 <div className="space-y-3 mb-4">
                   <div className="flex items-center text-sm text-gray-300">
                     <Calendar className="w-4 h-4 mr-2 text-gray-500" />
@@ -236,14 +228,12 @@ export default function SuperligaPage() {
                   )}
                 </div>
 
-                {/* Descrição */}
                 {superliga.descricao && (
                   <p className="text-sm text-gray-400 line-clamp-2 mb-4">
                     {superliga.descricao}
                   </p>
                 )}
 
-                {/* Footer */}
                 <div className="pt-4 border-t border-gray-600">
                   <div className="flex justify-between items-center">
                     <span className="text-xs text-gray-500">
@@ -260,7 +250,6 @@ export default function SuperligaPage() {
         </div>
       )}
 
-      {/* Estatísticas Gerais */}
       {superligas.length > 0 && (
         <div className="mt-8 bg-[#272731] rounded-lg border border-gray-700 p-6">
           <h3 className="text-lg font-semibold text-white mb-4">Estatísticas Gerais</h3>

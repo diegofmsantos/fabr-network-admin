@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react'
 import { Trophy, Crown, Target, Play, CheckCircle, Clock, AlertTriangle, Zap, Eye, Edit, RotateCcw, Download } from 'lucide-react'
-
 import { Loading } from '@/components/ui/Loading'
 import Image from 'next/image'
 import { ImageService } from '@/utils/services/ImageService'
@@ -99,7 +98,6 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
       <div className={`bg-[#272731] rounded-lg border border-gray-700 p-${isSmall ? '3' : '4'} hover:border-[#63E300] transition-colors cursor-pointer`}
            onClick={() => { setSelectedJogo(jogo); setShowModal(true) }}>
         
-        {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <span className={`text-${isSmall ? 'xs' : 'sm'} text-gray-400`}>
@@ -125,9 +123,7 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
           </div>
         </div>
 
-        {/* Times */}
         <div className="space-y-2">
-          {/* Time 1 */}
           <div className="flex items-center justify-between p-2 bg-[#1C1C24] rounded">
             <div className="flex items-center gap-2 flex-1 min-w-0">
               {jogo.timeClassificado1 ? (
@@ -160,12 +156,10 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
             )}
           </div>
 
-          {/* VS */}
           <div className="text-center">
             <span className="text-gray-500 font-bold text-xs">VS</span>
           </div>
 
-          {/* Time 2 */}
           <div className="flex items-center justify-between p-2 bg-[#1C1C24] rounded">
             <div className="flex items-center gap-2 flex-1 min-w-0">
               {jogo.timeClassificado2 ? (
@@ -199,7 +193,6 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
           </div>
         </div>
 
-        {/* Data */}
         {jogo.dataJogo && (
           <div className="mt-3 text-center">
             <span className={`text-gray-400 ${isSmall ? 'text-xs' : 'text-sm'}`}>
@@ -218,7 +211,6 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
 
     return (
       <div className="space-y-6">
-        {/* Wild Cards */}
         {wildCards.length > 0 && (
           <div>
             <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
@@ -233,7 +225,6 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
           </div>
         )}
 
-        {/* Semifinais */}
         {semifinais.length > 0 && (
           <div>
             <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
@@ -248,7 +239,6 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
           </div>
         )}
 
-        {/* Final */}
         {final && (
           <div>
             <h4 className="text-white font-semibold mb-3 flex items-center gap-2">
@@ -279,7 +269,6 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
 
     return (
       <div className="space-y-8">
-        {/* Semifinais Nacionais */}
         {semifinais.length > 0 && (
           <div>
             <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
@@ -294,7 +283,6 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
           </div>
         )}
 
-        {/* Final Nacional */}
         {final && (
           <div>
             <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
@@ -335,7 +323,6 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Controles */}
       <div className="bg-[#272731] rounded-lg border border-gray-700 p-4">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
@@ -403,7 +390,6 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
         </div>
       ) : (
         <>
-          {/* Navegação */}
           <div className="bg-[#272731] rounded-lg border border-gray-700 p-4">
             <div className="flex flex-wrap gap-2">
               {conferencias.map((conf) => (
@@ -435,7 +421,6 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
             </div>
           </div>
 
-          {/* Conteúdo */}
           {selectedConferencia === 'NACIONAL' ? (
             <FaseNacional />
           ) : (
@@ -463,7 +448,6 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
         </>
       )}
 
-      {/* Modal de Jogo */}
       {showModal && selectedJogo && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-[#272731] rounded-lg border border-gray-700 p-6 max-w-md w-full">

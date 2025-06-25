@@ -4,7 +4,6 @@ import { queryKeys } from './queryKeys'
 import { useNotifications } from './useNotifications'
 import { Materia } from '@/types'
 
-// Hook para buscar matérias
 export function useMaterias() {
   return useQuery({
     queryKey: queryKeys.materias.lists(),
@@ -16,7 +15,6 @@ export function useMaterias() {
   })
 }
 
-// Hook para buscar uma matéria específica
 export function useMateria(id: number) {
   return useQuery({
     queryKey: queryKeys.materias.detail(id),
@@ -27,7 +25,6 @@ export function useMateria(id: number) {
   })
 }
 
-// Hook para criar matéria
 export function useCreateMateria() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -35,12 +32,10 @@ export function useCreateMateria() {
   return useMutation({
     mutationFn: (data: Omit<Materia, 'id'>) => MateriasService.createMateria(data),
     onSuccess: (newMateria) => {
-      // Invalidar lista de matérias
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.materias.lists() 
       })
       
-      // Adicionar ao cache
       queryClient.setQueryData(queryKeys.materias.detail(newMateria.id), newMateria)
       
       notifications.success('Matéria criada!', `"${newMateria.titulo}" foi criada com sucesso`)
@@ -51,7 +46,6 @@ export function useCreateMateria() {
   })
 }
 
-// Hook para atualizar matéria
 export function useUpdateMateria() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -60,10 +54,8 @@ export function useUpdateMateria() {
     mutationFn: ({ id, data }: { id: number; data: Partial<Materia> }) =>
       MateriasService.updateMateria(id, data),
     onSuccess: (updatedMateria, { id }) => {
-      // Atualizar cache específico
       queryClient.setQueryData(queryKeys.materias.detail(id), updatedMateria)
       
-      // Invalidar lista de matérias
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.materias.lists() 
       })
@@ -76,7 +68,6 @@ export function useUpdateMateria() {
   })
 }
 
-// Hook para deletar matéria
 export function useDeleteMateria() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -84,12 +75,10 @@ export function useDeleteMateria() {
   return useMutation({
     mutationFn: MateriasService.deleteMateria,
     onSuccess: (_, id) => {
-      // Remover do cache
       queryClient.removeQueries({ 
         queryKey: queryKeys.materias.detail(id) 
       })
       
-      // Invalidar lista de matérias
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.materias.lists() 
       })

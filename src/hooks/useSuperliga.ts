@@ -1,10 +1,7 @@
-// src/hooks/useSuperliga.ts
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNotifications } from './useNotifications'
 import { ConferenciaConfig, TipoConferencia, TipoRegional } from '@/types'
 import { SuperligaService } from '@/services/superliga.service'
-
-// ==================== QUERY KEYS ====================
 
 export const superligaQueryKeys = {
   all: ['superliga'] as const,
@@ -29,8 +26,6 @@ export const superligaQueryKeys = {
     
   finalNacional: (id: number) => [...superligaQueryKeys.campeonato(id), 'final'] as const,
 }
-
-// ==================== HOOKS DE CRIAÇÃO ====================
 
 export function useCriarSuperliga() {
   const queryClient = useQueryClient()
@@ -89,8 +84,6 @@ export function useDistribuirTimes() {
   })
 }
 
-// ==================== HOOKS DE TEMPORADA REGULAR ====================
-
 export function useGerarJogosTemporadaRegular() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -133,8 +126,6 @@ export function useFinalizarTemporadaRegular() {
   })
 }
 
-// ==================== HOOKS DE PLAYOFFS ====================
-
 export function useGerarPlayoffs() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -159,7 +150,7 @@ export function usePlayoffBracket(campeonatoId: number) {
     queryKey: superligaQueryKeys.bracket(campeonatoId),
     queryFn: () => SuperligaService.getPlayoffBracket(campeonatoId),
     enabled: !!campeonatoId,
-    staleTime: 1000 * 60 * 2, // 2 minutos
+    staleTime: 1000 * 60 * 2, 
     retry: 2,
   })
 }
@@ -173,8 +164,6 @@ export function usePlayoffConferencia(campeonatoId: number, conferencia: TipoCon
     retry: 2,
   })
 }
-
-// ==================== HOOKS DE CLASSIFICAÇÃO ====================
 
 export function useClassificacaoConferencia(campeonatoId: number, conferencia: TipoConferencia) {
   return useQuery({
@@ -203,8 +192,6 @@ export function useTimesClassificados(campeonatoId: number) {
   })
 }
 
-// ==================== HOOKS DE RESULTADOS ====================
-
 export function useAtualizarResultadoPlayoff() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -216,7 +203,6 @@ export function useAtualizarResultadoPlayoff() {
       placarTime2: number
     }) => SuperligaService.atualizarResultadoPlayoff(jogoId, placarTime1, placarTime2),
     onSuccess: () => {
-      // Invalidar brackets e classificações
       queryClient.invalidateQueries({ queryKey: superligaQueryKeys.all })
       notifications.success('Resultado atualizado!', 'Chaveamento foi atualizado')
     },
@@ -241,8 +227,6 @@ export function useFinalizarJogoPlayoff() {
     },
   })
 }
-
-// ==================== HOOKS DE FASE NACIONAL ====================
 
 export function useGerarSemifinaisNacionais() {
   const queryClient = useQueryClient()
@@ -290,15 +274,13 @@ export function useFinalNacional(campeonatoId: number) {
   })
 }
 
-// ==================== HOOKS UTILITÁRIOS ====================
-
 export function useStatusSuperliga(campeonatoId: number) {
   return useQuery({
     queryKey: superligaQueryKeys.status(campeonatoId),
     queryFn: () => SuperligaService.getStatusSuperliga(campeonatoId),
     enabled: !!campeonatoId,
-    staleTime: 1000 * 30, // 30 segundos - status muda frequentemente
-    refetchInterval: 1000 * 60, // Refetch a cada minuto
+    staleTime: 1000 * 30,
+    refetchInterval: 1000 * 60, 
   })
 }
 
@@ -350,6 +332,6 @@ export function useEstatisticasSuperliga(campeonatoId: number) {
     queryKey: [...superligaQueryKeys.campeonato(campeonatoId), 'estatisticas'],
     queryFn: () => SuperligaService.getEstatisticasSuperliga(campeonatoId),
     enabled: !!campeonatoId,
-    staleTime: 1000 * 60 * 10, // 10 minutos
+    staleTime: 1000 * 60 * 10, 
   })
 }

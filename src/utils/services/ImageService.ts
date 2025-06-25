@@ -1,4 +1,3 @@
-
 export class ImageService {
 
   static normalizeForFilePath(input: string): string {

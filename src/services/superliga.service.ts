@@ -1,10 +1,7 @@
-// src/services/superliga.service.ts
 import { ConferenciaConfig, PlayoffBracket, PlayoffTeam, SuperligaBracket, TipoConferencia, TipoRegional } from '@/types'
 import { BaseService } from './base.service'
 
 export class SuperligaService extends BaseService {
-
-  // ==================== CRIAÇÃO DA SUPERLIGA ====================
   
   static async criarSuperliga(temporada: string): Promise<any> {
     const service = new SuperligaService()
@@ -25,8 +22,6 @@ export class SuperligaService extends BaseService {
     return service.post(`/campeonatos/${campeonatoId}/distribuir-times-superliga`)
   }
 
-  // ==================== TEMPORADA REGULAR ====================
-
   static async gerarJogosTemporadaRegular(campeonatoId: number): Promise<any> {
     const service = new SuperligaService()
     return service.post(`/campeonatos/${campeonatoId}/gerar-jogos-superliga`)
@@ -36,8 +31,6 @@ export class SuperligaService extends BaseService {
     const service = new SuperligaService()
     return service.post(`/campeonatos/${campeonatoId}/finalizar-temporada-regular`)
   }
-
-  // ==================== PLAYOFFS ====================
 
   static async gerarPlayoffs(campeonatoId: number): Promise<SuperligaBracket> {
     const service = new SuperligaService()
@@ -49,7 +42,6 @@ export class SuperligaService extends BaseService {
     return service.get(`/campeonatos/${campeonatoId}/playoff-bracket`)
   }
 
-  // Playoffs por Conferência
   static async gerarPlayoffConferencia(
     campeonatoId: number, 
     conferencia: TipoConferencia
@@ -65,8 +57,6 @@ export class SuperligaService extends BaseService {
     const service = new SuperligaService()
     return service.get(`/campeonatos/${campeonatoId}/playoffs/${conferencia.toLowerCase()}`)
   }
-
-  // ==================== CLASSIFICAÇÃO E RESULTADOS ====================
 
   static async getClassificacaoConferencia(
     campeonatoId: number,
@@ -89,8 +79,6 @@ export class SuperligaService extends BaseService {
     return service.get(`/campeonatos/${campeonatoId}/times-classificados`)
   }
 
-  // ==================== JOGOS DE PLAYOFF ====================
-
   static async atualizarResultadoPlayoff(
     jogoId: number,
     placarTime1: number,
@@ -108,8 +96,6 @@ export class SuperligaService extends BaseService {
     return service.post(`/campeonatos/playoff-jogos/${jogoId}/finalizar`)
   }
 
-  // ==================== FASE NACIONAL ====================
-
   static async gerarSemifinaisNacionais(campeonatoId: number): Promise<any> {
     const service = new SuperligaService()
     return service.post(`/campeonatos/${campeonatoId}/gerar-semifinais-nacionais`)
@@ -125,8 +111,6 @@ export class SuperligaService extends BaseService {
     return service.get(`/campeonatos/${campeonatoId}/final-nacional`)
   }
 
-  // ==================== UTILITÁRIOS ====================
-
   static async resetarPlayoffs(campeonatoId: number): Promise<any> {
     const service = new SuperligaService()
     return service.post(`/campeonatos/${campeonatoId}/resetar-playoffs`)
@@ -141,8 +125,6 @@ export class SuperligaService extends BaseService {
     const service = new SuperligaService()
     return service.post(`/campeonatos/${campeonatoId}/simular-playoffs`)
   }
-
-  // ==================== VALIDAÇÕES ====================
 
   static async validarEstruturaSuperliga(campeonatoId: number): Promise<{
     valida: boolean

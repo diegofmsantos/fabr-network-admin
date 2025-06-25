@@ -1,4 +1,3 @@
-// src/services/base.service.ts
 import axios, { AxiosInstance, AxiosResponse } from 'axios'
 
 export class BaseService {
@@ -10,7 +9,6 @@ export class BaseService {
       timeout: 30000,
     })
 
-    // Interceptor de resposta para tratamento de erros global
     this.api.interceptors.response.use(
       (response: AxiosResponse) => response,
       (error) => {
@@ -33,7 +31,6 @@ export class BaseService {
     )
   }
 
-  // Métodos auxiliares para requisições comuns
   protected async get<T>(url: string, params?: Record<string, any>): Promise<T> {
     const response = await this.api.get<T>(url, { params })
     return response.data
@@ -54,7 +51,6 @@ export class BaseService {
     return response.data
   }
 
-  // Upload de arquivos
   protected async upload<T>(url: string, file: File, additionalData?: Record<string, any>): Promise<T> {
     const formData = new FormData()
     formData.append('arquivo', file)

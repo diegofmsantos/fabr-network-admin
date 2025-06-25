@@ -4,8 +4,6 @@ import { queryKeys } from './queryKeys'
 import { useNotifications } from './useNotifications'
 import { IniciarTemporadaData, IniciarTemporadaResponse } from '@/types'
 
-
-
 class TemporadaService extends BaseService {
   static async iniciarTemporada(ano: string, alteracoes: IniciarTemporadaData): Promise<IniciarTemporadaResponse> {
     const service = new TemporadaService()
@@ -13,7 +11,6 @@ class TemporadaService extends BaseService {
   }
 }
 
-// Hook para iniciar nova temporada
 export function useIniciarTemporada() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -22,7 +19,6 @@ export function useIniciarTemporada() {
     mutationFn: ({ ano, alteracoes }: { ano: string; alteracoes: IniciarTemporadaData }) =>
       TemporadaService.iniciarTemporada(ano, alteracoes),
     onSuccess: (result, { ano }) => {
-      // Invalidar todos os dados da nova temporada
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.times.list(ano) 
       })
@@ -33,7 +29,6 @@ export function useIniciarTemporada() {
         queryKey: queryKeys.campeonatos.lists() 
       })
       
-      // Invalidar estatísticas admin
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.admin.all 
       })
@@ -46,9 +41,9 @@ export function useIniciarTemporada() {
     onError: (error: any) => {
       notifications.error('Erro ao iniciar temporada', error.message || 'Verifique os dados e tente novamente')
     },
-    // Timeout maior para operação pesada
+  
     meta: {
-      timeout: 120000, // 2 minutos
+      timeout: 120000, 
     }
   })
 }

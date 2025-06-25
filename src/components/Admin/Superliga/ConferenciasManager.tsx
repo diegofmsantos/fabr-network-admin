@@ -59,7 +59,6 @@ export const ConferenciasManager: React.FC<ConferenciasManagerProps> = ({
     }
   ]
 
-  // Organizar grupos por conferência
   const gruposPorConferencia = grupos.reduce((acc, grupo) => {
     const regional = grupo.regional
     if (!regional) return acc
@@ -76,7 +75,6 @@ export const ConferenciasManager: React.FC<ConferenciasManagerProps> = ({
     return acc
   }, {} as Record<string, any[]>)
 
-  // Organizar classificação por grupo
   const classificacaoPorGrupo = classificacao.reduce((acc, item) => {
     if (!acc[item.grupoId]) acc[item.grupoId] = []
     acc[item.grupoId].push(item)
@@ -191,7 +189,6 @@ export const ConferenciasManager: React.FC<ConferenciasManagerProps> = ({
             </div>
 
             <div className="flex items-center gap-3">
-              {/* Status */}
               <div className="flex items-center gap-1">
                 {timesTotal === conferencia.totalTimes ? (
                   <CheckCircle className="w-5 h-5 text-green-400" />
@@ -203,7 +200,6 @@ export const ConferenciasManager: React.FC<ConferenciasManagerProps> = ({
                 </span>
               </div>
 
-              {/* Expand Icon */}
               {isExpanded ? (
                 <ChevronUp className="w-5 h-5 text-gray-400" />
               ) : (
@@ -213,7 +209,6 @@ export const ConferenciasManager: React.FC<ConferenciasManagerProps> = ({
           </div>
         </div>
 
-        {/* Conteúdo Expandido */}
         {isExpanded && (
           <div className="px-6 pb-6">
             <div className="border-t border-gray-600 pt-4">
@@ -243,7 +238,6 @@ export const ConferenciasManager: React.FC<ConferenciasManagerProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Controles */}
       <div className="bg-[#272731] rounded-lg border border-gray-700 p-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -270,7 +264,6 @@ export const ConferenciasManager: React.FC<ConferenciasManagerProps> = ({
         </div>
       </div>
 
-      {/* Estatísticas Gerais */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-[#272731] rounded-lg border border-gray-700 p-4 text-center">
           <div className="text-2xl font-bold text-white">32</div>
@@ -295,14 +288,12 @@ export const ConferenciasManager: React.FC<ConferenciasManagerProps> = ({
         </div>
       </div>
 
-      {/* Lista de Conferências */}
       <div className="space-y-4">
         {conferencias.map((conferencia) => (
           <ConferenciaCard key={conferencia.tipo} conferencia={conferencia} />
         ))}
       </div>
 
-      {/* Ações em Lote */}
       <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
         <h3 className="text-white font-semibold mb-4">Ações em Lote</h3>
         

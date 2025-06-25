@@ -29,14 +29,12 @@ export const TemporadaRegularManager: React.FC<TemporadaRegularManagerProps> = (
     const { mutate: gerarJogos, isPending: gerandoJogos } = useGerarJogosTemporadaRegular()
     const { mutate: updateJogo } = useUpdateJogo()
 
-    // Filtrar jogos
     const jogosFiltrados = jogos.filter(jogo => {
         const statusMatch = filterStatus === 'todos' || jogo.status === filterStatus
         const rodadaMatch = filterRodada === 'todas' || jogo.rodada === filterRodada
         return statusMatch && rodadaMatch
     })
 
-    // Estatísticas
     const estatisticas = {
         total: jogos.length,
         agendados: jogos.filter(j => j.status === 'AGENDADO').length,
@@ -45,7 +43,6 @@ export const TemporadaRegularManager: React.FC<TemporadaRegularManagerProps> = (
         adiados: jogos.filter(j => j.status === 'ADIADO').length,
     }
 
-    // Rodadas disponíveis
     const rodadas = [...new Set(jogos.map(j => j.rodada))].sort((a, b) => a - b)
 
     const getStatusIcon = (status: string) => {
@@ -99,9 +96,7 @@ export const TemporadaRegularManager: React.FC<TemporadaRegularManagerProps> = (
                 </div>
             </div>
 
-            {/* Confronto */}
             <div className="flex items-center justify-between mb-3">
-                {/* Time Casa */}
                 <div className="flex items-center gap-3 flex-1">
                     <Image
                         src={ImageService.getTeamLogo(jogo.timeCasa.nome)}
@@ -123,12 +118,10 @@ export const TemporadaRegularManager: React.FC<TemporadaRegularManagerProps> = (
                     )}
                 </div>
 
-                {/* VS */}
                 <div className="px-4">
                     <span className="text-gray-500 font-bold">×</span>
                 </div>
 
-                {/* Time Visitante */}
                 <div className="flex items-center gap-3 flex-1 flex-row-reverse">
                     <Image
                         src={ImageService.getTeamLogo(jogo.timeVisitante.nome)}
@@ -151,7 +144,6 @@ export const TemporadaRegularManager: React.FC<TemporadaRegularManagerProps> = (
                 </div>
             </div>
 
-            {/* Informações do Jogo */}
             <div className="flex items-center justify-between text-sm text-gray-400">
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-1">
@@ -320,7 +312,6 @@ export const TemporadaRegularManager: React.FC<TemporadaRegularManagerProps> = (
         <div className="space-y-6">
             {/* ... resto do JSX já existente ... */}
 
-            {/* Conteúdo */}
             {jogos.length === 0 ? (
                 <div className="bg-[#272731] rounded-lg border border-gray-700 p-12 text-center">
                     <Calendar className="w-16 h-16 text-gray-500 mx-auto mb-4" />
@@ -344,7 +335,6 @@ export const TemporadaRegularManager: React.FC<TemporadaRegularManagerProps> = (
                 </>
             )}
 
-            {/* Progresso */}
             {jogos.length > 0 && (
                 <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
                     <h3 className="text-white font-semibold mb-4">Progresso da Temporada Regular</h3>

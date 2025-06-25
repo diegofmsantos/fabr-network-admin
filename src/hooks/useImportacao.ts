@@ -2,35 +2,27 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ImportacaoService,} from '@/services/importacao.service'
 import { queryKeys } from './queryKeys'
 import { useNotifications } from './useNotifications'
-import { EstatisticasResponse, ImportacaoResponse, TransferenciasResponse } from '@/types'
 
-// ==================== HOOKS DE MUTAÇÃO PARA IMPORTAÇÃO ====================
-
-// Hook para importar times
 export function useImportarTimes() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
 
   return useMutation({
     mutationFn: (arquivo: File) => ImportacaoService.importarTimes(arquivo),
-    onSuccess: (result: ImportacaoResponse) => {
-      // Invalidar todos os caches relacionados a times
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.times.lists() 
       })
       
-      // Invalidar estatísticas admin
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.admin.all 
       })
       
-      // Notificação de sucesso
       notifications.success(
         'Times importados!', 
         `${result.sucesso} times processados com sucesso`
       )
 
-      // Se houver erros, mostrar aviso
       if (result.erros && result.erros.length > 0) {
         notifications.warning(
           'Importação com avisos',
@@ -45,22 +37,19 @@ export function useImportarTimes() {
         error.message || 'Verifique o arquivo e tente novamente'
       )
     },
-    // Timeout maior para upload de arquivos
     meta: {
-      timeout: 60000, // 1 minuto
+      timeout: 60000,
     }
   })
 }
 
-// Hook para importar jogadores
 export function useImportarJogadores() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
 
   return useMutation({
     mutationFn: (arquivo: File) => ImportacaoService.importarJogadores(arquivo),
-    onSuccess: (result: ImportacaoResponse) => {
-      // Invalidar caches de jogadores e times
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.jogadores.lists() 
       })
@@ -91,12 +80,11 @@ export function useImportarJogadores() {
       )
     },
     meta: {
-      timeout: 90000, // 1.5 minutos - jogadores podem ser muitos
+      timeout: 90000, 
     }
   })
 }
 
-// Hook para atualizar estatísticas de jogo
 export function useAtualizarEstatisticas() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -108,20 +96,17 @@ export function useAtualizarEstatisticas() {
       dataJogo: string 
     }) => ImportacaoService.atualizarEstatisticas(arquivo, idJogo, dataJogo),
     
-    onSuccess: (result: EstatisticasResponse) => {
-      // Invalidar estatísticas dos jogadores
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.jogadores.lists() 
       })
       
-      // Invalidar dados do jogo específico se soubermos o ID
       if (result.jogoId) {
         queryClient.invalidateQueries({ 
           queryKey: queryKeys.jogos.detail(parseInt(result.jogoId)) 
         })
       }
       
-      // Invalidar listas de jogos
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.jogos.lists() 
       })
@@ -138,12 +123,11 @@ export function useAtualizarEstatisticas() {
       )
     },
     meta: {
-      timeout: 45000, // 45 segundos
+      timeout: 45000, 
     }
   })
 }
 
-// Hook para iniciar nova temporada
 export function useIniciarTemporada() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -157,8 +141,7 @@ export function useIniciarTemporada() {
       alteracoes: Parameters<typeof ImportacaoService.iniciarTemporada>[1]
     }) => ImportacaoService.iniciarTemporada(ano, alteracoes),
     
-    onSuccess: (result: TransferenciasResponse, { ano }) => {
-      // Invalidar todos os dados da nova temporada
+    onSuccess: (result, { ano }) => {
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.times.list(ano) 
       })
@@ -169,7 +152,6 @@ export function useIniciarTemporada() {
         queryKey: queryKeys.campeonatos.lists() 
       })
       
-      // Invalidar estatísticas admin
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.admin.all 
       })
@@ -185,57 +167,48 @@ export function useIniciarTemporada() {
         error.message || 'Verifique os dados e tente novamente'
       )
     },
-    // Timeout maior para operação pesada
     meta: {
-      timeout: 120000, // 2 minutos
+      timeout: 120000, 
     }
   })
 }
 
-// ==================== HOOKS DE QUERY PARA CONSULTAS ====================
-
-// Hook para buscar transferências salvas
 export function useTransferencias(temporadaOrigem: string, temporadaDestino: string) {
   return useQuery({
     queryKey: queryKeys.temporada.transition(temporadaOrigem, temporadaDestino),
     queryFn: () => ImportacaoService.getTransferencias(temporadaOrigem, temporadaDestino),
     enabled: !!(temporadaOrigem && temporadaDestino),
-    staleTime: 1000 * 60 * 10, // 10 minutos
+    staleTime: 1000 * 60 * 10, 
     retry: (failureCount, error: any) => {
-      // Não tentar novamente se for 404 (arquivo não existe)
       if (error?.message?.includes('404')) return false
       return failureCount < 2
     },
-    throwOnError: false, // Não quebrar se não houver transferências
+    throwOnError: false, 
   })
 }
 
-// Hook para verificar se uma temporada existe
 export function useVerificarTemporada(temporada: string) {
   return useQuery({
     queryKey: [...queryKeys.temporada.all, 'verificar', temporada],
     queryFn: () => ImportacaoService.verificarTemporada(temporada),
     enabled: !!temporada,
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    staleTime: 1000 * 60 * 5, 
     retry: false,
   })
 }
 
-// Hook para estatísticas de importação
 export function useEstatisticasImportacao(temporada: string) {
   return useQuery({
     queryKey: [...queryKeys.importacao.all, 'stats', temporada],
     queryFn: () => ImportacaoService.getEstatisticasImportacao(temporada),
     enabled: !!temporada,
-    staleTime: 1000 * 60 * 2, // 2 minutos
+    staleTime: 1000 * 60 * 2, 
     retry: 2,
-    throwOnError: false, // Pode não existir ainda
+    throwOnError: false, 
   })
 }
 
-// ==================== HOOKS DE VALIDAÇÃO (OPCIONAL) ====================
-
-// Hook para validar planilha de times antes da importação
+// ==================== HOOKS DE VALIDAÇÃO (OPCIONAL) ==========
 export function useValidarPlanilhaTimes() {
   const notifications = useNotifications()
 
@@ -250,7 +223,6 @@ export function useValidarPlanilhaTimes() {
   })
 }
 
-// Hook para validar planilha de jogadores antes da importação
 export function useValidarPlanilhaJogadores() {
   const notifications = useNotifications()
 

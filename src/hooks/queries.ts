@@ -22,7 +22,6 @@ const createNotFoundError = (temporada: string, entityName?: string): DataNotFou
     return error;
 };
 
-// Hook para obter a temporada dos parâmetros da URL
 export function useTemporada(explicitTemporada?: string) {
     const searchParams = useSearchParams();
     let temporada = explicitTemporada || searchParams?.get('temporada') || '2025';
@@ -35,7 +34,6 @@ export function useTemporada(explicitTemporada?: string) {
     return temporada;
 }
 
-// Hook para notícias/matérias
 export function useNoticias() {
     return useQuery({
         queryKey: queryKeys.materias.lists(),
@@ -45,7 +43,6 @@ export function useNoticias() {
     })
 }
 
-// Hook para buscar time por nome/slug
 export function useTeam(teamName: string | undefined, explicitTemporada?: string) {
     const temporada = useTemporada(explicitTemporada);
     const router = useRouter();
@@ -79,7 +76,6 @@ export function useTeam(teamName: string | undefined, explicitTemporada?: string
                 return timeEncontrado;
             }
 
-            // Lógica especial para mudanças de nome entre temporadas
             if (temporada === '2025' && teamSlug === 'Parana-HP') {
                 timeEncontrado = times.find(t =>
                     getTeamSlug(t.nome || '') === 'Calvary-Cavaliers'
@@ -127,7 +123,6 @@ export function useTeam(teamName: string | undefined, explicitTemporada?: string
     });
 }
 
-// Hook para detalhes de jogador específico
 export function usePlayerDetails(
     timeSlug: string | undefined,
     jogadorSlug: string | undefined,

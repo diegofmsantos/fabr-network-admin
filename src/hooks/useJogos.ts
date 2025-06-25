@@ -3,23 +3,18 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNotifications } from '@/hooks/useNotifications'
 import { queryKeys } from './queryKeys'
-import { FiltroJogos, Jogo } from '@/types'
+import { FiltroJogos } from '@/types'
 import { CampeonatosService } from '@/services/campeonatos.service'
 
-// ==================== HOOKS DE QUERY ====================
-
-// Hook para buscar jogos com filtros
 export function useJogos(filters: FiltroJogos) {
   return useQuery({
     queryKey: queryKeys.jogos.list(filters),
     queryFn: () => CampeonatosService.getJogos(filters),
-    staleTime: 1000 * 60 * 2, // Jogos mudam mais frequentemente
-    gcTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 2, 
     retry: 2,
   })
 }
 
-// Hook para buscar um jogo específico
 export function useJogo(jogoId: number) {
   return useQuery({
     queryKey: queryKeys.jogos.detail(jogoId),
@@ -29,7 +24,6 @@ export function useJogo(jogoId: number) {
   })
 }
 
-// Hook para buscar jogos de um time específico
 export function useJogosTime(timeId: number, campeonatoId?: number, limit: number = 20) {
   return useQuery({
     queryKey: [...queryKeys.jogos.all, 'jogos-time', timeId, campeonatoId, limit] as const,
@@ -43,9 +37,6 @@ export function useJogosTime(timeId: number, campeonatoId?: number, limit: numbe
   })
 }
 
-// ==================== HOOKS DE MUTATION ====================
-
-// Hook para criar jogo
 export function useCreateJogo() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -53,17 +44,14 @@ export function useCreateJogo() {
   return useMutation({
     mutationFn: (data: any) => CampeonatosService.createJogo(data),
     onSuccess: (newJogo) => {
-      // Invalidar lista de jogos
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.jogos.lists() 
       })
       
-      // Invalidar dados do campeonato
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.campeonatos.detail(newJogo.campeonatoId) 
       })
       
-      // Adicionar ao cache
       queryClient.setQueryData(queryKeys.jogos.detail(newJogo.id), newJogo)
       
       notifications.success('Jogo criado!', 'Jogo foi criado com sucesso')
@@ -74,7 +62,6 @@ export function useCreateJogo() {
   })
 }
 
-// Hook para atualizar jogo
 export function useUpdateJogo() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -83,15 +70,12 @@ export function useUpdateJogo() {
     mutationFn: ({ id, data }: { id: number; data: any }) =>
       CampeonatosService.updateJogo(id, data),
     onSuccess: (updatedJogo, { id }) => {
-      // Atualizar cache específico
       queryClient.setQueryData(queryKeys.jogos.detail(id), updatedJogo)
       
-      // Invalidar lista de jogos
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.jogos.lists() 
       })
       
-      // Invalidar dados do campeonato se necessário
       if (updatedJogo.campeonatoId) {
         queryClient.invalidateQueries({ 
           queryKey: queryKeys.campeonatos.detail(updatedJogo.campeonatoId) 
@@ -106,7 +90,6 @@ export function useUpdateJogo() {
   })
 }
 
-// Hook para deletar jogo
 export function useDeleteJogo() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -114,17 +97,14 @@ export function useDeleteJogo() {
   return useMutation({
     mutationFn: (id: number) => CampeonatosService.deleteJogo(id),
     onSuccess: (_, id) => {
-      // Remover do cache
       queryClient.removeQueries({ 
         queryKey: queryKeys.jogos.detail(id) 
       })
       
-      // Invalidar lista de jogos
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.jogos.lists() 
       })
       
-      // Invalidar dados dos campeonatos
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.campeonatos.lists() 
       })
@@ -137,7 +117,6 @@ export function useDeleteJogo() {
   })
 }
 
-// Hook para gerar jogos automaticamente
 export function useGerarJogos() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -145,12 +124,10 @@ export function useGerarJogos() {
   return useMutation({
     mutationFn: (campeonatoId: number) => CampeonatosService.gerarJogos(campeonatoId),
     onSuccess: (result, campeonatoId) => {
-      // Invalidar dados do campeonato
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.campeonatos.detail(campeonatoId) 
       })
       
-      // Invalidar lista de jogos
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.jogos.lists() 
       })
@@ -166,7 +143,6 @@ export function useGerarJogos() {
   })
 }
 
-// Hook para atualizar resultado do jogo
 export function useAtualizarResultado() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -182,10 +158,8 @@ export function useAtualizarResultado() {
       placarVisitante: number 
     }) => CampeonatosService.atualizarResultadoJogo(jogoId, placarCasa, placarVisitante),
     onSuccess: (updatedJogo) => {
-      // Atualizar cache do jogo
       queryClient.setQueryData(queryKeys.jogos.detail(updatedJogo.id), updatedJogo)
       
-      // Invalidar dados relacionados
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.jogos.lists() 
       })
@@ -195,7 +169,6 @@ export function useAtualizarResultado() {
           queryKey: queryKeys.campeonatos.detail(updatedJogo.campeonatoId) 
         })
         
-        // Invalidar classificação se for jogo de grupo
         if (updatedJogo.grupoId) {
           queryClient.invalidateQueries({ 
             queryKey: queryKeys.classificacao.grupo(updatedJogo.grupoId) 
@@ -211,7 +184,6 @@ export function useAtualizarResultado() {
   })
 }
 
-// Hook para finalizar jogo
 export function useFinalizarJogo() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -219,10 +191,8 @@ export function useFinalizarJogo() {
   return useMutation({
     mutationFn: (jogoId: number) => CampeonatosService.finalizarJogo(jogoId),
     onSuccess: (updatedJogo) => {
-      // Atualizar cache do jogo
       queryClient.setQueryData(queryKeys.jogos.detail(updatedJogo.id), updatedJogo)
       
-      // Invalidar listas e dados relacionados
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.jogos.lists() 
       })
@@ -241,7 +211,6 @@ export function useFinalizarJogo() {
   })
 }
 
-// Hook para adiar jogo
 export function useAdiarJogo() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -250,10 +219,8 @@ export function useAdiarJogo() {
     mutationFn: ({ jogoId, novaData }: { jogoId: number; novaData?: string }) =>
       CampeonatosService.adiarJogo(jogoId, novaData),
     onSuccess: (updatedJogo) => {
-      // Atualizar cache do jogo
       queryClient.setQueryData(queryKeys.jogos.detail(updatedJogo.id), updatedJogo)
       
-      // Invalidar listas
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.jogos.lists() 
       })

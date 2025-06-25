@@ -91,7 +91,6 @@ export default function CriarSuperligaPage() {
           </div>
         </div>
 
-        {/* Progress Bar */}
         <div className="flex items-center gap-2 mb-6">
           {[1, 2, 3, 4].map((etapa) => (
             <div key={etapa} className="flex items-center">
@@ -121,9 +120,7 @@ export default function CriarSuperligaPage() {
         </div>
       </div>
 
-      {/* Conteúdo por Etapa */}
       <div className="max-w-2xl mx-auto">
-        {/* ETAPA 1: Informações Básicas */}
         {step === 1 && (
           <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
             <h2 className="text-xl font-bold text-white mb-6">Informações da Superliga</h2>
@@ -186,7 +183,6 @@ export default function CriarSuperligaPage() {
                 />
               </div>
 
-              {/* Info Box */}
               <div className="bg-blue-500 bg-opacity-10 border border-blue-500 border-opacity-30 rounded-lg p-4">
                 <div className="flex items-start gap-3">
                   <Info className="w-5 h-5 text-blue-400 mt-0.5" />
@@ -213,7 +209,6 @@ export default function CriarSuperligaPage() {
           </div>
         )}
 
-        {/* ETAPA 2: Configurar Conferências */}
         {step === 2 && (
           <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
             <h2 className="text-xl font-bold text-white mb-6">Configurar Conferências</h2>
@@ -249,7 +244,6 @@ export default function CriarSuperligaPage() {
           </div>
         )}
 
-        {/* ETAPA 3: Distribuir Times */}
         {step === 3 && (
           <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
             <h2 className="text-xl font-bold text-white mb-6">Distribuir Times</h2>
@@ -287,7 +281,6 @@ export default function CriarSuperligaPage() {
           </div>
         )}
 
-        {/* ETAPA 4: Finalização */}
         {step === 4 && (
           <div className="bg-[#272731] rounded-lg border border-gray-700 p-6 text-center">
             <div className="mb-6">

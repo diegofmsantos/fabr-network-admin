@@ -1,7 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query"
 
 export const queryKeys = {
-  // Times
   times: {
     all: ['times'] as const,
     lists: () => [...queryKeys.times.all, 'list'] as const,
@@ -12,7 +11,6 @@ export const queryKeys = {
       [...queryKeys.times.detail(timeId), 'jogadores', temporada] as const,
   },
 
-  // Jogadores
   jogadores: {
     all: ['jogadores'] as const,
     lists: () => [...queryKeys.jogadores.all, 'list'] as const,
@@ -25,7 +23,6 @@ export const queryKeys = {
       [...queryKeys.jogadores.detail(jogadorId), 'historico'] as const,
   },
 
-  // Campeonatos
   campeonatos: {
     all: ['campeonatos'] as const,
     lists: () => [...queryKeys.campeonatos.all, 'list'] as const,
@@ -40,7 +37,6 @@ export const queryKeys = {
       [...queryKeys.campeonatos.detail(campeonatoId), 'grupos'] as const,
   },
 
-  // Jogos
   jogos: {
     all: ['jogos'] as const,
     lists: () => [...queryKeys.jogos.all, 'list'] as const,
@@ -55,7 +51,6 @@ export const queryKeys = {
       [...queryKeys.jogos.all, 'resultados', timeId, limit] as const,
   },
 
-  // Materias/Notícias
   materias: {
     all: ['materias'] as const,
     lists: () => [...queryKeys.materias.all, 'list'] as const,
@@ -64,7 +59,6 @@ export const queryKeys = {
     detail: (id: number) => [...queryKeys.materias.details(), id] as const,
   },
 
-  // Admin/Dashboard
   admin: {
     all: ['admin'] as const,
     stats: (filters: Record<string, any>) => [...queryKeys.admin.all, 'stats', filters] as const,
@@ -72,7 +66,6 @@ export const queryKeys = {
     alerts: () => [...queryKeys.admin.all, 'alerts'] as const,
   },
 
-  // Temporadas
   temporadas: {
     all: ['temporadas'] as const,
     list: () => [...queryKeys.temporadas.all, 'list'] as const,
@@ -80,9 +73,7 @@ export const queryKeys = {
   },
 } as const
 
-// Utility functions para invalidação em massa
 export const invalidateQueries = {
-  // Invalidar todos os dados de uma temporada
   temporada: (queryClient: any, temporada: string) => {
     queryClient.invalidateQueries({ 
       predicate: (query: any) => {
@@ -93,7 +84,6 @@ export const invalidateQueries = {
     })
   },
 
-  // Invalidar todos os dados de um time
   time: (queryClient: any, timeId: number) => {
     queryClient.invalidateQueries({ queryKey: queryKeys.times.detail(timeId) })
     queryClient.invalidateQueries({ 
@@ -106,7 +96,6 @@ export const invalidateQueries = {
     })
   },
 
-  // Invalidar todos os dados de um jogador
   jogador: (queryClient: any, jogadorId: number) => {
     queryClient.invalidateQueries({ queryKey: queryKeys.jogadores.detail(jogadorId) })
     queryClient.invalidateQueries({ 
@@ -119,7 +108,6 @@ export const invalidateQueries = {
     })
   },
 
-  // Invalidar todos os dados de um campeonato
   campeonato: (queryClient: any, campeonatoId: number) => {
     queryClient.invalidateQueries({ queryKey: queryKeys.campeonatos.detail(campeonatoId) })
     queryClient.invalidateQueries({ 
@@ -133,13 +121,11 @@ export const invalidateQueries = {
     })
   },
 
-  // Invalidar tudo (usar com cuidado)
   all: (queryClient: any) => {
     queryClient.invalidateQueries()
   },
 }
 
-// Hook para facilitar invalidações
 export function useInvalidateQueries() {
   const queryClient = useQueryClient()
 
@@ -152,7 +138,6 @@ export function useInvalidateQueries() {
   }
 }
 
-// Type utilities para query keys
 export type QueryKeys = typeof queryKeys
 export type TimeQueryKeys = typeof queryKeys.times
 export type JogadorQueryKeys = typeof queryKeys.jogadores
