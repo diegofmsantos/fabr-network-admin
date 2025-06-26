@@ -13,9 +13,9 @@ interface ConferenciasManagerProps {
   temporada: string
 }
 
-export const ConferenciasManager: React.FC<ConferenciasManagerProps> = ({ 
-  superligaId, 
-  temporada 
+export const ConferenciasManager: React.FC<ConferenciasManagerProps> = ({
+  superligaId,
+  temporada
 }) => {
   const [expandedConferencia, setExpandedConferencia] = useState<string | null>('SUDESTE')
   const [showClassificacao, setShowClassificacao] = useState(true)
@@ -34,7 +34,7 @@ export const ConferenciasManager: React.FC<ConferenciasManagerProps> = ({
       regionais: ['Serramar', 'Canastra', 'Cantareira']
     },
     {
-      tipo: 'SUL', 
+      tipo: 'SUL',
       nome: 'Conferência Sul',
       icone: '🧊',
       cor: 'bg-blue-500',
@@ -43,7 +43,7 @@ export const ConferenciasManager: React.FC<ConferenciasManagerProps> = ({
     },
     {
       tipo: 'NORDESTE',
-      nome: 'Conferência Nordeste', 
+      nome: 'Conferência Nordeste',
       icone: '🌵',
       cor: 'bg-yellow-500',
       totalTimes: 6,
@@ -52,7 +52,7 @@ export const ConferenciasManager: React.FC<ConferenciasManagerProps> = ({
     {
       tipo: 'CENTRO_NORTE',
       nome: 'Conferência Centro-Norte',
-      icone: '🌲', 
+      icone: '🌲',
       cor: 'bg-green-500',
       totalTimes: 6,
       regionais: ['Cerrado', 'Amazônia']
@@ -60,18 +60,18 @@ export const ConferenciasManager: React.FC<ConferenciasManagerProps> = ({
   ]
 
   const gruposPorConferencia = grupos.reduce((acc, grupo) => {
+    if (!grupo.regional) return acc
+
     const regional = grupo.regional
-    if (!regional) return acc
-    
-    const conferencia = conferencias.find(c => 
+    const conferencia = conferencias.find(c =>
       c.regionais.some(r => regional.nome.includes(r))
     )
-    
+
     if (conferencia) {
       if (!acc[conferencia.tipo]) acc[conferencia.tipo] = []
       acc[conferencia.tipo].push(grupo)
     }
-    
+
     return acc
   }, {} as Record<string, any[]>)
 
@@ -86,11 +86,11 @@ export const ConferenciasManager: React.FC<ConferenciasManagerProps> = ({
       <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
         ${posicao === 1 ? 'bg-yellow-500 text-black' :
           posicao === 2 ? 'bg-gray-400 text-black' :
-          posicao === 3 ? 'bg-orange-600 text-white' :
-          'bg-gray-600 text-white'}`}>
+            posicao === 3 ? 'bg-orange-600 text-white' :
+              'bg-gray-600 text-white'}`}>
         {posicao}
       </div>
-      
+
       <Image
         src={ImageService.getTeamLogo(time.nome)}
         alt={`Logo ${time.nome}`}
@@ -99,12 +99,12 @@ export const ConferenciasManager: React.FC<ConferenciasManagerProps> = ({
         className="rounded"
         onError={(e) => ImageService.handleTeamLogoError(e, time.nome)}
       />
-      
+
       <div className="flex-1 min-w-0">
         <div className="text-white font-medium truncate">{time.nome}</div>
         <div className="text-gray-400 text-sm">{time.sigla}</div>
       </div>
-      
+
       {showClassificacao && (
         <div className="text-right">
           <div className="text-white font-medium">{classificacaoPorGrupo[time.grupoId]?.[0]?.pontos || 0}</div>
@@ -117,7 +117,7 @@ export const ConferenciasManager: React.FC<ConferenciasManagerProps> = ({
   const RegionalCard = ({ grupo }: { grupo: any }) => {
     const timesDoGrupo = grupo.times?.map((gt: any) => gt.time) || []
     const classificacaoGrupo = classificacaoPorGrupo[grupo.id] || []
-    
+
     return (
       <div className="bg-[#272731] rounded-lg border border-gray-700 p-4">
         <div className="flex items-center justify-between mb-4">
@@ -125,7 +125,7 @@ export const ConferenciasManager: React.FC<ConferenciasManagerProps> = ({
             <h4 className="text-white font-semibold">{grupo.nome}</h4>
             <p className="text-gray-400 text-sm">{timesDoGrupo.length} times</p>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <button className="p-2 text-gray-400 hover:text-white transition-colors">
               <Settings className="w-4 h-4" />
@@ -165,7 +165,7 @@ export const ConferenciasManager: React.FC<ConferenciasManagerProps> = ({
     return (
       <div className="bg-[#272731] rounded-lg border border-gray-700 overflow-hidden">
         {/* Header da Conferência */}
-        <div 
+        <div
           className="p-6 cursor-pointer hover:bg-[#2A2A35] transition-colors"
           onClick={() => setExpandedConferencia(isExpanded ? null : conferencia.tipo)}
         >
@@ -174,7 +174,7 @@ export const ConferenciasManager: React.FC<ConferenciasManagerProps> = ({
               <div className={`p-3 ${conferencia.cor} bg-opacity-20 rounded-lg`}>
                 <span className="text-2xl">{conferencia.icone}</span>
               </div>
-              
+
               <div>
                 <h3 className="text-white text-xl font-bold">{conferencia.nome}</h3>
                 <div className="flex items-center gap-4 mt-1">
@@ -269,17 +269,17 @@ export const ConferenciasManager: React.FC<ConferenciasManagerProps> = ({
           <div className="text-2xl font-bold text-white">32</div>
           <div className="text-gray-400 text-sm">Times Total</div>
         </div>
-        
+
         <div className="bg-[#272731] rounded-lg border border-gray-700 p-4 text-center">
           <div className="text-2xl font-bold text-[#63E300]">4</div>
           <div className="text-gray-400 text-sm">Conferências</div>
         </div>
-        
+
         <div className="bg-[#272731] rounded-lg border border-gray-700 p-4 text-center">
           <div className="text-2xl font-bold text-blue-400">8</div>
           <div className="text-gray-400 text-sm">Regionais</div>
         </div>
-        
+
         <div className="bg-[#272731] rounded-lg border border-gray-700 p-4 text-center">
           <div className="text-2xl font-bold text-purple-400">
             {Object.values(gruposPorConferencia).flat().reduce((acc, g) => acc + (g.times?.length || 0), 0)}
@@ -296,18 +296,18 @@ export const ConferenciasManager: React.FC<ConferenciasManagerProps> = ({
 
       <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
         <h3 className="text-white font-semibold mb-4">Ações em Lote</h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <button className="flex items-center justify-center gap-2 p-3 bg-[#63E300] bg-opacity-20 text-[#63E300] rounded-lg hover:bg-opacity-30 transition-colors">
             <CheckCircle className="w-4 h-4" />
             Validar Distribuição
           </button>
-          
+
           <button className="flex items-center justify-center gap-2 p-3 bg-blue-500 bg-opacity-20 text-blue-400 rounded-lg hover:bg-opacity-30 transition-colors">
             <Shuffle className="w-4 h-4" />
             Redistribuir Automaticamente
           </button>
-          
+
           <button className="flex items-center justify-center gap-2 p-3 bg-purple-500 bg-opacity-20 text-purple-400 rounded-lg hover:bg-opacity-30 transition-colors">
             <Trophy className="w-4 h-4" />
             Gerar Classificação

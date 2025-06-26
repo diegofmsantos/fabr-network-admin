@@ -4,7 +4,7 @@ import { queryKeys } from './queryKeys'
 import { useNotifications } from './useNotifications'
 import { Campeonato, CriarCampeonatoRequest, FiltroJogos } from '@/types';
 
-export function useCampeonatos(filters?: { temporada?: string; tipo?: string; status?: string }) {
+export function useCampeonatos(filters?: { temporada?: string; tipo?: string; status?: string; isSuperliga?: boolean }) {
   return useQuery({
     queryKey: queryKeys.campeonatos.list(filters || {}),
     queryFn: () => CampeonatosService.getCampeonatos(filters),

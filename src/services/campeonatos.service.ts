@@ -2,7 +2,7 @@ import { Campeonato, ClassificacaoGrupo, CriarCampeonatoRequest, FiltroJogos, Gr
 import { BaseService } from './base.service'
 
 export class CampeonatosService extends BaseService {
-  static async getCampeonatos(filters?: { temporada?: string; tipo?: string; status?: string }): Promise<Campeonato[]> {
+  static async getCampeonatos(filters?: { temporada?: string; tipo?: string; status?: string;  }): Promise<Campeonato[]> {
     const service = new CampeonatosService()
     return service.get<Campeonato[]>('/campeonatos/campeonatos', filters)
   }

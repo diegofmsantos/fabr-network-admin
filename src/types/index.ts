@@ -370,9 +370,11 @@ export interface Grupo extends BaseEntity {
   nome: string
   campeonatoId: number
   ordem: number
+  regionalId?: number
   
   // Relacionamentos
   campeonato?: Campeonato
+  regional?: Regional  // ADICIONAR ESTA LINHA
   times: GrupoTime[]
   classificacoes: ClassificacaoGrupo[]
   jogos?: Jogo[]

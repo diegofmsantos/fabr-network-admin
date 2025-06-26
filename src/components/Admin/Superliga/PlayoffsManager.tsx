@@ -12,9 +12,9 @@ interface PlayoffsManagerProps {
   temporada: string
 }
 
-export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({ 
-  superligaId, 
-  temporada 
+export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
+  superligaId,
+  temporada
 }) => {
   const [selectedConferencia, setSelectedConferencia] = useState<string>('SUDESTE')
   const [showModal, setShowModal] = useState(false)
@@ -29,31 +29,31 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
   const { mutate: simularPlayoffs, isPending: simulando } = useSimularPlayoffs()
 
   const conferencias = [
-    { 
-      tipo: 'SUDESTE', 
-      nome: 'Sudeste', 
-      icone: '🏭', 
+    {
+      tipo: 'SUDESTE',
+      nome: 'Sudeste',
+      icone: '🏭',
       cor: 'bg-orange-500',
       descricao: '12 times • 3 regionais'
     },
-    { 
-      tipo: 'SUL', 
-      nome: 'Sul', 
-      icone: '🧊', 
+    {
+      tipo: 'SUL',
+      nome: 'Sul',
+      icone: '🧊',
       cor: 'bg-blue-500',
       descricao: '8 times • 2 regionais'
     },
-    { 
-      tipo: 'NORDESTE', 
-      nome: 'Nordeste', 
-      icone: '🌵', 
+    {
+      tipo: 'NORDESTE',
+      nome: 'Nordeste',
+      icone: '🌵',
       cor: 'bg-yellow-500',
       descricao: '6 times • 1 regional'
     },
-    { 
-      tipo: 'CENTRO_NORTE', 
-      nome: 'Centro-Norte', 
-      icone: '🌲', 
+    {
+      tipo: 'CENTRO_NORTE',
+      nome: 'Centro-Norte',
+      icone: '🌲',
       cor: 'bg-green-500',
       descricao: '6 times • 2 regionais'
     }
@@ -93,11 +93,11 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
   const JogoPlayoffCard = ({ jogo, size = 'normal' }: { jogo: any, size?: 'small' | 'normal' | 'large' }) => {
     const isSmall = size === 'small'
     const isLarge = size === 'large'
-    
+
     return (
       <div className={`bg-[#272731] rounded-lg border border-gray-700 p-${isSmall ? '3' : '4'} hover:border-[#63E300] transition-colors cursor-pointer`}
-           onClick={() => { setSelectedJogo(jogo); setShowModal(true) }}>
-        
+        onClick={() => { setSelectedJogo(jogo); setShowModal(true) }}>
+
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <span className={`text-${isSmall ? 'xs' : 'sm'} text-gray-400`}>
@@ -106,11 +106,11 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
             <span className={`px-2 py-1 rounded-full text-xs text-white flex items-center gap-1 ${getStatusColor(jogo.status)}`}>
               {getStatusIcon(jogo.status)}
               {jogo.status === 'AGUARDANDO' ? 'Aguardando' :
-               jogo.status === 'AGENDADO' ? 'Agendado' :
-               jogo.status === 'FINALIZADO' ? 'Finalizado' : jogo.status}
+                jogo.status === 'AGENDADO' ? 'Agendado' :
+                  jogo.status === 'FINALIZADO' ? 'Finalizado' : jogo.status}
             </span>
           </div>
-          
+
           <div className="flex items-center gap-1">
             <button className="p-1 text-gray-400 hover:text-white transition-colors">
               <Eye className={`w-${isSmall ? '3' : '4'} h-${isSmall ? '3' : '4'}`} />
@@ -146,11 +146,10 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
                 </span>
               )}
             </div>
-            
+
             {jogo.status === 'FINALIZADO' && jogo.placarTime1 !== null && (
-              <span className={`font-bold ${isSmall ? 'text-sm' : 'text-lg'} ${
-                jogo.placarTime1 > jogo.placarTime2 ? 'text-green-400' : 'text-gray-400'
-              }`}>
+              <span className={`font-bold ${isSmall ? 'text-sm' : 'text-lg'} ${jogo.placarTime1 > jogo.placarTime2 ? 'text-green-400' : 'text-gray-400'
+                }`}>
                 {jogo.placarTime1}
               </span>
             )}
@@ -182,11 +181,10 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
                 </span>
               )}
             </div>
-            
+
             {jogo.status === 'FINALIZADO' && jogo.placarTime2 !== null && (
-              <span className={`font-bold ${isSmall ? 'text-sm' : 'text-lg'} ${
-                jogo.placarTime2 > jogo.placarTime1 ? 'text-green-400' : 'text-gray-400'
-              }`}>
+              <span className={`font-bold ${isSmall ? 'text-sm' : 'text-lg'} ${jogo.placarTime2 > jogo.placarTime1 ? 'text-green-400' : 'text-gray-400'
+                }`}>
                 {jogo.placarTime2}
               </span>
             )}
@@ -261,10 +259,29 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
     )
   }
 
+  const getJogosConferencia = (bracket: any, conferencia: string): any[] => {
+    if (!bracket) return []
+
+    const key = `playoffs${conferencia.charAt(0) + conferencia.slice(1).toLowerCase()}`
+    const jogosData = bracket[key]
+
+    // TYPE-SAFE CHECK
+    if (Array.isArray(jogosData)) {
+      return jogosData
+    }
+
+    // Se é um objeto com jogos
+    if (jogosData && typeof jogosData === 'object' && 'jogos' in jogosData) {
+      return Array.isArray(jogosData.jogos) ? jogosData.jogos : []
+    }
+
+    return []
+  }
+
   const FaseNacional = () => {
     const semifinais = bracket?.semifinalNacional1 ? [bracket.semifinalNacional1] : []
     if (bracket?.semifinalNacional2) semifinais.push(bracket.semifinalNacional2)
-    
+
     const final = bracket?.finalNacional
 
     return (
@@ -396,24 +413,22 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
                 <button
                   key={conf.tipo}
                   onClick={() => setSelectedConferencia(conf.tipo)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
-                    selectedConferencia === conf.tipo
+                  className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${selectedConferencia === conf.tipo
                       ? 'bg-[#63E300] text-black'
                       : 'bg-[#1C1C24] text-gray-300 hover:bg-[#2A2A35]'
-                  }`}
+                    }`}
                 >
                   <span className="text-lg">{conf.icone}</span>
                   <span className="font-medium">{conf.nome}</span>
                 </button>
               ))}
-              
+
               <button
                 onClick={() => setSelectedConferencia('NACIONAL')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
-                  selectedConferencia === 'NACIONAL'
+                className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${selectedConferencia === 'NACIONAL'
                     ? 'bg-[#63E300] text-black'
                     : 'bg-[#1C1C24] text-gray-300 hover:bg-[#2A2A35]'
-                }`}
+                  }`}
               >
                 <Crown className="w-5 h-5" />
                 <span className="font-medium">Nacional</span>
@@ -439,9 +454,9 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
                 </div>
               </div>
 
-              <ConferenciaBracket 
+              <ConferenciaBracket
                 conferencia={conferencias.find(c => c.tipo === selectedConferencia)}
-                jogos={bracket[`playoffs${selectedConferencia.charAt(0) + selectedConferencia.slice(1).toLowerCase()}` as keyof typeof bracket] || []}
+                jogos={getJogosConferencia(bracket, selectedConferencia)}
               />
             </div>
           )}
@@ -465,7 +480,7 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
 
             <div className="space-y-4">
               <JogoPlayoffCard jogo={selectedJogo} />
-              
+
               <div className="flex gap-2">
                 <button className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
                   Editar Resultado

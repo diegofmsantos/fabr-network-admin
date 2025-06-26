@@ -14,7 +14,7 @@ export default function SuperligaPage() {
   const [isCreating, setIsCreating] = useState(false)
 
   const { data: superligas = [], isLoading, refetch } = useCampeonatos({
-    filters: { isSuperliga: true }
+    isSuperliga: true
   })
 
   const { mutate: criarSuperliga, isPending } = useCriarSuperliga()
@@ -30,7 +30,7 @@ export default function SuperligaPage() {
     setIsCreating(true)
     const anoAtual = new Date().getFullYear()
     const proximoAno = anoAtual + 1
-    
+
     criarSuperliga(proximoAno.toString(), {
       onSuccess: (novaSuperlgia) => {
         setIsCreating(false)
@@ -138,7 +138,7 @@ export default function SuperligaPage() {
             {superligas.length === 0 ? 'Nenhuma Superliga criada ainda' : 'Nenhuma Superliga encontrada'}
           </h3>
           <p className="text-gray-400 mb-6">
-            {superligas.length === 0 
+            {superligas.length === 0
               ? 'Crie a primeira edição da Superliga de Futebol Americano'
               : 'Ajuste os filtros ou crie uma nova Superliga'
             }
@@ -176,7 +176,7 @@ export default function SuperligaPage() {
                       <p className="text-sm text-gray-400">{superliga.temporada}</p>
                     </div>
                   </div>
-                  
+
                   <span className={`px-2 py-1 rounded-full text-xs text-white flex items-center gap-1 ${getStatusColor(superliga.status)}`}>
                     {getStatusIcon(superliga.status)}
                     {getStatusText(superliga.status)}
@@ -214,12 +214,12 @@ export default function SuperligaPage() {
                       )}
                     </span>
                   </div>
-                  
+
                   <div className="flex items-center text-sm text-gray-300">
                     <Users className="w-4 h-4 mr-2 text-gray-500" />
                     <span>32 times • 4 conferências • 8 regionais</span>
                   </div>
-                  
+
                   {superliga._count && (
                     <div className="flex items-center text-sm text-gray-300">
                       <Play className="w-4 h-4 mr-2 text-gray-500" />

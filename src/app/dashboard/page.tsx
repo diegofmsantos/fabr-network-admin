@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { HeaderGeneral } from '@/components/HeaderGeneral'
-import { Jogador, Time } from '@/types'
+import { Estatisticas, Jogador, Time } from '@/types'
 import { useTimes } from '@/hooks/useTimes'
 import { useJogadores } from '@/hooks/useJogadores'
 
@@ -165,20 +165,32 @@ export default function DashboardPage() {
             titulo: "Top 10 Jogadores por Estatística",
             descricao: "Exibe os jogadores com melhores estatísticas em diversas categorias",
             executar: (times, jogadores) => {
+                type CategoriaValida = keyof Estatisticas
+
+                const isValidCategory = (grupo: string): grupo is CategoriaValida => {
+                    return ['passe', 'corrida', 'recepcao', 'retorno', 'defesa', 'kicker', 'punter'].includes(grupo)
+                }
+
                 const getEstatistica = (jogador: Jogador, grupo: string, campo: string) => {
                     if (!jogador.estatisticas) return 0
-                    return jogador.estatisticas[grupo]?.[campo] || 0
+
+                    if (!isValidCategory(grupo)) return 0
+
+                    const stats = jogador.estatisticas[grupo]
+                    if (!stats || typeof stats !== 'object') return 0
+
+                    return (stats as any)[campo] || 0
                 }
 
                 const categorias = [
-                    { grupo: 'passe', campo: 'jardas_de_passe', titulo: 'Jardas de Passe' },
-                    { grupo: 'passe', campo: 'td_passados', titulo: 'Touchdowns Passados' },
-                    { grupo: 'corrida', campo: 'jardas_corridas', titulo: 'Jardas Corridas' },
-                    { grupo: 'corrida', campo: 'tds_corridos', titulo: 'Touchdowns Corridos' },
-                    { grupo: 'recepcao', campo: 'recepcoes', titulo: 'Recepções' },
-                    { grupo: 'recepcao', campo: 'jardas_recebidas', titulo: 'Jardas Recebidas' },
-                    { grupo: 'defesa', campo: 'tackles_totais', titulo: 'Tackles Totais' },
-                    { grupo: 'defesa', campo: 'sacks_forcado', titulo: 'Sacks' }
+                    { grupo: 'passe' as CategoriaValida, campo: 'jardas_de_passe', titulo: 'Jardas de Passe' },
+                    { grupo: 'passe' as CategoriaValida, campo: 'td_passados', titulo: 'Touchdowns Passados' },
+                    { grupo: 'corrida' as CategoriaValida, campo: 'jardas_corridas', titulo: 'Jardas Corridas' },
+                    { grupo: 'corrida' as CategoriaValida, campo: 'tds_corridos', titulo: 'Touchdowns Corridos' },
+                    { grupo: 'recepcao' as CategoriaValida, campo: 'recepcoes', titulo: 'Recepções' },
+                    { grupo: 'recepcao' as CategoriaValida, campo: 'jardas_recebidas', titulo: 'Jardas Recebidas' },
+                    { grupo: 'defesa' as CategoriaValida, campo: 'tackles_totais', titulo: 'Tackles Totais' },
+                    { grupo: 'defesa' as CategoriaValida, campo: 'sacks_forcado', titulo: 'Sacks' }
                 ]
 
                 const resultados = categorias.map(categoria => {
