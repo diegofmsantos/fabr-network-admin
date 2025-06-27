@@ -83,7 +83,7 @@ export const Times = () => {
             updatedAt: new Date().toISOString(),
             titulos: data.titulos ? [data.titulos] : []
         } as Omit<Time, 'id'>
-        
+
         createTimeMutation.mutate(timeData, {
             onSuccess: () => {
                 setSuccessMessage("Time adicionado com sucesso!")
@@ -148,12 +148,12 @@ export const Times = () => {
         // Preencher com dados do formulário
         if (data.estatisticas) {
             const grupos: Array<keyof Estatisticas> = ['passe', 'corrida', 'recepcao', 'retorno', 'defesa', 'kicker', 'punter']
-            
+
             grupos.forEach(grupo => {
                 if (data.estatisticas![grupo]) {
                     const estatisticasGrupo = data.estatisticas![grupo] as any
                     const estatisticasCompleta = estatisticasCompletas[grupo] as any
-                    
+
                     Object.keys(estatisticasGrupo).forEach(campo => {
                         if (estatisticasGrupo[campo] !== undefined && estatisticasGrupo[campo] !== '') {
                             estatisticasCompleta[campo] = Number(estatisticasGrupo[campo]) || 0
@@ -220,11 +220,10 @@ export const Times = () => {
                     <nav className="flex justify-between">
                         <button
                             onClick={() => setActiveTab('time')}
-                            className={`px-4 py-4 text-xl font-extrabold italic leading-[55px] tracking-[-1px] transition-colors relative ${
-                                activeTab === 'time'
-                                    ? 'text-[#63E300]'
-                                    : 'text-gray-400 hover:text-white'
-                            }`}
+                            className={`px-4 py-4 text-xl font-extrabold italic leading-[55px] tracking-[-1px] transition-colors relative ${activeTab === 'time'
+                                ? 'text-[#63E300]'
+                                : 'text-gray-400 hover:text-white'
+                                }`}
                         >
                             ADICIONAR TIME
                             {activeTab === 'time' && (
@@ -233,11 +232,10 @@ export const Times = () => {
                         </button>
                         <button
                             onClick={() => setActiveTab('jogador')}
-                            className={`px-4 py-4 text-xl font-extrabold italic leading-[55px] tracking-[-1px] transition-colors relative ${
-                                activeTab === 'jogador'
-                                    ? 'text-[#63E300]'
-                                    : 'text-gray-400 hover:text-white'
-                            }`}
+                            className={`px-4 py-4 text-xl font-extrabold italic leading-[55px] tracking-[-1px] transition-colors relative ${activeTab === 'jogador'
+                                ? 'text-[#63E300]'
+                                : 'text-gray-400 hover:text-white'
+                                }`}
                         >
                             ADICIONAR JOGADOR
                             {activeTab === 'jogador' && (
@@ -246,11 +244,10 @@ export const Times = () => {
                         </button>
                         <button
                             onClick={() => setActiveTab('times-cadastrados')}
-                            className={`px-4 py-4 text-xl font-extrabold italic leading-[55px] tracking-[-1px] transition-colors relative ${
-                                activeTab === 'times-cadastrados'
-                                    ? 'text-[#63E300]'
-                                    : 'text-gray-400 hover:text-white'
-                            }`}
+                            className={`px-4 py-4 text-xl font-extrabold italic leading-[55px] tracking-[-1px] transition-colors relative ${activeTab === 'times-cadastrados'
+                                ? 'text-[#63E300]'
+                                : 'text-gray-400 hover:text-white'
+                                }`}
                         >
                             TIMES CADASTRADOS
                             {activeTab === 'times-cadastrados' && (
@@ -330,7 +327,7 @@ export const Times = () => {
                                                 setValueAs: (v) => (v === "" ? undefined : Number(v)),
                                             })}
                                             error={jogadorErrors.timeId as FieldError | undefined}
-                                            isSelect={true}
+                                            type="select"
                                             options={[
                                                 { value: "", label: "Selecione um time" },
                                                 ...times.map((time) => ({
@@ -339,7 +336,7 @@ export const Times = () => {
                                                 }))
                                             ]}
                                         />
-                                        
+
                                         {camposJogador.map((field) => (
                                             <FormField
                                                 key={field.id}
@@ -347,10 +344,10 @@ export const Times = () => {
                                                 id={field.id}
                                                 register={registerJogador(field.id as keyof JogadorFormData)}
                                                 error={jogadorErrors[field.id as keyof JogadorFormData] as FieldError | undefined}
-                                                isSelect={field.options ? true : false}
+                                                type={field.options ? "select" : "text"}
                                                 options={field.options?.map(option => ({
-                                                    value: option,
-                                                    label: option
+                                                    value: typeof option === 'string' ? option : option.value,
+                                                    label: typeof option === 'string' ? option : option.label
                                                 }))}
                                             />
                                         ))}
@@ -365,11 +362,12 @@ export const Times = () => {
                                                     onClick={() => toggleGroup(grupo.group)}
                                                     className="w-full flex items-center justify-between p-4 bg-[#2C2C34] hover:bg-[#3C3C44] transition-colors"
                                                 >
-                                                    <span className="text-white font-medium">{grupo.title}</span>
+                                                    <span className="text-white font-medium">
+                                                        {(grupo as any).title || grupo.group}
+                                                    </span>
                                                     <svg
-                                                        className={`w-5 h-5 text-gray-400 transition-transform ${
-                                                            expandedGroups[grupo.group] ? 'rotate-180' : ''
-                                                        }`}
+                                                        className={`w-5 h-5 text-gray-400 transition-transform ${expandedGroups[grupo.group] ? 'rotate-180' : ''
+                                                            }`}
                                                         fill="none"
                                                         stroke="currentColor"
                                                         viewBox="0 0 24 24"
@@ -378,11 +376,10 @@ export const Times = () => {
                                                     </svg>
                                                 </button>
                                                 <div
-                                                    className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                                                        expandedGroups[grupo.group]
-                                                            ? 'max-h-[1000px] opacity-100'
-                                                            : 'max-h-0 opacity-0'
-                                                    }`}
+                                                    className={`transition-all duration-300 ease-in-out overflow-hidden ${expandedGroups[grupo.group]
+                                                        ? 'max-h-[1000px] opacity-100'
+                                                        : 'max-h-0 opacity-0'
+                                                        }`}
                                                 >
                                                     {grupo.fields.map((field) => (
                                                         <FormField
@@ -465,11 +462,11 @@ export const Times = () => {
                                                     {time.temporada}
                                                 </span>
                                             </div>
-                                            
+
                                             <h3 className="text-white font-bold text-lg mb-2 line-clamp-2">
                                                 {time.nome}
                                             </h3>
-                                            
+
                                             <div className="space-y-2 text-sm text-gray-400">
                                                 <div className="flex justify-between">
                                                     <span>Sigla:</span>

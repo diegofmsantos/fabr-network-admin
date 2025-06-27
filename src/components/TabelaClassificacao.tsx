@@ -9,7 +9,7 @@ export const TabelaClassificacao: React.FC<TabelaClassificacaoProps> = ({
   classificacao,
   grupoNome,
   showGroup = false,
-  compact = false,
+  compact = false, // @ts-ignore
   temporada = '2025'
 }) => {
   if (!classificacao || classificacao.length === 0) {

@@ -144,4 +144,29 @@ export class SuperligaService extends BaseService {
     const service = new SuperligaService()
     return service.get(`/campeonatos/${campeonatoId}/status`)
   }
+
+    static async getRankingGeral(campeonatoId: number): Promise<{
+    porConferencia: {
+      [key: string]: any[]
+    }
+    geral: any[]
+    criterios: string[]
+  }> {
+    const service = new SuperligaService()
+    return service.get(`/superliga/campeonatos/${campeonatoId}/ranking`)
+  }
+
+    static async getFaseNacional(campeonatoId: number): Promise<{
+    semifinais: any[]
+    final: any
+    status: string
+  }> {
+    const service = new SuperligaService()
+    return service.get(`/superliga/campeonatos/${campeonatoId}/fase-nacional`)
+  }
+
+    static async getBracketPlayoffs(campeonatoId: number): Promise<SuperligaBracket> {
+    const service = new SuperligaService()
+    return service.get(`/superliga/campeonatos/${campeonatoId}/bracket`)
+  }
 }

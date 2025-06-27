@@ -1,28 +1,26 @@
+import { ImportResult } from '@/hooks/useImportacao'
 import { BaseService } from './base.service'
 
 export class ImportacaoService extends BaseService {
 
-  static async importarTimes(arquivo: File) {
+  static async importarTimes(arquivo: File): Promise<ImportResult> {
     const service = new ImportacaoService()
-    return service.upload('/admin/importar-times', arquivo)
+    return service.upload('/admin/importar-times', arquivo) as Promise<ImportResult>
   }
 
-  static async importarJogadores(arquivo: File) {
+  static async importarJogadores(arquivo: File): Promise<ImportResult> {
     const service = new ImportacaoService()
-    return service.upload('/admin/importar-jogadores', arquivo)
+    return service.upload('/admin/importar-jogadores', arquivo) as Promise<ImportResult>
   }
 
-  static async atualizarEstatisticas(
-    arquivo: File,
-    idJogo: string,
-    dataJogo: string
-  ) {
+  static async atualizarEstatisticas(arquivo: File, idJogo: string, dataJogo: string): Promise<ImportResult> {
     const service = new ImportacaoService()
     return service.upload('/admin/atualizar-estatisticas', arquivo, {
       id_jogo: idJogo,
       data_jogo: dataJogo
-    })
+    }) as Promise<ImportResult>
   }
+
 
   static async iniciarTemporada(
     ano: string,
@@ -57,7 +55,7 @@ export class ImportacaoService extends BaseService {
     }
   ) {
     const service = new ImportacaoService()
-    return service.post(`/admin/iniciar-temporada/${ano}`, alteracoes)
+    return service.post(`/admin/iniciar-temporada/${ano}`, { alteracoes }) as Promise<ImportResult>
   }
 
   static async getTransferencias(
@@ -71,14 +69,14 @@ export class ImportacaoService extends BaseService {
     })
   }
 
-  static async validarPlanilhaTimes(arquivo: File): Promise<any> {
+   static async validarPlanilhaTimes(arquivo: File): Promise<ImportResult> {
     const service = new ImportacaoService()
-    return service.upload('/admin/validar-times', arquivo)
+    return service.upload('/admin/validar-times', arquivo) as Promise<ImportResult>
   }
 
-  static async validarPlanilhaJogadores(arquivo: File): Promise<any> {
+  static async validarPlanilhaJogadores(arquivo: File): Promise<ImportResult> {
     const service = new ImportacaoService()
-    return service.upload('/admin/validar-jogadores', arquivo)
+    return service.upload('/admin/validar-jogadores', arquivo) as Promise<ImportResult>
   }
 
   static async verificarTemporada(temporada: string): Promise<boolean> {

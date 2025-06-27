@@ -117,10 +117,10 @@ export default function SuperligaDetailPage() {
             <div>
               <p className="text-gray-400 text-sm">Total de Jogos</p>
               <p className="text-lg font-semibold text-white">
-                {status?.estatisticas?.jogosTotal || 0}
+                {(status as any)?.estatisticas?.jogosTotal || 0}
               </p>
               <p className="text-xs text-gray-500">
-                {status?.estatisticas?.jogosFinalizados || 0} finalizados
+                {(status as any)?.estatisticas?.jogosFinalizados || 0} finalizados
               </p>
             </div>
             <div className="p-3 bg-green-500 bg-opacity-20 rounded-lg">
@@ -153,7 +153,7 @@ export default function SuperligaDetailPage() {
                     </button>
                   )}
                   
-                  {status.fase === 'TEMPORADA_REGULAR' && status.estatisticas?.jogosFinalizados === status.estatisticas?.jogosTotal && (
+                  {status.fase === 'TEMPORADA_REGULAR' && (status as any).estatisticas?.jogosFinalizados === (status as any).estatisticas?.jogosTotal && (
                     <button
                       onClick={handleGerarPlayoffs}
                       disabled={gerandoPlayoffs}

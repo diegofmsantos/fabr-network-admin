@@ -20,16 +20,16 @@ export function TeamChangesDisplay({ timeChanges, times, onRemove }: TeamChanges
               <div>
                 <span className="text-white font-medium">{time?.nome}</span>
                 <ul className="text-gray-400 text-sm mt-1">
-                  {change.nome && <li>Nome: {change.nome}</li>}
-                  {change.sigla && <li>Sigla: {change.sigla}</li>}
-                  {change.cor && <li>Cor: {change.cor}</li>}
-                  {change.instagram && <li>Instagram: {change.instagram}</li>}
-                  {change.instagram2 && <li>@:: {change.instagram2}</li>}
-                  {change.logo && <li>Logo: {change.logo}</li>}
-                  {change.presidente && <li>Presidente: {change.presidente}</li>}
-                  {change.head_coach && <li>Head Coach: {change.head_coach}</li>}
-                  {change.coord_ofen && <li>Coord. Ofensivo: {change.coord_ofen}</li>}
-                  {change.coord_defen && <li>Coord. Defensivo: {change.coord_defen}</li>}
+                  {(change as any).nome && <li>Nome: {(change as any).nome}</li>}
+                  {(change as any).sigla && <li>Sigla: {(change as any).sigla}</li>}
+                  {(change as any).cor && <li>Cor: {(change as any).cor}</li>}
+                  {(change as any).instagram && <li>Instagram: {(change as any).instagram}</li>}
+                  {(change as any).instagram2 && <li>@:: {(change as any).instagram2}</li>}
+                  {(change as any).logo && <li>Logo: {(change as any).logo}</li>}
+                  {(change as any).presidente && <li>Presidente: {(change as any).presidente}</li>}
+                  {(change as any).head_coach && <li>Head Coach: {(change as any).head_coach}</li>}
+                  {(change as any).coord_ofen && <li>Coord. Ofensivo: {(change as any).coord_ofen}</li>}
+                  {(change as any).coord_defen && <li>Coord. Defensivo: {(change as any).coord_defen}</li>}
                 </ul>
               </div>
               <button

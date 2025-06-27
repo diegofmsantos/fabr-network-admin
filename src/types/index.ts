@@ -1069,11 +1069,25 @@ export interface TimeChange {
 }
 
 export interface TransferenciaTemporada {
+  id?: number
+  jogadorNome: string
   jogadorId: number
-  timeOrigemId: number
+  timeOrigemId?: number
+  timeOrigemNome?: string
+  timeOrigemSigla?: string
   timeDestinoId: number
+  timeDestinoNome?: string
+  timeDestinoSigla?: string
+  temporadaOrigem?: string
+  temporadaDestino?: string
+  novaPosicao?: string
+  novoSetor?: string
   novoNumero?: number
   novaCamisa?: string
+  tipo?: 'TRANSFERENCIA' | 'RENOVACAO' | 'NOVO'
+  status?: 'PENDENTE' | 'APROVADO' | 'REJEITADO'
+  observacoes?: string
+  dataTransferencia?: string
 }
 
 export interface IniciarTemporadaData {

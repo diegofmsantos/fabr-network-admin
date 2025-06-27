@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNotifications } from './useNotifications'
 import { ConferenciaConfig, TipoConferencia, TipoRegional } from '@/types'
 import { SuperligaService } from '@/services/superliga.service'
+import { queryKeys } from './queryKeys'
 
 export const superligaQueryKeys = {
   all: ['superliga'] as const,
@@ -335,3 +336,34 @@ export function useEstatisticasSuperliga(campeonatoId: number) {
     staleTime: 1000 * 60 * 10, 
   })
 }
+
+export function useRankingGeral(campeonatoId: number) {
+  return useQuery({
+    queryKey: [...queryKeys.admin.all, 'superliga', campeonatoId, 'ranking'],
+    queryFn: () => SuperligaService.getRankingGeral(campeonatoId),
+    enabled: !!campeonatoId,
+    staleTime: 1000 * 60 * 5, 
+    retry: 2,
+  })
+}
+
+export function useFaseNacional(campeonatoId: number) {
+  return useQuery({
+    queryKey: [...queryKeys.admin.all, 'superliga', campeonatoId, 'fase-nacional'],
+    queryFn: () => SuperligaService.getFaseNacional(campeonatoId),
+    enabled: !!campeonatoId,
+    staleTime: 1000 * 60 * 2,
+    retry: 2,
+  })
+}
+
+export function useBracketPlayoffs(campeonatoId: number) {
+  return useQuery({
+    queryKey: [...queryKeys.admin.all, 'superliga', campeonatoId, 'bracket'],
+    queryFn: () => SuperligaService.getBracketPlayoffs(campeonatoId),
+    enabled: !!campeonatoId,
+    staleTime: 1000 * 60 * 3,
+    retry: 2,
+  })
+}
+

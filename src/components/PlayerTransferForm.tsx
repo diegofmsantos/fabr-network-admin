@@ -45,7 +45,7 @@ export function PlayerTransferForm({
     const timeOrigem = times.find(t => t.id === selectedJogador.timeId);
 
     const timeDestinoDados = timeChanges.find(tc => tc.timeId === Number(selectedNovoTime));
-    const novoTimeNome = timeDestinoDados?.nome || novoTime.nome;
+    const novoTimeNome = (timeDestinoDados as any)?.nome || novoTime.nome;
 
     const transferencia: TransferenciaTemporada = {
       jogadorId: selectedJogador.id || 0,
@@ -148,9 +148,9 @@ export function PlayerTransferForm({
             {times
               .filter(time => !selectedJogador || time.id !== selectedJogador.timeId)
               .map((time) => {
-                const change = timeChanges.find(tc => tc.timeId === time.id && tc.nome);
+                const change = timeChanges.find(tc => tc.timeId === time.id && (tc as any).nome);
                 const displayName = change
-                  ? `${time.nome} → ${change.nome} (${change.sigla || time.sigla})`
+                  ? `${time.nome} → ${(change as any).nome} (${(change as any).sigla || time.sigla})`
                   : `${time.nome} (${time.sigla})`;
 
                 return (

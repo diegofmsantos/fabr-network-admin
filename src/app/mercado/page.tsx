@@ -20,7 +20,7 @@ export default function MercadoPage() {
     ? transferencias.filter(t =>
       t.jogadorNome.toLowerCase().includes(searchTerm.toLowerCase()) ||
       t.timeOrigemNome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.timeDestinoNome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      t.timeDestinoNome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       t.novaPosicao?.toLowerCase().includes(searchTerm.toLowerCase())
     )
     : transferencias;

@@ -181,13 +181,13 @@ export default function IniciarTemporadaPage() {
                   <div>
                     <span className="text-white font-medium">{time?.nome}</span>
                     <ul className="text-gray-400 text-sm mt-1">
-                      {change.nome && <li>Nome: {change.nome}</li>}
-                      {change.sigla && <li>Sigla: {change.sigla}</li>}
-                      {change.cor && <li>Cor: {change.cor}</li>}
-                      {change.presidente && <li>Presidente: {change.presidente}</li>}
-                      {change.head_coach && <li>Head Coach: {change.head_coach}</li>}
-                      {change.coord_ofen && <li>Coord. Ofensivo: {change.coord_ofen}</li>}
-                      {change.coord_defen && <li>Coord. Defensivo: {change.coord_defen}</li>}
+                      {(change as any).nome && <li>Nome: {(change as any).nome}</li>}
+                      {(change as any).sigla && <li>Sigla: {(change as any).sigla}</li>}
+                      {(change as any).cor && <li>Cor: {(change as any).cor}</li>}
+                      {(change as any).presidente && <li>Presidente: {(change as any).presidente}</li>}
+                      {(change as any).head_coach && <li>Head Coach: {(change as any).head_coach}</li>}
+                      {(change as any).coord_ofen && <li>Coord. Ofensivo: {(change as any).coord_ofen}</li>}
+                      {(change as any).coord_defen && <li>Coord. Defensivo: {(change as any).coord_defen}</li>}
                     </ul>
                   </div>
                   <button
@@ -217,16 +217,16 @@ export default function IniciarTemporadaPage() {
             {transferencias.map((transfer, index) => (
               <div key={index} className="bg-[#1C1C24] p-3 rounded-lg flex justify-between items-center">
                 <div>
-                  <span className="text-white font-medium">{transfer.jogadorNome}</span>
+                  <span className="text-white font-medium">{(transfer as any).jogadorNome}</span>
                   <div className="text-gray-400 text-sm mt-1">
-                    {transfer.timeOrigemNome && (
+                    {(transfer as any).timeOrigemNome && (
                       <span>
-                        {transfer.timeOrigemNome} → {transfer.timeDestinoNome}
+                        {(transfer as any).timeOrigemNome} → {(transfer as any).timeDestinoNome}
                       </span>
                     )}
-                    {transfer.novoNumero && (
+                    {(transfer as any).novoNumero && (
                       <span className="ml-2">
-                        Novo número: {transfer.novoNumero}
+                        Novo número: {(transfer as any).novoNumero}
                       </span>
                     )}
                   </div>

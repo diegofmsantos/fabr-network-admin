@@ -37,83 +37,84 @@ export function TeamChangesForm({ times, onAddChange }: TeamChangesProps) {
     }
   };
 
-  const handleSubmit = () => {
+const handleSubmit = () => {
+  if (!selectedTime) return;
 
-    if (!selectedTime) return;
+  const timeExistente = times.find(t => t.id === Number(selectedTime));
+  if (!timeExistente) return;
 
-    const timeExistente = times.find(t => t.id === Number(selectedTime));
-    if (!timeExistente) return;
+  const alteracoes: any = {};
+  let temAlteracoes = false;
 
-    const alteracoes: Partial<TimeChange> = {};
-    let temAlteracoes = false;
+  if (timeForm.nome && timeForm.nome !== timeExistente.nome) {
+    alteracoes.nome = timeForm.nome;
+    temAlteracoes = true;
+  }
 
-    if (timeForm.nome && timeForm.nome !== timeExistente.nome) {
-      alteracoes.nome = timeForm.nome;
-      temAlteracoes = true;
-    }
+  if (timeForm.sigla && timeForm.sigla !== timeExistente.sigla) {
+    alteracoes.sigla = timeForm.sigla;
+    temAlteracoes = true;
+  }
 
-    if (timeForm.sigla && timeForm.sigla !== timeExistente.sigla) {
-      alteracoes.sigla = timeForm.sigla;
-      temAlteracoes = true;
-    }
+  if (timeForm.cor && timeForm.cor !== timeExistente.cor) {
+    alteracoes.cor = timeForm.cor;
+    temAlteracoes = true;
+  }
 
-    if (timeForm.cor && timeForm.cor !== timeExistente.cor) {
-      alteracoes.cor = timeForm.cor;
-      temAlteracoes = true;
-    }
+  if (timeForm.instagram && timeForm.instagram !== timeExistente.instagram) {
+    alteracoes.instagram = timeForm.instagram;
+    temAlteracoes = true;
+  }
 
-    if (timeForm.instagram && timeForm.instagram !== timeExistente.instagram) {
-      alteracoes.instagram = timeForm.instagram;
-      temAlteracoes = true;
-    }
+  if (timeForm.instagram2 && timeForm.instagram2 !== timeExistente.instagram2) {
+    alteracoes.instagram2 = timeForm.instagram2;
+    temAlteracoes = true;
+  }
 
-    if (timeForm.instagram2 && timeForm.instagram2 !== timeExistente.instagram2) {
-      alteracoes.instagram2 = timeForm.instagram2;
-      temAlteracoes = true;
-    }
+  if (timeForm.logo && timeForm.logo !== timeExistente.logo) {
+    alteracoes.logo = timeForm.logo;
+    temAlteracoes = true;
+  }
 
-    if (timeForm.logo && timeForm.logo !== timeExistente.logo) {
-      alteracoes.logo = timeForm.logo;
-      temAlteracoes = true;
-    }
+  if (timeForm.capacete && timeForm.capacete !== timeExistente.capacete) {
+    alteracoes.capacete = timeForm.capacete;
+    temAlteracoes = true;
+  }
 
-    if (timeForm.capacete && timeForm.capacete !== timeExistente.capacete) {
-      alteracoes.capacete = timeForm.capacete;
-      temAlteracoes = true;
-    }
+  if (timeForm.presidente && timeForm.presidente !== timeExistente.presidente) {
+    alteracoes.presidente = timeForm.presidente;
+    temAlteracoes = true;
+  }
 
-    if (timeForm.presidente && timeForm.presidente !== timeExistente.presidente) {
-      alteracoes.presidente = timeForm.presidente;
-      temAlteracoes = true;
-    }
+  if (timeForm.head_coach && timeForm.head_coach !== timeExistente.head_coach) {
+    alteracoes.head_coach = timeForm.head_coach;
+    temAlteracoes = true;
+  }
 
-    if (timeForm.head_coach && timeForm.head_coach !== timeExistente.head_coach) {
-      alteracoes.head_coach = timeForm.head_coach;
-      temAlteracoes = true;
-    }
+  if (timeForm.coord_ofen && timeForm.coord_ofen !== timeExistente.coord_ofen) {
+    alteracoes.coord_ofen = timeForm.coord_ofen;
+    temAlteracoes = true;
+  }
 
-    if (timeForm.coord_ofen && timeForm.coord_ofen !== timeExistente.coord_ofen) {
-      alteracoes.coord_ofen = timeForm.coord_ofen;
-      temAlteracoes = true;
-    }
+  if (timeForm.coord_defen && timeForm.coord_defen !== timeExistente.coord_defen) {
+    alteracoes.coord_defen = timeForm.coord_defen;
+    temAlteracoes = true;
+  }
 
-    if (timeForm.coord_defen && timeForm.coord_defen !== timeExistente.coord_defen) {
-      alteracoes.coord_defen = timeForm.coord_defen;
-      temAlteracoes = true;
-    }
+  if (temAlteracoes) {
+    const novaAlteracao: TimeChange = {
+      timeId: Number(selectedTime),
+      temporada: timeExistente.temporada, 
+      tipo: 'ALTERACAO',
+      aprovado: false,
+      ...alteracoes  
+    } as any; 
 
-    if (temAlteracoes) {
-      const novaAlteracao: TimeChange = {
-        timeId: Number(selectedTime),
-        alteracoes: { ...alteracoes },
-        ...alteracoes  
-      };
-
-      onAddChange(novaAlteracao);
-      setSelectedTime("");
-      setTimeForm({});
-    }
-  };
+    onAddChange(novaAlteracao);
+    setSelectedTime("");
+    setTimeForm({});
+  }
+};
 
   return (
     <div className="mb-8 bg-[#272731] p-6 rounded-lg">
