@@ -1,36 +1,179 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNotifications } from './useNotifications'
-import { useCampeonatos } from './useCampeonatos'
-import { ConferenciaConfig, TipoConferencia, TipoRegional } from '@/types'
 import { SuperligaService } from '@/services/superliga.service'
-import { queryKeys } from './queryKeys'
 
 // ==================== QUERY KEYS ====================
 
 export const superligaQueryKeys = {
   all: ['superliga'] as const,
   
-  campeonato: (id: number) => [...superligaQueryKeys.all, 'campeonato', id] as const,
-  status: (id: number) => [...superligaQueryKeys.campeonato(id), 'status'] as const,
-  bracket: (id: number) => [...superligaQueryKeys.campeonato(id), 'bracket'] as const,
+  temporada: (temporada: string) => [...superligaQueryKeys.all, temporada] as const,
+  status: (temporada: string) => [...superligaQueryKeys.temporada(temporada), 'status'] as const,
+  conferencias: (temporada: string) => [...superligaQueryKeys.temporada(temporada), 'conferencias'] as const,
+  regionais: (temporada: string) => [...superligaQueryKeys.temporada(temporada), 'regionais'] as const,
+  times: (temporada: string) => [...superligaQueryKeys.temporada(temporada), 'times'] as const,
+  jogos: (temporada: string) => [...superligaQueryKeys.temporada(temporada), 'jogos'] as const,
+  classificacao: (temporada: string) => [...superligaQueryKeys.temporada(temporada), 'classificacao'] as const,
+  bracket: (temporada: string) => [...superligaQueryKeys.temporada(temporada), 'bracket'] as const,
+  validacao: (temporada: string) => [...superligaQueryKeys.temporada(temporada), 'validacao'] as const,
   
-  conferencias: (id: number) => [...superligaQueryKeys.campeonato(id), 'conferencias'] as const,
-  conferencia: (id: number, conf: TipoConferencia) => 
-    [...superligaQueryKeys.conferencias(id), conf] as const,
-    
-  playoffs: (id: number) => [...superligaQueryKeys.campeonato(id), 'playoffs'] as const,
-  playoffConferencia: (id: number, conf: TipoConferencia) => 
-    [...superligaQueryKeys.playoffs(id), conf] as const,
-    
-  classificacao: (id: number) => [...superligaQueryKeys.campeonato(id), 'classificacao'] as const,
-  classificacaoConferencia: (id: number, conf: TipoConferencia) =>
-    [...superligaQueryKeys.classificacao(id), conf] as const,
-  classificacaoRegional: (id: number, reg: TipoRegional) =>
-    [...superligaQueryKeys.classificacao(id), 'regional', reg] as const,
-    
-  jogos: (id: number) => [...superligaQueryKeys.campeonato(id), 'jogos'] as const,
-  estatisticas: (id: number) => [...superligaQueryKeys.campeonato(id), 'estatisticas'] as const,
-  finalNacional: (id: number) => [...superligaQueryKeys.campeonato(id), 'final'] as const,
+  // Query keys específicas
+  jogosRodada: (temporada: string, rodada: number) => 
+    [...superligaQueryKeys.jogos(temporada), 'rodada', rodada] as const,
+  classificacaoConferencia: (temporada: string, conferencia: string) => 
+    [...superligaQueryKeys.classificacao(temporada), 'conferencia', conferencia] as const,
+}
+
+// ==================== QUERIES BÁSICAS ====================
+
+export function useSuperliga(temporada: string) {
+  return useQuery({
+    queryKey: superligaQueryKeys.temporada(temporada),
+    queryFn: () => SuperligaService.getSuperliga(temporada),
+    enabled: !!temporada,
+    staleTime: 1000 * 60 * 5, // 5 minutos
+    retry: 2,
+  })
+}
+
+export function useStatusSuperliga(temporada: string) {
+  return useQuery({
+    queryKey: superligaQueryKeys.status(temporada),
+    queryFn: () => SuperligaService.getStatus(temporada),
+    enabled: !!temporada,
+    staleTime: 1000 * 30, // 30 segundos (atualiza mais frequentemente)
+    refetchInterval: 1000 * 60, // Refetch a cada minuto
+  })
+}
+
+export function useConferencias(temporada: string) {
+  return useQuery({
+    queryKey: superligaQueryKeys.conferencias(temporada),
+    queryFn: () => SuperligaService.getConferencias(temporada),
+    enabled: !!temporada,
+    staleTime: 1000 * 60 * 10, // 10 minutos (estrutura não muda muito)
+  })
+}
+
+export function useRegionais(temporada: string, conferencia?: string) {
+  return useQuery({
+    queryKey: [...superligaQueryKeys.regionais(temporada), conferencia],
+    queryFn: () => SuperligaService.getRegionais(temporada, conferencia),
+    enabled: !!temporada,
+    staleTime: 1000 * 60 * 10,
+  })
+}
+
+export function useTimesPorConferencia(temporada: string) {
+  return useQuery({
+    queryKey: [...superligaQueryKeys.times(temporada), 'por-conferencia'],
+    queryFn: () => SuperligaService.getTimesPorConferencia(temporada),
+    enabled: !!temporada,
+    staleTime: 1000 * 60 * 5,
+  })
+}
+
+// ==================== QUERIES DE JOGOS ====================
+
+export function useJogosSuperliga(temporada: string, filters?: {
+  conferencia?: string
+  fase?: string
+  rodada?: number
+  status?: string
+}) {
+  return useQuery({
+    queryKey: [...superligaQueryKeys.jogos(temporada), filters],
+    queryFn: () => SuperligaService.getJogos(temporada, filters),
+    enabled: !!temporada,
+    staleTime: 1000 * 60 * 2, // 2 minutos
+  })
+}
+
+export function useJogosPorRodada(temporada: string, rodada: number) {
+  return useQuery({
+    queryKey: superligaQueryKeys.jogosRodada(temporada, rodada),
+    queryFn: () => SuperligaService.getJogosPorRodada(temporada, rodada),
+    enabled: !!temporada && !!rodada,
+    staleTime: 1000 * 60 * 3,
+  })
+}
+
+export function useProximosJogos(temporada: string, limite?: number) {
+  return useQuery({
+    queryKey: [...superligaQueryKeys.jogos(temporada), 'proximos', limite],
+    queryFn: () => SuperligaService.getProximosJogos(temporada, limite),
+    enabled: !!temporada,
+    staleTime: 1000 * 60 * 1, // 1 minuto (próximos jogos mudam)
+  })
+}
+
+// ==================== QUERIES DE CLASSIFICAÇÃO ====================
+
+export function useClassificacaoGeral(temporada: string) {
+  return useQuery({
+    queryKey: [...superligaQueryKeys.classificacao(temporada), 'geral'],
+    queryFn: () => SuperligaService.getClassificacaoGeral(temporada),
+    enabled: !!temporada,
+    staleTime: 1000 * 60 * 5,
+  })
+}
+
+export function useClassificacaoConferencia(temporada: string, conferencia: string) {
+  return useQuery({
+    queryKey: superligaQueryKeys.classificacaoConferencia(temporada, conferencia),
+    queryFn: () => SuperligaService.getClassificacaoConferencia(temporada, conferencia),
+    enabled: !!temporada && !!conferencia,
+    staleTime: 1000 * 60 * 5,
+  })
+}
+
+export function useWildCardRanking(temporada: string, conferencia: string) {
+  return useQuery({
+    queryKey: [...superligaQueryKeys.classificacao(temporada), 'wildcard', conferencia],
+    queryFn: () => SuperligaService.getWildCardRanking(temporada, conferencia),
+    enabled: !!temporada && !!conferencia,
+    staleTime: 1000 * 60 * 3,
+  })
+}
+
+// ==================== QUERIES DE PLAYOFFS ====================
+
+export function usePlayoffBracket(temporada: string) {
+  return useQuery({
+    queryKey: superligaQueryKeys.bracket(temporada),
+    queryFn: () => SuperligaService.getBracket(temporada),
+    enabled: !!temporada,
+    staleTime: 1000 * 60 * 2,
+  })
+}
+
+export function useFaseNacional(temporada: string) {
+  return useQuery({
+    queryKey: [...superligaQueryKeys.bracket(temporada), 'nacional'],
+    queryFn: () => SuperligaService.getFaseNacional(temporada),
+    enabled: !!temporada,
+    staleTime: 1000 * 60 * 2,
+  })
+}
+
+// ==================== QUERIES DE VALIDAÇÃO ====================
+
+export function useValidarEstrutura(temporada: string) {
+  return useQuery({
+    queryKey: [...superligaQueryKeys.validacao(temporada), 'estrutura'],
+    queryFn: () => SuperligaService.validarEstrutura(temporada),
+    enabled: !!temporada,
+    staleTime: 1000 * 60 * 2,
+  })
+}
+
+export function useValidarIntegridade(temporada: string) {
+  return useQuery({
+    queryKey: [...superligaQueryKeys.validacao(temporada), 'integridade'],
+    queryFn: () => SuperligaService.validarIntegridade(temporada),
+    enabled: !!temporada,
+    staleTime: 1000 * 60 * 2,
+  })
 }
 
 // ==================== MUTATIONS - CRIAÇÃO E CONFIGURAÇÃO ====================
@@ -41,12 +184,9 @@ export function useCriarSuperliga() {
 
   return useMutation({
     mutationFn: (temporada: string) => SuperligaService.criarSuperliga(temporada),
-    onSuccess: (campeonato) => {
-      queryClient.invalidateQueries({ queryKey: ['campeonatos'] })
-      notifications.success(
-        'Superliga criada!', 
-        `Superliga ${campeonato.temporada} foi criada com sucesso`
-      )
+    onSuccess: (data: any, temporada: string) => {
+      queryClient.invalidateQueries({ queryKey: superligaQueryKeys.all })
+      notifications.success('Superliga criada!', `Superliga ${temporada} criada com sucesso`)
     },
     onError: (error: any) => {
       notifications.error('Erro ao criar Superliga', error.message)
@@ -59,13 +199,10 @@ export function useConfigurarConferencias() {
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: ({ campeonatoId, config }: { campeonatoId: number; config: ConferenciaConfig[] }) =>
-      SuperligaService.configurarConferencias(campeonatoId, config),
-    onSuccess: (_, { campeonatoId }) => {
-      queryClient.invalidateQueries({ 
-        queryKey: superligaQueryKeys.conferencias(campeonatoId) 
-      })
-      notifications.success('Conferências configuradas!', 'Estrutura da Superliga foi criada')
+    mutationFn: (temporada: string) => SuperligaService.configurarConferencias(temporada),
+    onSuccess: (_, temporada) => {
+      queryClient.invalidateQueries({ queryKey: superligaQueryKeys.temporada(temporada) })
+      notifications.success('Conferências configuradas!', 'Estrutura da Superliga criada')
     },
     onError: (error: any) => {
       notifications.error('Erro ao configurar conferências', error.message)
@@ -78,13 +215,10 @@ export function useDistribuirTimes() {
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: (campeonatoId: number) => 
-      SuperligaService.distribuirTimesAutomaticamente(campeonatoId),
-    onSuccess: (_, campeonatoId) => {
-      queryClient.invalidateQueries({ 
-        queryKey: superligaQueryKeys.campeonato(campeonatoId) 
-      })
-      notifications.success('Times distribuídos!', 'Distribuição automática concluída com sucesso')
+    mutationFn: (temporada: string) => SuperligaService.distribuirTimes(temporada),
+    onSuccess: (_, temporada) => {
+      queryClient.invalidateQueries({ queryKey: superligaQueryKeys.temporada(temporada) })
+      notifications.success('Times distribuídos!', 'Times organizados nas conferências')
     },
     onError: (error: any) => {
       notifications.error('Erro ao distribuir times', error.message)
@@ -92,41 +226,34 @@ export function useDistribuirTimes() {
   })
 }
 
-export function useDistribuirTimesManual() {
+export function useDistribuirTimesAutomatico() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: ({ campeonatoId, distribuicao }: { 
-      campeonatoId: number; 
-      distribuicao: Record<TipoRegional, number[]> 
-    }) => SuperligaService.distribuirTimes(campeonatoId, distribuicao),
-    onSuccess: (_, { campeonatoId }) => {
-      queryClient.invalidateQueries({ 
-        queryKey: superligaQueryKeys.campeonato(campeonatoId) 
-      })
-      notifications.success('Times distribuídos!', 'Distribuição manual concluída')
+    mutationFn: (temporada: string) => SuperligaService.distribuirTimesAutomatico(temporada),
+    onSuccess: (_, temporada) => {
+      queryClient.invalidateQueries({ queryKey: superligaQueryKeys.temporada(temporada) })
+      notifications.success('Distribuição automática concluída!', 'Times organizados automaticamente')
     },
     onError: (error: any) => {
-      notifications.error('Erro ao distribuir times', error.message)
+      notifications.error('Erro na distribuição automática', error.message)
     },
   })
 }
 
-// ==================== MUTATIONS - GERAÇÃO DE JOGOS ====================
+// ==================== MUTATIONS - TEMPORADA REGULAR ====================
 
-export function useGerarJogosTemporadaRegular() {
+export function useGerarJogosTemporada() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: ({ campeonatoId, rodadas }: { campeonatoId: number; rodadas?: number }) =>
-      SuperligaService.gerarJogosTemporada(campeonatoId, rodadas),
-    onSuccess: (_, { campeonatoId }) => {
-      queryClient.invalidateQueries({ 
-        queryKey: superligaQueryKeys.jogos(campeonatoId) 
-      })
-      notifications.success('Jogos gerados!', 'Temporada regular foi criada')
+    mutationFn: ({ temporada, config }: { temporada: string, config: { rodadas?: number } }) => 
+      SuperligaService.gerarJogosTemporada(temporada, config),
+    onSuccess: (_, { temporada }) => {
+      queryClient.invalidateQueries({ queryKey: superligaQueryKeys.jogos(temporada) })
+      notifications.success('Jogos gerados!', 'Temporada regular criada')
     },
     onError: (error: any) => {
       notifications.error('Erro ao gerar jogos', error.message)
@@ -134,38 +261,20 @@ export function useGerarJogosTemporadaRegular() {
   })
 }
 
+// ==================== MUTATIONS - PLAYOFFS ====================
+
 export function useGerarPlayoffs() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: (campeonatoId: number) => SuperligaService.gerarPlayoffs(campeonatoId),
-    onSuccess: (_, campeonatoId) => {
-      queryClient.invalidateQueries({ 
-        queryKey: superligaQueryKeys.playoffs(campeonatoId) 
-      })
-      notifications.success('Playoffs gerados!', 'Chaveamento criado para todas as conferências')
+    mutationFn: (temporada: string) => SuperligaService.gerarPlayoffs(temporada),
+    onSuccess: (_, temporada) => {
+      queryClient.invalidateQueries({ queryKey: superligaQueryKeys.bracket(temporada) })
+      notifications.success('Playoffs gerados!', 'Chaveamento criado')
     },
     onError: (error: any) => {
       notifications.error('Erro ao gerar playoffs', error.message)
-    },
-  })
-}
-
-export function useGerarFaseNacional() {
-  const queryClient = useQueryClient()
-  const notifications = useNotifications()
-
-  return useMutation({
-    mutationFn: (campeonatoId: number) => SuperligaService.gerarFaseNacional(campeonatoId),
-    onSuccess: (_, campeonatoId) => {
-      queryClient.invalidateQueries({ 
-        queryKey: superligaQueryKeys.finalNacional(campeonatoId) 
-      })
-      notifications.success('Fase nacional gerada!', 'Semifinais e final nacional criadas')
-    },
-    onError: (error: any) => {
-      notifications.error('Erro ao gerar fase nacional', error.message)
     },
   })
 }
@@ -175,12 +284,10 @@ export function useResetarPlayoffs() {
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: (campeonatoId: number) => SuperligaService.resetarPlayoffs(campeonatoId),
-    onSuccess: (_, campeonatoId) => {
-      queryClient.invalidateQueries({ 
-        queryKey: superligaQueryKeys.campeonato(campeonatoId) 
-      })
-      notifications.success('Playoffs resetados!', 'Chaveamento foi limpo')
+    mutationFn: (temporada: string) => SuperligaService.resetarPlayoffs(temporada),
+    onSuccess: (_, temporada) => {
+      queryClient.invalidateQueries({ queryKey: superligaQueryKeys.bracket(temporada) })
+      notifications.success('Playoffs resetados!', 'Chaveamento limpo')
     },
     onError: (error: any) => {
       notifications.error('Erro ao resetar playoffs', error.message)
@@ -188,322 +295,33 @@ export function useResetarPlayoffs() {
   })
 }
 
-// ==================== MUTATIONS - JOGOS DOS PLAYOFFS ====================
-
-export function useAtualizarResultadoPlayoff() {
+export function useGerarFaseNacional() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: ({ jogoId, placarTime1, placarTime2 }: {
-      jogoId: number
-      placarTime1: number
-      placarTime2: number
-    }) => SuperligaService.atualizarResultadoPlayoff(jogoId, placarTime1, placarTime2),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: superligaQueryKeys.all })
-      notifications.success('Resultado atualizado!', 'Chaveamento foi atualizado')
+    mutationFn: (temporada: string) => SuperligaService.gerarFaseNacional(temporada),
+    onSuccess: (_, temporada) => {
+      queryClient.invalidateQueries({ queryKey: superligaQueryKeys.bracket(temporada) })
+      notifications.success('Fase nacional gerada!', 'Final da Superliga criada')
     },
     onError: (error: any) => {
-      notifications.error('Erro ao atualizar resultado', error.message)
+      notifications.error('Erro ao gerar fase nacional', error.message)
     },
   })
 }
 
-export function useFinalizarJogoPlayoff() {
-  const queryClient = useQueryClient()
-  const notifications = useNotifications()
-
-  return useMutation({
-    mutationFn: (jogoId: number) => SuperligaService.finalizarJogoPlayoff(jogoId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: superligaQueryKeys.all })
-      notifications.success('Jogo finalizado!', 'Resultado foi registrado')
-    },
-    onError: (error: any) => {
-      notifications.error('Erro ao finalizar jogo', error.message)
-    },
-  })
-}
-
-// ==================== MUTATIONS - SIMULAÇÃO ====================
-
-export function useSimularPlayoffs() {
-  const queryClient = useQueryClient()
-  const notifications = useNotifications()
-
-  return useMutation({
-    mutationFn: (campeonatoId: number) => SuperligaService.simularPlayoffs(campeonatoId),
-    onSuccess: (bracket, campeonatoId) => {
-      queryClient.setQueryData(superligaQueryKeys.bracket(campeonatoId), bracket)
-      notifications.success('Playoffs simulados!', 'Resultados fictícios gerados para teste')
-    },
-    onError: (error: any) => {
-      notifications.error('Erro ao simular playoffs', error.message)
-    },
-  })
-}
-
-export function useGerarTemporadaCompleta() {
-  const queryClient = useQueryClient()
-  const notifications = useNotifications()
-
-  return useMutation({
-    mutationFn: ({ campeonatoId, configuracao }: { 
-      campeonatoId: number; 
-      configuracao: {
-        rodadas?: number
-        incluirPlayoffs?: boolean
-        incluirFaseNacional?: boolean
-      }
-    }) => SuperligaService.gerarTemporadaCompleta(campeonatoId, configuracao),
-    onSuccess: (_, { campeonatoId }) => {
-      queryClient.invalidateQueries({ 
-        queryKey: superligaQueryKeys.campeonato(campeonatoId) 
-      })
-      notifications.success('Temporada completa gerada!', 'Todos os jogos foram criados')
-    },
-    onError: (error: any) => {
-      notifications.error('Erro ao gerar temporada', error.message)
-    },
-  })
-}
-
-// ==================== QUERIES - INFORMAÇÕES GERAIS ====================
-
-export function useSuperligaInfo(campeonatoId: number) {
-  return useQuery({
-    queryKey: superligaQueryKeys.campeonato(campeonatoId),
-    queryFn: () => SuperligaService.getSuperliga(campeonatoId),
-    enabled: !!campeonatoId,
-    staleTime: 1000 * 60 * 5,
-    retry: 2,
-  })
-}
-
-export function useStatusSuperliga(campeonatoId: number) {
-  return useQuery({
-    queryKey: superligaQueryKeys.status(campeonatoId),
-    queryFn: () => SuperligaService.getStatusSuperliga(campeonatoId),
-    enabled: !!campeonatoId,
-    staleTime: 1000 * 30,
-    refetchInterval: 1000 * 60, 
-  })
-}
-
-export function useConferencias(campeonatoId: number) {
-  return useQuery({
-    queryKey: superligaQueryKeys.conferencias(campeonatoId),
-    queryFn: () => SuperligaService.getConferencias(campeonatoId),
-    enabled: !!campeonatoId,
-    staleTime: 1000 * 60 * 10, 
-    retry: 2,
-  })
-}
-
-export function useTimesPorConferencia(campeonatoId: number) {
-  return useQuery({
-    queryKey: [...superligaQueryKeys.conferencias(campeonatoId), 'times'],
-    queryFn: () => SuperligaService.getTimesPorConferencia(campeonatoId),
-    enabled: !!campeonatoId,
-    staleTime: 1000 * 60 * 10,
-    retry: 2,
-  })
-}
-
-// ==================== QUERIES - CLASSIFICAÇÕES ====================
-
-export function useClassificacaoGeral(campeonatoId: number) {
-  return useQuery({
-    queryKey: [...superligaQueryKeys.classificacao(campeonatoId), 'geral'],
-    queryFn: () => SuperligaService.getClassificacaoGeral(campeonatoId),
-    enabled: !!campeonatoId,
-    staleTime: 1000 * 60 * 5,
-    retry: 2,
-  })
-}
-
-export function useClassificacaoConferencia(campeonatoId: number, conferencia: TipoConferencia) {
-  return useQuery({
-    queryKey: superligaQueryKeys.classificacaoConferencia(campeonatoId, conferencia),
-    queryFn: () => SuperligaService.getClassificacaoConferencia(campeonatoId, conferencia),
-    enabled: !!campeonatoId && !!conferencia,
-    staleTime: 1000 * 60 * 5,
-  })
-}
-
-export function useClassificacaoRegional(campeonatoId: number, regional: TipoRegional) {
-  return useQuery({
-    queryKey: superligaQueryKeys.classificacaoRegional(campeonatoId, regional),
-    queryFn: () => SuperligaService.getClassificacaoRegional(campeonatoId, regional),
-    enabled: !!campeonatoId && !!regional,
-    staleTime: 1000 * 60 * 5,
-  })
-}
-
-export function useRankingGeral(campeonatoId: number) {
-  return useQuery({
-    queryKey: [...superligaQueryKeys.classificacao(campeonatoId), 'ranking'],
-    queryFn: () => SuperligaService.getRankingGeral(campeonatoId),
-    enabled: !!campeonatoId,
-    staleTime: 1000 * 60 * 5, 
-    retry: 2,
-  })
-}
-
-export function useWildCardRanking(campeonatoId: number, conferencia: TipoConferencia) {
-  return useQuery({
-    queryKey: [...superligaQueryKeys.classificacao(campeonatoId), 'wildcard', conferencia],
-    queryFn: () => SuperligaService.getWildCardRanking(campeonatoId, conferencia),
-    enabled: !!campeonatoId && !!conferencia,
-    staleTime: 1000 * 60 * 3,
-  })
-}
-
-// ==================== QUERIES - PLAYOFFS ====================
-
-export function usePlayoffBracket(campeonatoId: number) {
-  return useQuery({
-    queryKey: superligaQueryKeys.bracket(campeonatoId),
-    queryFn: () => SuperligaService.getPlayoffBracket(campeonatoId),
-    enabled: !!campeonatoId,
-    staleTime: 1000 * 60 * 2, 
-    retry: 2,
-  })
-}
-
-export function usePlayoffConferencia(campeonatoId: number, conferencia: TipoConferencia) {
-  return useQuery({
-    queryKey: superligaQueryKeys.playoffConferencia(campeonatoId, conferencia),
-    queryFn: () => SuperligaService.getPlayoffsConferencia(campeonatoId, conferencia),
-    enabled: !!campeonatoId && !!conferencia,
-    staleTime: 1000 * 60 * 2,
-    retry: 2,
-  })
-}
-
-export function useFaseNacional(campeonatoId: number) {
-  return useQuery({
-    queryKey: superligaQueryKeys.finalNacional(campeonatoId),
-    queryFn: () => SuperligaService.getFaseNacional(campeonatoId),
-    enabled: !!campeonatoId,
-    staleTime: 1000 * 60 * 2,
-    retry: 2,
-  })
-}
-
-// ==================== QUERIES - JOGOS ====================
-
-export function useJogosSuperliga(
-  campeonatoId: number, 
-  filters?: {
-    conferencia?: string
-    fase?: string
-    rodada?: number
-    status?: string
-  }
-) {
-  return useQuery({
-    queryKey: [...superligaQueryKeys.jogos(campeonatoId), filters],
-    queryFn: () => SuperligaService.getJogosSuperliga(campeonatoId, filters),
-    enabled: !!campeonatoId,
-    staleTime: 1000 * 60 * 2, 
-    retry: 2,
-  })
-}
-
-export function useProximosJogosSuperliga(campeonatoId: number, limite?: number) {
-  return useQuery({
-    queryKey: [...superligaQueryKeys.jogos(campeonatoId), 'proximos', limite],
-    queryFn: () => SuperligaService.getProximosJogosSuperliga(campeonatoId, limite),
-    enabled: !!campeonatoId,
-    staleTime: 1000 * 60 * 1, 
-    retry: 2,
-  })
-}
-
-export function useUltimosResultadosSuperliga(campeonatoId: number, limite?: number) {
-  return useQuery({
-    queryKey: [...superligaQueryKeys.jogos(campeonatoId), 'resultados', limite],
-    queryFn: () => SuperligaService.getUltimosResultadosSuperliga(campeonatoId, limite),
-    enabled: !!campeonatoId,
-    staleTime: 1000 * 60 * 3, 
-    retry: 2,
-  })
-}
-
-// ==================== QUERIES - ESTATÍSTICAS ====================
-
-export function useEstatisticasSuperliga(campeonatoId: number) {
-  return useQuery({
-    queryKey: superligaQueryKeys.estatisticas(campeonatoId),
-    queryFn: () => SuperligaService.getEstatisticasSuperliga(campeonatoId),
-    enabled: !!campeonatoId,
-    staleTime: 1000 * 60 * 10, 
-  })
-}
-
-export function useHistoricoSuperliga(temporadas: string[]) {
-  return useQuery({
-    queryKey: [...superligaQueryKeys.all, 'historico', temporadas],
-    queryFn: () => SuperligaService.getHistoricoSuperliga(temporadas),
-    enabled: temporadas.length > 0,
-    staleTime: 1000 * 60 * 60, 
-    retry: 2,
-  })
-}
-
-export function usePrevisoes(campeonatoId: number) {
-  return useQuery({
-    queryKey: [...superligaQueryKeys.campeonato(campeonatoId), 'previsoes'],
-    queryFn: () => SuperligaService.getPrevisoes(campeonatoId),
-    enabled: !!campeonatoId,
-    staleTime: 1000 * 60 * 30,
-    retry: 2,
-  })
-}
-
-// ==================== QUERIES - VALIDAÇÃO ====================
-
-export function useValidarEstruturaSuperliga(campeonatoId: number) {
-  return useQuery({
-    queryKey: [...superligaQueryKeys.campeonato(campeonatoId), 'validar-estrutura'],
-    queryFn: () => SuperligaService.validarEstruturaSuperliga(campeonatoId),
-    enabled: !!campeonatoId,
-    staleTime: 1000 * 60 * 2, 
-    retry: 2,
-  })
-}
-
-export function useValidarEstrutura(campeonatoId: number) {
-  return useQuery({
-    queryKey: [...superligaQueryKeys.campeonato(campeonatoId), 'validacao'],
-    queryFn: () => SuperligaService.validarEstrutura(campeonatoId),
-    enabled: !!campeonatoId,
-    staleTime: 1000 * 60 * 2,
-  })
-}
-
-export function useValidarIntegridade(campeonatoId: number) {
-  return useQuery({
-    queryKey: [...superligaQueryKeys.campeonato(campeonatoId), 'integridade'],
-    queryFn: () => SuperligaService.validarIntegridade(campeonatoId),
-    enabled: !!campeonatoId,
-    staleTime: 1000 * 60 * 2,
-  })
-}
+// ==================== MUTATIONS - VALIDAÇÃO ====================
 
 export function useRepararIntegridade() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: (campeonatoId: number) => SuperligaService.repararIntegridade(campeonatoId),
-    onSuccess: (_, campeonatoId) => {
-      queryClient.invalidateQueries({ 
-        queryKey: superligaQueryKeys.campeonato(campeonatoId) 
-      })
-      notifications.success('Integridade reparada!', 'Estrutura foi corrigida')
+    mutationFn: (temporada: string) => SuperligaService.repararIntegridade(temporada),
+    onSuccess: (_, temporada) => {
+      queryClient.invalidateQueries({ queryKey: superligaQueryKeys.temporada(temporada) })
+      notifications.success('Integridade reparada!', 'Estrutura corrigida')
     },
     onError: (error: any) => {
       notifications.error('Erro ao reparar integridade', error.message)
@@ -511,133 +329,17 @@ export function useRepararIntegridade() {
   })
 }
 
-// ==================== HOOKS COMPOSTOS - PARA PÁGINAS ESPECÍFICAS ====================
-
-// Hook para página principal da Superliga por temporada
-export function useSuperligaPorTemporada(temporada: string) {
-  const { data: campeonatos = [] } = useCampeonatos({
-    temporada,
-    isSuperliga: true
-  })
-  
-  const superligaId = campeonatos[0]?.id
-
-  const superligaInfo = useSuperligaInfo(superligaId || 0)
-  const status = useStatusSuperliga(superligaId || 0)
-  const conferencias = useConferencias(superligaId || 0)
-  const classificacao = useClassificacaoGeral(superligaId || 0)
-  const jogos = useJogosSuperliga(superligaId || 0)
-
-  return {
-    superliga: campeonatos[0],
-    superligaId,
-    isLoading: superligaInfo.isLoading,
-    info: superligaInfo.data,
-    status: status.data,
-    conferencias: conferencias.data,
-    classificacao: classificacao.data,
-    jogos: jogos.data,
-    refetch: () => {
-      superligaInfo.refetch()
-      status.refetch()
-      conferencias.refetch()
-      classificacao.refetch()
-      jogos.refetch()
-    }
-  }
-}
-
-// Hook para página de playoffs da Superliga
-export function usePlayoffsSuperliga(campeonatoId: number) {
-  const bracket = usePlayoffBracket(campeonatoId)
-  const faseNacional = useFaseNacional(campeonatoId)
-  const estatisticas = useEstatisticasSuperliga(campeonatoId)
-
-  return {
-    isLoading: bracket.isLoading || faseNacional.isLoading,
-    bracket: bracket.data,
-    faseNacional: faseNacional.data,
-    estatisticas: estatisticas.data,
-    refetch: () => {
-      bracket.refetch()
-      faseNacional.refetch()
-      estatisticas.refetch()
-    }
-  }
-}
-
-// Hook para página de administração da Superliga
-export function useAdminSuperliga(campeonatoId: number) {
-  const info = useSuperligaInfo(campeonatoId)
-  const status = useStatusSuperliga(campeonatoId)
-  const validacao = useValidarEstruturaSuperliga(campeonatoId)
-  const conferencias = useConferencias(campeonatoId)
-  const timesPorConferencia = useTimesPorConferencia(campeonatoId)
-
-  return {
-    isLoading: info.isLoading,
-    superliga: info.data,
-    status: status.data,
-    validacao: validacao.data,
-    conferencias: conferencias.data,
-    timesPorConferencia: timesPorConferencia.data,
-    refetch: () => {
-      info.refetch()
-      status.refetch()
-      validacao.refetch()
-      conferencias.refetch()
-      timesPorConferencia.refetch()
-    }
-  }
-}
-
-// ==================== HOOKS PARA FRONTEND DE EXIBIÇÃO ====================
-
-export function useSuperligaFinal(temporada: string) {
-  const { data: campeonatos = [] } = useCampeonatos({
-    temporada,
-    isSuperliga: true
-  })
-  
-  const superligaId = campeonatos[0]?.id
-
-  return useQuery({
-    queryKey: ['superliga', temporada, 'final'],
-    queryFn: () => SuperligaService.getFaseNacional(superligaId), 
-    enabled: !!superligaId,
-    staleTime: 1000 * 60 * 5,
-  })
-}
-
-export function usePlayoffBracketPorTemporada(temporada: string) {
-  const { data: campeonatos = [] } = useCampeonatos({
-    temporada,
-    isSuperliga: true
-  })
-  
-  const superligaId = campeonatos[0]?.id
-
-  return useQuery({
-    queryKey: ['superliga', temporada, 'brackets'],
-    queryFn: () => SuperligaService.getBracketPlayoffs(superligaId), 
-    enabled: !!superligaId,
-    staleTime: 1000 * 60 * 2,
-  })
-}
-
-// ==================== HOOKS DE SIMULAÇÃO PARA DESENVOLVIMENTO ====================
+// ==================== MUTATIONS - SIMULAÇÃO (DESENVOLVIMENTO) ====================
 
 export function useSimularTemporadaCompleta() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: (campeonatoId: number) => SuperligaService.simularTemporadaCompleta(campeonatoId),
-    onSuccess: (_, campeonatoId) => {
-      queryClient.invalidateQueries({ 
-        queryKey: superligaQueryKeys.campeonato(campeonatoId) 
-      })
-      notifications.success('Temporada simulada!', 'Resultados fictícios gerados para toda a temporada')
+    mutationFn: (temporada: string) => SuperligaService.simularTemporadaCompleta(temporada),
+    onSuccess: (_, temporada) => {
+      queryClient.invalidateQueries({ queryKey: superligaQueryKeys.temporada(temporada) })
+      notifications.success('Temporada simulada!', 'Resultados fictícios gerados')
     },
     onError: (error: any) => {
       notifications.error('Erro ao simular temporada', error.message)
@@ -645,37 +347,66 @@ export function useSimularTemporadaCompleta() {
   })
 }
 
-// ==================== HOOKS UTILITÁRIOS ====================
+// ==================== HOOKS COMPOSTOS - PÁGINAS ESPECÍFICAS ====================
 
-export function useTimesClassificados(campeonatoId: number) {
-  return useQuery({
-    queryKey: [...superligaQueryKeys.campeonato(campeonatoId), 'classificados'],
-    queryFn: () => SuperligaService.getTimesPorConferencia(campeonatoId),
-    enabled: !!campeonatoId,
-    staleTime: 1000 * 60 * 3,
-    select: (data) => {
-      // Processar dados para retornar apenas times classificados para playoffs
-      return data?.filter((time: any) => time.classificado === true) || []
+export function useAdminSuperliga(temporada: string) {
+  const superliga = useSuperliga(temporada)
+  const status = useStatusSuperliga(temporada)
+  const conferencias = useConferencias(temporada)
+  const validacao = useValidarIntegridade(temporada)
+  const times = useTimesPorConferencia(temporada)
+
+  return {
+    superliga: superliga.data,
+    status: status.data,
+    conferencias: conferencias.data,
+    validacao: validacao.data,
+    times: times.data,
+    isLoading: superliga.isLoading || status.isLoading || conferencias.isLoading,
+    error: superliga.error || status.error || conferencias.error,
+    refetch: () => {
+      superliga.refetch()
+      status.refetch()
+      conferencias.refetch()
+      validacao.refetch()
+      times.refetch()
     }
+  }
+}
+
+export function usePlayoffAdmin(temporada: string) {
+  const bracket = usePlayoffBracket(temporada)
+  const faseNacional = useFaseNacional(temporada)
+  const status = useStatusSuperliga(temporada)
+
+  return {
+    bracket: bracket.data,
+    faseNacional: faseNacional.data,
+    status: status.data,
+    isLoading: bracket.isLoading || faseNacional.isLoading || status.isLoading,
+    error: bracket.error || faseNacional.error || status.error,
+    refetch: () => {
+      bracket.refetch()
+      faseNacional.refetch()
+      status.refetch()
+    }
+  }
+}
+
+// ==================== UTILITIES ====================
+
+export function useTemporadas() {
+  return useQuery({
+    queryKey: [...superligaQueryKeys.all, 'temporadas'],
+    queryFn: () => SuperligaService.listarTemporadas(),
+    staleTime: 1000 * 60 * 10, // 10 minutos
   })
 }
 
-export function useStatusTemporadaRegular(campeonatoId: number) {
-  const jogos = useJogosSuperliga(campeonatoId, { fase: 'TEMPORADA_REGULAR' })
-  const status = useStatusSuperliga(campeonatoId)
-
+export function useTemporadaAtual() {
   return useQuery({
-    queryKey: [...superligaQueryKeys.campeonato(campeonatoId), 'status-temporada-regular'],
-    queryFn: () => ({
-      total: jogos.data?.length || 0,
-      finalizados: jogos.data?.filter((j: any) => j.status === 'FINALIZADO').length || 0,
-      porcentagem: jogos.data?.length 
-        ? Math.round((jogos.data.filter((j: any) => j.status === 'FINALIZADO').length / jogos.data.length) * 100)
-        : 0,
-      fase: status.data?.fase || 'CONFIGURACAO',
-      podeGerarPlayoffs: jogos.data?.every((j: any) => j.status === 'FINALIZADO') || false
-    }),
-    enabled: !!campeonatoId && !!jogos.data,
-    staleTime: 1000 * 60 * 1,
+    queryKey: [...superligaQueryKeys.all, 'atual'],
+    queryFn: () => SuperligaService.getTemporadaAtual(),
+    staleTime: 1000 * 60 * 30, // 30 minutos
   })
 }

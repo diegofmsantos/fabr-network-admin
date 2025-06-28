@@ -5,8 +5,6 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Trophy, Settings, Play, CheckCircle, Clock, AlertTriangle, Users, Calendar, BarChart3, Target, Zap, Download } from 'lucide-react'
 import { Loading } from '@/components/ui/Loading'
-import { useGerarJogosTemporadaRegular, useGerarPlayoffs, useStatusSuperliga, useValidarEstrutura } from '@/hooks/useSuperliga'
-import { useCampeonato } from '@/hooks/useCampeonatos'
 
 export default function SuperligaDetailPage() {
   const params = useParams()
@@ -15,12 +13,6 @@ export default function SuperligaDetailPage() {
   
   const superligaId = parseInt(params.id as string)
 
-  const { data: superliga, isLoading } = useCampeonato(superligaId)
-  const { data: status } = useStatusSuperliga(superligaId)
-  const { data: validacao } = useValidarEstrutura(superligaId)
-  
-  const { mutate: gerarJogos, isPending: gerandoJogos } = useGerarJogosTemporadaRegular()
-  const { mutate: gerarPlayoffs, isPending: gerandoPlayoffs } = useGerarPlayoffs()
 
   if (isLoading) {
     return <Loading />

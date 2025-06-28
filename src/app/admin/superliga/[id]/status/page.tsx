@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, CheckCircle, AlertTriangle, Clock, Trophy, Calendar, BarChart3, RefreshCw, Eye, Settings } from 'lucide-react'
 import { Loading } from '@/components/ui/Loading'
-import { useStatusSuperliga, useValidarEstrutura, useRankingGeral, useBracketPlayoffs, useFaseNacional } from '@/hooks/useSuperliga'
+import { useStatusSuperliga, useValidarEstrutura, useFaseNacional } from '@/hooks/useSuperliga'
 
 export default function SuperligaStatusPage() {
   const params = useParams()

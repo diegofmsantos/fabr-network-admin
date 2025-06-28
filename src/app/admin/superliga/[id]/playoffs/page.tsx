@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Trophy, Play, Edit3, Eye, Calendar, CheckCircle, Clock, Zap } from 'lucide-react'
 import { Loading } from '@/components/ui/Loading'
-import { useBracketPlayoffs, useGerarPlayoffs, useAtualizarResultadoPlayoff, useFinalizarJogoPlayoff } from '@/hooks/useSuperliga'
+import { useGerarPlayoffs } from '@/hooks/useSuperliga'
 
 interface JogoPlayoff {
   id: number

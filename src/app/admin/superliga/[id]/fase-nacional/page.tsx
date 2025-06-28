@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Trophy, Crown, Star, Calendar, Play, Edit3, CheckCircle, Clock, Zap, Eye, Award } from 'lucide-react'
 import { Loading } from '@/components/ui/Loading'
-import { useFaseNacional, useGerarSemifinaisNacionais, useGerarFinalNacional, useAtualizarResultadoPlayoff, useFinalizarJogoPlayoff } from '@/hooks/useSuperliga'
+import { useFaseNacional } from '@/hooks/useSuperliga'
 
 interface JogoNacional {
   id: number
