@@ -73,10 +73,10 @@ export interface Time extends BaseEntity {
   coord_ofen: string
   coord_defen: string
   titulos: Titulo[] // Sempre array, nunca undefined
-  
+
   // Relacionamentos (para frontend)
   jogadores?: JogadorTime[]
-  
+
   // Campos calculados (cache/otimização)
   _count?: {
     jogadores: number
@@ -264,10 +264,10 @@ export interface Jogador extends BaseEntity {
   cidade: string
   nacionalidade: string
   timeFormador: string
-  
+
   // Relacionamentos (para frontend - via JogadorTime)
   times?: JogadorTime[]
-  
+
   // Dados do relacionamento atual (para facilitar acesso)
   timeId?: number
   numero?: number
@@ -308,7 +308,7 @@ export interface JogadorTime extends BaseEntity {
   numero: number
   camisa: string
   estatisticas: Estatisticas // Sempre presente, mesmo que vazio
-  
+
   // Relacionamentos (quando incluídos)
   jogador?: Jogador
   time?: Time
@@ -354,11 +354,11 @@ export interface Campeonato extends BaseEntity {
   dataFim?: string
   descricao?: string
   formato: FormatoCampeonato
-  
+
   // Relacionamentos
   grupos: Grupo[]
   jogos?: Jogo[]
-  
+
   // Contadores
   _count?: {
     grupos: number
@@ -371,7 +371,7 @@ export interface Grupo extends BaseEntity {
   campeonatoId: number
   ordem: number
   regionalId?: number
-  
+
   // Relacionamentos
   campeonato?: Campeonato
   regional?: Regional  // ADICIONAR ESTA LINHA
@@ -383,7 +383,7 @@ export interface Grupo extends BaseEntity {
 export interface GrupoTime extends BaseEntity {
   grupoId: number
   timeId: number
-  
+
   // Relacionamentos
   grupo?: Grupo
   time: Time
@@ -403,7 +403,7 @@ export interface Jogo extends BaseEntity {
   placarVisitante?: number
   observacoes?: string
   estatisticasProcessadas: boolean
-  
+
   // Relacionamentos
   campeonato?: {
     id: number
@@ -432,7 +432,7 @@ export interface ClassificacaoGrupo extends BaseEntity {
   saldoPontos: number
   pontos: number // Pontos na tabela (vitória = 3, empate = 1)
   aproveitamento: number
-  
+
   // Relacionamentos
   time: Time
   grupo?: {
@@ -447,7 +447,7 @@ export interface EstatisticaJogo extends BaseEntity {
   jogadorId: number
   timeId: number
   estatisticas: Estatisticas // Mesma estrutura das estatísticas existente
-  
+
   // Relacionamentos
   jogo?: Jogo
   jogador: {
@@ -938,13 +938,13 @@ export interface CreateJogadorRequest {
   timeFormador: string
   instagram?: string
   instagram2?: string
-  
+
   // Dados do relacionamento atual
   timeId: number
   temporada: string
   numero: number
   camisa: string
-  
+
   // Estatísticas iniciais (opcional)
   estatisticas?: Partial<Estatisticas>
 }
@@ -1303,7 +1303,7 @@ export interface TeamComparisonProps {
 
 
 // Re-exports para facilitar imports
-export type { 
+export type {
   Estatisticas as Stats,
   EstatisticasOptional as StatsOptional,
   StatCategory as Category,
@@ -1314,7 +1314,7 @@ export type {
 
 export type TipoConferencia = 'SUDESTE' | 'SUL' | 'NORDESTE' | 'CENTRO_NORTE'
 
-export type TipoRegional = 
+export type TipoRegional =
   | 'SERRAMAR' | 'CANASTRA' | 'CANTAREIRA' // Sudeste
   | 'ARAUCARIA' | 'PAMPA' // Sul  
   | 'ATLANTICO' // Nordeste
@@ -1345,6 +1345,75 @@ export interface PlayoffConfig {
 
 // ==================== CONFIGURAÇÃO DA SUPERLIGA ====================
 
+// ADICIONAR ESTA CONFIGURAÇÃO NO ARQUIVO src/types/index.ts
+
+export const TIMES_SUPERLIGA: Record<TipoRegional, string[]> = {
+  // Conferência Sudeste - Regional Serramar
+  SERRAMAR: [
+    'Vasco Almirantes',
+    'Flamengo Imperadores',
+    'Locomotiva FA',
+    'Tritões FA'
+  ],
+
+  // Conferência Sudeste - Regional Canastra
+  CANASTRA: [
+    'Galo FA',
+    'Moura Lacerda Dragons',
+    'Rio Preto Weilers',
+    'Spartans FA'
+  ],
+
+  // Conferência Sudeste - Regional Cantareira
+  CANTAREIRA: [
+    'Corinthians Steamrollers',
+    'Cruzeiro FA',
+    'Guarulhos Rhynos',
+    'Ocelots FA'
+  ],
+
+  // Conferência Sul - Regional Araucária
+  ARAUCARIA: [
+    'Timbó Rex',
+    'Coritiba Crocodiles',
+    'Calvary Cavaliers',
+    'Brown Spiders'
+  ],
+
+  // Conferência Sul - Regional Pampa
+  PAMPA: [
+    'Santa Maria Soldiers',
+    'Juventude FA',
+    'Bravos FA',
+    'Istepôs FA'
+  ],
+
+  // Conferência Nordeste - Regional Atlântico
+  ATLANTICO: [
+    'Fortaleza Tritões',
+    'Ceará Sabres',
+    'João Pessoa Espectros',
+    'Recife Mariners',
+    'Cavalaria 2 de Julho',
+    'Caruaru Wolves'
+  ],
+
+  // Conferência Centro-Norte - Regional Cerrado
+  CERRADO: [
+    'Rondonópolis Hawks',
+    'Cuiabá Arsenal',
+    'Tubarões do Cerrado'
+  ],
+
+  // Conferência Centro-Norte - Regional Amazônia  
+  AMAZONIA: [
+    'Porto Velho Miners',
+    'Manaus FA',
+    'Manaus Cavaliers'
+  ]
+}
+
+// COMPLETAR A CONFIGURAÇÃO SUPERLIGA_CONFIG
 export const SUPERLIGA_CONFIG: ConferenciaConfig[] = [
   {
     tipo: 'SUDESTE',
@@ -1357,10 +1426,10 @@ export const SUPERLIGA_CONFIG: ConferenciaConfig[] = [
         nome: 'Regional Serramar',
         conferencia: 'SUDESTE',
         timesPorRegional: 4,
-        times: [] // IDs dos times
+        times: [] // Será preenchido dinamicamente
       },
       {
-        tipo: 'CANASTRA', 
+        tipo: 'CANASTRA',
         nome: 'Regional Canastra',
         conferencia: 'SUDESTE',
         timesPorRegional: 4,
@@ -1368,16 +1437,16 @@ export const SUPERLIGA_CONFIG: ConferenciaConfig[] = [
       },
       {
         tipo: 'CANTAREIRA',
-        nome: 'Regional Cantareira', 
+        nome: 'Regional Cantareira',
         conferencia: 'SUDESTE',
         timesPorRegional: 4,
         times: []
       }
     ],
     playoffConfig: {
-      semifinalDireta: 2, // 2 melhores 1º colocados
-      wildcardVagas: 4, // 4 vagas de wild card
-      estrutura: 'REGIONAL'
+      semifinalDireta: 2, // 2 melhores 1º colocados vão direto
+      wildcardVagas: 4,   // 4 vagas de wild card
+      estrutura: 'CONFERENCIA'
     }
   },
   {
@@ -1396,15 +1465,15 @@ export const SUPERLIGA_CONFIG: ConferenciaConfig[] = [
       {
         tipo: 'PAMPA',
         nome: 'Regional Pampa',
-        conferencia: 'SUL', 
+        conferencia: 'SUL',
         timesPorRegional: 4,
         times: []
       }
     ],
     playoffConfig: {
-      semifinalDireta: 2, // 1º de cada regional
-      wildcardVagas: 4, // 2º e 3º de cada
-      estrutura: 'REGIONAL'
+      semifinalDireta: 2, // 1º de cada regional vai direto
+      wildcardVagas: 4,   // 2º e 3º de cada regional
+      estrutura: 'CONFERENCIA'
     }
   },
   {
@@ -1422,9 +1491,9 @@ export const SUPERLIGA_CONFIG: ConferenciaConfig[] = [
       }
     ],
     playoffConfig: {
-      semifinalDireta: 2, // 1º e 2º colocados
-      wildcardVagas: 4, // 3º, 4º, 5º e 6º
-      estrutura: 'GERAL'
+      semifinalDireta: 2, // 1º e 2º vão direto
+      wildcardVagas: 4,   // 3º, 4º, 5º, 6º disputam wild card
+      estrutura: 'CONFERENCIA'
     }
   },
   {
@@ -1441,7 +1510,7 @@ export const SUPERLIGA_CONFIG: ConferenciaConfig[] = [
         times: []
       },
       {
-        tipo: 'AMAZONIA', 
+        tipo: 'AMAZONIA',
         nome: 'Regional Amazônia',
         conferencia: 'CENTRO_NORTE',
         timesPorRegional: 3,
@@ -1449,80 +1518,12 @@ export const SUPERLIGA_CONFIG: ConferenciaConfig[] = [
       }
     ],
     playoffConfig: {
-      semifinalDireta: 0, // Nenhum vai direto
-      wildcardVagas: 4, // 1º e 2º de cada regional
-      estrutura: 'REGIONAL'
+      semifinalDireta: 2, // 1º de cada regional vai direto
+      wildcardVagas: 2,   // 2º de cada regional
+      estrutura: 'CONFERENCIA'
     }
   }
 ]
-
-// ==================== TIMES DA SUPERLIGA ====================
-
-export const TIMES_SUPERLIGA = {
-  // Conferência Sudeste - Regional Serramar
-  SERRAMAR: [
-    'Vasco Almirantes',
-    'Flamengo Imperadores', 
-    'Locomotiva FA',
-    'Tritões FA'
-  ],
-  
-  // Conferência Sudeste - Regional Canastra
-  CANASTRA: [
-    'Galo FA',
-    'Moura Lacerda Dragons',
-    'Rio Preto Weilers', 
-    'Spartans FA'
-  ],
-  
-  // Conferência Sudeste - Regional Cantareira
-  CANTAREIRA: [
-    'Corinthians Steamrollers',
-    'Cruzeiro FA',
-    'Guarulhos Rhynos',
-    'Ocelots FA'
-  ],
-  
-  // Conferência Sul - Regional Araucária  
-  ARAUCARIA: [
-    'Timbó Rex',
-    'Coritiba Crocodiles',
-    'Calvary Cavaliers',
-    'Brown Spiders'
-  ],
-  
-  // Conferência Sul - Regional Pampa
-  PAMPA: [
-    'Santa Maria Soldiers',
-    'Juventude FA', 
-    'Bravos FA',
-    'Istepôs FA'
-  ],
-  
-  // Conferência Nordeste - Regional Atlântico
-  ATLANTICO: [
-    'Fortaleza Tritões',
-    'Ceará Sabres',
-    'João Pessoa Espectros',
-    'Recife Mariners',
-    'Cavalaria 2 de Julho',
-    'Caruaru Wolves'
-  ],
-  
-  // Conferência Centro-Norte - Regional Cerrado
-  CERRADO: [
-    'Rondonópolis Hawks',
-    'Cuiabá Arsenal', 
-    'Tubarões do Cerrado'
-  ],
-  
-  // Conferência Centro-Norte - Regional Amazônia
-  AMAZONIA: [
-    'Porto Velho Miners',
-    'Manaus FA',
-    'Manaus Cavaliers'
-  ]
-}
 
 // ==================== TIPOS PARA PLAYOFFS ====================
 
@@ -1576,7 +1577,7 @@ export interface SemifinalNacional {
     campeao: PlayoffTeam
   }
   time2: {
-    conferencia: TipoConferencia  
+    conferencia: TipoConferencia
     campeao: PlayoffTeam
   }
   vencedor?: PlayoffTeam
@@ -1593,13 +1594,13 @@ export interface FinalNacional {
 export interface SuperligaBracket {
   temporada: string
   status: 'CONFIGURANDO' | 'FASE_GRUPOS' | 'PLAYOFFS' | 'FINALIZADO'
-  
+
   // Playoffs por conferência
   playoffsSudeste: PlayoffBracket
   playoffsSul: PlayoffBracket
   playoffsNordeste: PlayoffBracket
   playoffsCentroNorte: PlayoffBracket
-  
+
   // Fase Nacional
   semifinalNacional1: SemifinalNacional
   semifinalNacional2: SemifinalNacional
@@ -1802,3 +1803,4 @@ export interface FormAtualizarPlacar {
   placarVisitante: string
   observacoes?: string
 }
+

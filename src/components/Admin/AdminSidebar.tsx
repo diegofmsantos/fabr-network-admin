@@ -22,21 +22,21 @@ const sidebarItems: SidebarItem[] = [
     icon: Home
   },
   {
-    id: 'campeonatos',
-    label: 'Campeonatos',
-    href: '/admin/campeonatos',
+    id: 'superliga',
+    label: 'Superliga',
+    href: '/admin/superliga',
     icon: Trophy,
     children: [
       {
-        id: 'campeonatos-list',
-        label: 'Listar',
-        href: '/admin/campeonatos',
+        id: 'superliga-list',
+        label: 'Gerenciar',
+        href: '/admin/superliga', 
         icon: Trophy
       },
       {
-        id: 'campeonatos-criar',
-        label: 'Criar Novo',
-        href: '/admin/campeonatos/criar',
+        id: 'superliga-criar',
+        label: 'Criar Nova',
+        href: '/admin/superliga/criar',
         icon: Trophy
       }
     ]
