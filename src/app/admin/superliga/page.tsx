@@ -1,284 +1,240 @@
 "use client"
 
 import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Trophy, Plus, Calendar, Users, Play, Clock, CheckCircle, AlertCircle } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Plus, Search, Filter, Trophy, Users, Calendar, Eye, Settings, AlertTriangle, Download } from 'lucide-react'
 import { Loading } from '@/components/ui/Loading'
-import { useCriarSuperliga } from '@/hooks/useSuperliga'
-import { useCampeonatos } from '@/hooks/useCampeonatos'
+import { useTemporadas, useSuperliga } from '@/hooks/useSuperliga'
 
-export default function SuperligaPage() {
+// Tipagens corretas baseadas no backend
+interface TemporadaInfo {
+  temporada: string
+  status: string
+  dataInicio: string
+  dataFim?: string
+  _count: {
+    jogos: number
+    conferencias: number
+  }
+}
+
+interface SuperligaData {
+  id: number
+  nome: string
+  temporada: string
+  status: string
+  dataInicio: string
+  dataFim?: string
+  descricao?: string
+  isSuperliga: boolean
+  configSuperliga?: any
+  conferencias?: any[]
+  _count?: {
+    jogos: number
+    conferencias: number
+  }
+}
+
+export default function AdminSuperligaPage() {
   const router = useRouter()
-  const [filtroTemporada, setFiltroTemporada] = useState<string>('todas')
-  const [isCreating, setIsCreating] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filterTemporada, setFilterTemporada] = useState('2025')
 
-  const { data: superligas = [], isLoading, refetch } = useCampeonatos({
-    isSuperliga: true
-  })
+  const { data: temporadas, isLoading: loadingTemporadas } = useTemporadas()
+  const { data: superliga, isLoading: loadingSuperliga, error } = useSuperliga(filterTemporada)
 
-  const { mutate: criarSuperliga, isPending } = useCriarSuperliga()
-
-  const superligasFiltradas = superligas.filter(superliga => {
-    if (filtroTemporada === 'todas') return true
-    return superliga.temporada === filtroTemporada
-  })
-
-  const temporadas = [...new Set(superligas.map(s => s.temporada))].sort((a, b) => b.localeCompare(a))
-
-  const handleCriarSuperliga = () => {
-    setIsCreating(true)
-    const anoAtual = new Date().getFullYear()
-    const proximoAno = anoAtual + 1
-
-    criarSuperliga(proximoAno.toString(), {
-      onSuccess: (novaSuperlgia) => {
-        setIsCreating(false)
-        router.push(`/admin/superliga/criar`)
-      },
-      onError: () => {
-        setIsCreating(false)
-      }
-    })
-  }
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'NAO_INICIADO':
-        return <Clock className="w-4 h-4" />
-      case 'EM_ANDAMENTO':
-        return <Play className="w-4 h-4" />
-      case 'FINALIZADO':
-        return <CheckCircle className="w-4 h-4" />
-      default:
-        return <AlertCircle className="w-4 h-4" />
-    }
-  }
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'NAO_INICIADO':
-        return 'Não Iniciado'
-      case 'EM_ANDAMENTO':
-        return 'Em Andamento'
-      case 'FINALIZADO':
-        return 'Finalizado'
-      default:
-        return status
-    }
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'NAO_INICIADO':
-        return 'bg-gray-500'
-      case 'EM_ANDAMENTO':
-        return 'bg-blue-500'
-      case 'FINALIZADO':
-        return 'bg-green-500'
-      default:
-        return 'bg-gray-500'
-    }
-  }
-
-  if (isLoading) {
+  if (loadingTemporadas || loadingSuperliga) {
     return <Loading />
   }
 
-  return (
-    <div className="min-h-screen bg-[#1C1C24] p-6">
-      <div className="mb-8">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div>
-            <h1 className="text-4xl font-extrabold text-[#63E300] italic tracking-[-2px] mb-2">
-              🏆 SUPERLIGA DE FUTEBOL AMERICANO
-            </h1>
-            <p className="text-gray-400">
-              Gerencie todas as edições da Superliga de Futebol Americano do Brasil
-            </p>
-          </div>
+  // Tipagem correta para temporadas
+  const temporadasDisponiveis = temporadas ? 
+    (temporadas as TemporadaInfo[]).map(t => t.temporada) : 
+    ['2025']
 
-          <button
-            onClick={handleCriarSuperliga}
-            disabled={isPending || isCreating}
-            className="inline-flex items-center rounded-md bg-[#63E300] px-4 py-3 text-sm font-semibold text-black shadow-sm hover:bg-[#50B800] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+  const renderEmptyState = () => (
+    <div className="text-center py-12">
+      <Trophy className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+      <h3 className="text-xl font-bold text-white mb-2">
+        Nenhuma Superliga encontrada para {filterTemporada}
+      </h3>
+      <p className="text-gray-400 mb-6">
+        Crie uma nova Superliga para começar a gerenciar o campeonato
+      </p>
+      <Link
+        href="/admin/superliga/criar"
+        className="inline-flex items-center bg-[#63E300] text-black px-6 py-3 rounded-md font-semibold hover:bg-[#50B800] transition-colors"
+      >
+        <Plus className="w-5 h-5 mr-2" />
+        Criar Superliga {filterTemporada}
+      </Link>
+    </div>
+  )
+
+  const renderSuperligaCard = () => {
+    if (!superliga) return renderEmptyState()
+
+    const superligaData = superliga as SuperligaData
+
+    const getStatusColor = (status: string) => {
+      switch (status) {
+        case 'NAO_INICIADO': return 'bg-gray-500'
+        case 'EM_ANDAMENTO': return 'bg-blue-500'
+        case 'FINALIZADO': return 'bg-green-500'
+        default: return 'bg-gray-500'
+      }
+    }
+
+    const getStatusLabel = (status: string) => {
+      switch (status) {
+        case 'NAO_INICIADO': return 'Não Iniciado'
+        case 'EM_ANDAMENTO': return 'Em Andamento'
+        case 'FINALIZADO': return 'Finalizado'
+        default: return status
+      }
+    }
+
+    return (
+      <div className="bg-[#272731] rounded-lg border border-gray-700 p-6 hover:border-gray-600 transition-colors">
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <h3 className="text-xl font-bold text-white mb-2">
+              {superligaData.nome}
+            </h3>
+            <p className="text-gray-400">Temporada {superligaData.temporada}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className={`px-2 py-1 rounded-full text-xs font-medium text-white ${getStatusColor(superligaData.status)}`}>
+              {getStatusLabel(superligaData.status)}
+            </span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="text-center">
+            <p className="text-2xl font-bold text-[#63E300]">32</p>
+            <p className="text-sm text-gray-400">Times</p>
+          </div>
+          <div className="text-center">
+            <p className="text-2xl font-bold text-[#63E300]">
+              {superligaData._count?.conferencias || 4}
+            </p>
+            <p className="text-sm text-gray-400">Conferências</p>
+          </div>
+          <div className="text-center">
+            <p className="text-2xl font-bold text-[#63E300]">8</p>
+            <p className="text-sm text-gray-400">Regionais</p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href={`/admin/superliga/${superligaData.id}`}
+            className="flex items-center gap-2 bg-[#63E300] text-black px-4 py-2 rounded-md font-medium hover:bg-[#50B800] transition-colors"
           >
-            <Plus className="h-5 w-5 mr-2" />
-            {isPending || isCreating ? 'Criando...' : 'Criar Nova Superliga 2025'}
-          </button>
+            <Settings className="w-4 h-4" />
+            Gerenciar
+          </Link>
+          
+          <Link
+            href={`/admin/superliga/${superligaData.id}/status`}
+            className="flex items-center gap-2 bg-[#1C1C24] text-white px-4 py-2 rounded-md border border-gray-700 hover:border-gray-600 transition-colors"
+          >
+            <AlertTriangle className="w-4 h-4" />
+            Status
+          </Link>
+
+          <Link
+            href={`/admin/superliga/${superligaData.id}/playoffs`}
+            className="flex items-center gap-2 bg-[#1C1C24] text-white px-4 py-2 rounded-md border border-gray-700 hover:border-gray-600 transition-colors"
+          >
+            <Trophy className="w-4 h-4" />
+            Playoffs
+          </Link>
+
+          <Link
+            href={`/superliga/${superligaData.temporada}`}
+            className="flex items-center gap-2 bg-[#1C1C24] text-white px-4 py-2 rounded-md border border-gray-700 hover:border-gray-600 transition-colors"
+          >
+            <Eye className="w-4 h-4" />
+            Visualizar
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Superliga de Futebol Americano</h1>
+          <p className="mt-1 text-sm text-gray-400">
+            Gerencie a estrutura e funcionamento da Superliga
+          </p>
+        </div>
+
+        <div className="mt-4 flex space-x-3 sm:mt-0">
+          <Link
+            href="/admin/superliga/criar"
+            className="inline-flex items-center rounded-md bg-[#63E300] px-4 py-2 text-sm font-semibold text-black shadow-sm hover:bg-[#50B800] transition-colors"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Nova Superliga
+          </Link>
         </div>
       </div>
 
-      <div className="bg-[#272731] rounded-lg p-4 mb-6 border border-gray-700">
+      {/* Filtros */}
+      <div className="bg-[#272731] shadow rounded-lg p-6">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Filtrar por Temporada
-            </label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <input
+                type="text"
+                placeholder="Buscar..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-[#1C1C24] text-white rounded-md border border-gray-700 focus:border-[#63E300] focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="w-full sm:w-48">
             <select
-              value={filtroTemporada}
-              onChange={(e) => setFiltroTemporada(e.target.value)}
-              className="w-full bg-[#1C1C24] border border-gray-600 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#63E300]"
+              value={filterTemporada}
+              onChange={(e) => setFilterTemporada(e.target.value)}
+              className="w-full px-3 py-2 bg-[#1C1C24] text-white rounded-md border border-gray-700 focus:border-[#63E300] focus:outline-none"
             >
-              <option value="todas">Todas as Temporadas</option>
-              {temporadas.map(temporada => (
-                <option key={temporada} value={temporada}>
-                  {temporada}
-                </option>
+              {temporadasDisponiveis.map((temp: string) => (
+                <option key={temp} value={temp}>{temp}</option>
               ))}
             </select>
           </div>
         </div>
       </div>
 
-      {superligasFiltradas.length === 0 ? (
-        <div className="bg-[#272731] rounded-lg border border-gray-700 p-12 text-center">
-          <Trophy className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-white mb-2">
-            {superligas.length === 0 ? 'Nenhuma Superliga criada ainda' : 'Nenhuma Superliga encontrada'}
-          </h3>
-          <p className="text-gray-400 mb-6">
-            {superligas.length === 0
-              ? 'Crie a primeira edição da Superliga de Futebol Americano'
-              : 'Ajuste os filtros ou crie uma nova Superliga'
-            }
-          </p>
-          {superligas.length === 0 && (
+      {/* Conteúdo Principal */}
+      <div className="bg-[#272731] shadow rounded-lg p-6">
+        {error ? (
+          <div className="text-center py-12">
+            <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-white mb-2">Erro ao carregar Superliga</h3>
+            <p className="text-gray-400 mb-6">{(error as Error)?.message || 'Erro desconhecido'}</p>
             <button
-              onClick={handleCriarSuperliga}
-              disabled={isPending || isCreating}
-              className="inline-flex items-center rounded-md bg-[#63E300] px-4 py-2 text-sm font-semibold text-black shadow-sm hover:bg-[#50B800] transition-colors"
+              onClick={() => window.location.reload()}
+              className="bg-[#63E300] text-black px-6 py-2 rounded-md font-medium hover:bg-[#50B800] transition-colors"
             >
-              <Plus className="h-4 w-4 mr-2" />
-              {isPending || isCreating ? 'Criando...' : 'Criar Primeira Superliga'}
+              Tentar novamente
             </button>
-          )}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {superligasFiltradas.map((superliga) => (
-            <Link
-              key={superliga.id}
-              href={`/admin/superliga/${superliga.id}`}
-              className="block group"
-            >
-              <div className="bg-[#272731] rounded-lg border border-gray-700 p-6 hover:border-[#63E300] transition-all duration-300 group-hover:shadow-xl group-hover:translate-y-[-2px]">
-                {/* Header do Card */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center">
-                    <div className="p-2 bg-[#63E300] bg-opacity-20 rounded-lg mr-3">
-                      <Trophy className="w-6 h-6 text-[#63E300]" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-lg text-white leading-tight">
-                        {superliga.nome}
-                      </h3>
-                      <p className="text-sm text-gray-400">{superliga.temporada}</p>
-                    </div>
-                  </div>
-
-                  <span className={`px-2 py-1 rounded-full text-xs text-white flex items-center gap-1 ${getStatusColor(superliga.status)}`}>
-                    {getStatusIcon(superliga.status)}
-                    {getStatusText(superliga.status)}
-                  </span>
-                </div>
-
-                <div className="mb-4">
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="flex items-center text-gray-400">
-                      <span className="mr-1">🏭</span>
-                      <span>Sudeste (12)</span>
-                    </div>
-                    <div className="flex items-center text-gray-400">
-                      <span className="mr-1">🧊</span>
-                      <span>Sul (8)</span>
-                    </div>
-                    <div className="flex items-center text-gray-400">
-                      <span className="mr-1">🌵</span>
-                      <span>Nordeste (6)</span>
-                    </div>
-                    <div className="flex items-center text-gray-400">
-                      <span className="mr-1">🌲</span>
-                      <span>Centro-Norte (6)</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-3 mb-4">
-                  <div className="flex items-center text-sm text-gray-300">
-                    <Calendar className="w-4 h-4 mr-2 text-gray-500" />
-                    <span>
-                      {new Date(superliga.dataInicio).toLocaleDateString('pt-BR')}
-                      {superliga.dataFim && (
-                        <> - {new Date(superliga.dataFim).toLocaleDateString('pt-BR')}</>
-                      )}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center text-sm text-gray-300">
-                    <Users className="w-4 h-4 mr-2 text-gray-500" />
-                    <span>32 times • 4 conferências • 8 regionais</span>
-                  </div>
-
-                  {superliga._count && (
-                    <div className="flex items-center text-sm text-gray-300">
-                      <Play className="w-4 h-4 mr-2 text-gray-500" />
-                      <span>{superliga._count.jogos || 0} jogos</span>
-                    </div>
-                  )}
-                </div>
-
-                {superliga.descricao && (
-                  <p className="text-sm text-gray-400 line-clamp-2 mb-4">
-                    {superliga.descricao}
-                  </p>
-                )}
-
-                <div className="pt-4 border-t border-gray-600">
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-gray-500">
-                      Última atualização: {new Date(superliga.updatedAt).toLocaleDateString('pt-BR')}
-                    </span>
-                    <span className="text-xs text-[#63E300] group-hover:text-white transition-colors">
-                      Gerenciar →
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
-
-      {superligas.length > 0 && (
-        <div className="mt-8 bg-[#272731] rounded-lg border border-gray-700 p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">Estatísticas Gerais</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-[#63E300]">{superligas.length}</div>
-              <div className="text-sm text-gray-400">Superligas Criadas</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-400">
-                {superligas.filter(s => s.status === 'EM_ANDAMENTO').length}
-              </div>
-              <div className="text-sm text-gray-400">Em Andamento</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-400">
-                {superligas.filter(s => s.status === 'FINALIZADO').length}
-              </div>
-              <div className="text-sm text-gray-400">Finalizadas</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-yellow-400">
-                {superligas.reduce((acc, s) => acc + (s._count?.jogos || 0), 0)}
-              </div>
-              <div className="text-sm text-gray-400">Total de Jogos</div>
-            </div>
           </div>
-        </div>
-      )}
+        ) : (
+          renderSuperligaCard()
+        )}
+      </div>
     </div>
   )
 }

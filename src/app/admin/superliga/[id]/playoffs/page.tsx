@@ -3,409 +3,509 @@
 import React, { useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Trophy, Play, Edit3, Eye, Calendar, CheckCircle, Clock, Zap } from 'lucide-react'
+import { ArrowLeft, Trophy, Users, Play, CheckCircle, Clock, Zap, Eye, RefreshCw, Settings, Award } from 'lucide-react'
 import { Loading } from '@/components/ui/Loading'
-import { useGerarPlayoffs } from '@/hooks/useSuperliga'
+import { usePlayoffBracket, useGerarPlayoffs, useResetarPlayoffs, useSuperliga, useConferencias } from '@/hooks/useSuperliga'
 
-interface JogoPlayoff {
+// Tipagens corretas baseadas no backend
+interface PlayoffJogo {
   id: number
-  nome: string
+  campeonatoId: number
+  conferenciaId?: number
   fase: string
-  timeClassificado1?: { id: number; nome: string; sigla: string }
-  timeClassificado2?: { id: number; nome: string; sigla: string }
-  timeVencedor?: { id: number; nome: string; sigla: string }
+  rodada: number
+  nome: string
+  timeClassificado1Id?: number
+  timeClassificado2Id?: number
+  timeVencedorId?: number
   dataJogo?: string
   status: string
   placarTime1?: number
   placarTime2?: number
+  observacoes?: string
+  timeClassificado1?: {
+    id: number
+    nome: string
+    sigla: string
+    logo: string
+  }
+  timeClassificado2?: {
+    id: number
+    nome: string
+    sigla: string
+    logo: string
+  }
+  timeVencedor?: {
+    id: number
+    nome: string
+    sigla: string
+    logo: string
+  }
+  conferencia?: {
+    id: number
+    nome: string
+    tipo: string
+    icone: string
+  }
 }
 
-export default function PlayoffsManagerPage() {
+interface SuperligaData {
+  id: number
+  nome: string
+  temporada: string
+  status: string
+}
+
+interface ConferenciaData {
+  id: number
+  nome: string
+  tipo: string
+  icone: string
+  ordem: number
+  totalTimes: number
+}
+
+export default function PlayoffsPage() {
   const params = useParams()
-  const superligaId = parseInt(params.id as string)
+  const superligaId = params.id as string
+  const [selectedConferencia, setSelectedConferencia] = useState<string>('all')
+  const [selectedFase, setSelectedFase] = useState<string>('all')
 
-  const [conferenciaAtiva, setConferenciaAtiva] = useState<string>('SUDESTE')
-  const [jogoEditando, setJogoEditando] = useState<number | null>(null)
-  const [placarForm, setPlacarForm] = useState({ time1: '', time2: '' })
-
-  const { data: bracketsData, isLoading, refetch } = useBracketPlayoffs(superligaId)
-  const brackets = Array.isArray(bracketsData) ? bracketsData : []
+  const { data: superliga, isLoading: loadingSuperliga } = useSuperliga(superligaId)
+  const { data: bracket, isLoading: loadingBracket, refetch } = usePlayoffBracket(superligaId)
+  const { data: conferencias, isLoading: loadingConferencias } = useConferencias(superligaId)
   const { mutate: gerarPlayoffs, isPending: gerandoPlayoffs } = useGerarPlayoffs()
-  const { mutate: atualizarResultado } = useAtualizarResultadoPlayoff()
-  const { mutate: finalizarJogo } = useFinalizarJogoPlayoff()
+  const { mutate: resetarPlayoffs, isPending: resetandoPlayoffs } = useResetarPlayoffs()
 
-  const conferencias = [
-    { tipo: 'SUDESTE', nome: 'Sudeste', icone: '🏭', cor: 'from-orange-500 to-red-500' },
-    { tipo: 'SUL', nome: 'Sul', icone: '🧊', cor: 'from-blue-500 to-cyan-500' },
-    { tipo: 'NORDESTE', nome: 'Nordeste', icone: '🌵', cor: 'from-yellow-500 to-amber-500' },
-    { tipo: 'CENTRO_NORTE', nome: 'Centro-Norte', icone: '🌲', cor: 'from-green-500 to-emerald-500' }
-  ]
-
-  const handleGerarPlayoffs = () => {
-    gerarPlayoffs(superligaId, {
-      onSuccess: () => {
-        refetch()
-      }
-    })
-  }
-
-  const handleEditarPlacar = (jogo: JogoPlayoff) => {
-    setJogoEditando(jogo.id)
-    setPlacarForm({
-      time1: jogo.placarTime1?.toString() || '',
-      time2: jogo.placarTime2?.toString() || ''
-    })
-  }
-
-  const handleSalvarPlacar = (jogoId: number) => {
-    const placarTime1 = parseInt(placarForm.time1)
-    const placarTime2 = parseInt(placarForm.time2)
-
-    if (isNaN(placarTime1) || isNaN(placarTime2)) return
-
-    atualizarResultado({
-      jogoId,
-      placarTime1,
-      placarTime2
-    }, {
-      onSuccess: () => {
-        setJogoEditando(null)
-        refetch()
-      }
-    })
-  }
-
-  const handleFinalizarJogo = (jogoId: number) => {
-    finalizarJogo(jogoId, {
-      onSuccess: () => {
-        refetch()
-      }
-    })
-  }
-
-  const getStatusJogo = (jogo: JogoPlayoff) => {
-    switch (jogo.status) {
-      case 'AGUARDANDO':
-        return { icon: Clock, color: 'text-gray-400', bg: 'bg-gray-400/10', label: 'Aguardando' }
-      case 'AGENDADO':
-        return { icon: Calendar, color: 'text-blue-400', bg: 'bg-blue-400/10', label: 'Agendado' }
-      case 'AO_VIVO':
-        return { icon: Play, color: 'text-red-400', bg: 'bg-red-400/10', label: 'Ao Vivo' }
-      case 'FINALIZADO':
-        return { icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-400/10', label: 'Finalizado' }
-      default:
-        return { icon: Clock, color: 'text-gray-400', bg: 'bg-gray-400/10', label: 'Indefinido' }
-    }
-  }
-
-  const renderJogoCard = (jogo: JogoPlayoff) => {
-    const statusInfo = getStatusJogo(jogo)
-    const StatusIcon = statusInfo.icon
-    const isEditando = jogoEditando === jogo.id
-
-    return (
-      <div key={jogo.id} className="bg-[#1C1C24] rounded-lg border border-gray-700 p-4">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className={`p-2 rounded ${statusInfo.bg}`}>
-              <StatusIcon className={`w-4 h-4 ${statusInfo.color}`} />
-            </div>
-            <div>
-              <h4 className="font-semibold text-white text-sm">{jogo.nome}</h4>
-              <div className={`text-xs ${statusInfo.color}`}>{statusInfo.label}</div>
-            </div>
-          </div>
-
-          <div className="flex gap-2">
-            {jogo.status !== 'FINALIZADO' && (
-              <button
-                onClick={() => handleEditarPlacar(jogo)}
-                className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors"
-              >
-                <Edit3 className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
-                <span className="text-xs font-bold text-white">
-                  {jogo.timeClassificado1?.sigla || '?'}
-                </span>
-              </div>
-              <span className="text-white text-sm">
-                {jogo.timeClassificado1?.nome || 'A definir'}
-              </span>
-            </div>
-
-            <div className="text-right">
-              {isEditando ? (
-                <input
-                  type="number"
-                  value={placarForm.time1}
-                  onChange={(e) => setPlacarForm(prev => ({ ...prev, time1: e.target.value }))}
-                  className="w-12 h-8 text-center bg-gray-700 text-white rounded border border-gray-600 focus:border-[#63E300] focus:outline-none"
-                />
-              ) : (
-                <span className="text-lg font-bold text-white">
-                  {jogo.placarTime1 ?? '-'}
-                </span>
-              )}
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
-                <span className="text-xs font-bold text-white">
-                  {jogo.timeClassificado2?.sigla || '?'}
-                </span>
-              </div>
-              <span className="text-white text-sm">
-                {jogo.timeClassificado2?.nome || 'A definir'}
-              </span>
-            </div>
-
-            <div className="text-right">
-              {isEditando ? (
-                <input
-                  type="number"
-                  value={placarForm.time2}
-                  onChange={(e) => setPlacarForm(prev => ({ ...prev, time2: e.target.value }))}
-                  className="w-12 h-8 text-center bg-gray-700 text-white rounded border border-gray-600 focus:border-[#63E300] focus:outline-none"
-                />
-              ) : (
-                <span className="text-lg font-bold text-white">
-                  {jogo.placarTime2 ?? '-'}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {jogo.timeVencedor && (
-          <div className="mt-3 p-2 bg-green-500/10 rounded border border-green-500/30">
-            <div className="flex items-center gap-2">
-              <Trophy className="w-4 h-4 text-green-400" />
-              <span className="text-green-400 text-sm font-medium">
-                Vencedor: {jogo.timeVencedor.nome}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {isEditando && (
-          <div className="mt-4 flex gap-2">
-            <button
-              onClick={() => handleSalvarPlacar(jogo.id)}
-              className="flex-1 bg-[#63E300] text-black py-2 px-3 rounded text-sm font-medium hover:bg-[#50B800] transition-colors"
-            >
-              Salvar
-            </button>
-            <button
-              onClick={() => setJogoEditando(null)}
-              className="px-3 py-2 bg-gray-700 text-white rounded text-sm hover:bg-gray-600 transition-colors"
-            >
-              Cancelar
-            </button>
-          </div>
-        )}
-
-        {jogo.status === 'AO_VIVO' && jogo.placarTime1 !== null && jogo.placarTime2 !== null && (
-          <button
-            onClick={() => handleFinalizarJogo(jogo.id)}
-            className="mt-3 w-full bg-green-600 text-white py-2 px-3 rounded text-sm font-medium hover:bg-green-700 transition-colors"
-          >
-            Finalizar Jogo
-          </button>
-        )}
-
-        {jogo.dataJogo && (
-          <div className="mt-3 text-xs text-gray-400 flex items-center gap-1">
-            <Calendar className="w-3 h-3" />
-            {new Date(jogo.dataJogo).toLocaleDateString('pt-BR', {
-              day: '2-digit',
-              month: '2-digit',
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            })}
-          </div>
-        )}
-      </div>
-    )
-  }
+  const isLoading = loadingSuperliga || loadingBracket || loadingConferencias
 
   if (isLoading) {
     return <Loading />
   }
 
-  const bracketAtivo = brackets?.find(b => b.conferencia === conferenciaAtiva)
+  const superligaData = superliga as SuperligaData
+  const playoffJogos = bracket as PlayoffJogo[]
+  const conferenciasData = conferencias as ConferenciaData[]
 
-  return (
-    <div className="min-h-screen bg-[#1C1C24] p-6">
-      <div className="mb-8">
-        <Link
-          href={`/admin/superliga/${superligaId}`}
-          className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-4"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Voltar para Painel
-        </Link>
+  const handleGerarPlayoffs = () => {
+    gerarPlayoffs(superligaData.temporada, {
+      onSuccess: () => {
+        refetch()
+      }
+    })
+  }
 
-        <div className="flex items-center justify-between">
+  const handleResetarPlayoffs = () => {
+    if (confirm('Tem certeza que deseja resetar todos os playoffs? Esta ação não pode ser desfeita.')) {
+      resetarPlayoffs(superligaData.temporada, {
+        onSuccess: () => {
+          refetch()
+        }
+      })
+    }
+  }
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'FINALIZADO':
+        return <CheckCircle className="w-4 h-4 text-green-500" />
+      case 'AO_VIVO':
+        return <Play className="w-4 h-4 text-red-500" />
+      case 'AGENDADO':
+        return <Clock className="w-4 h-4 text-yellow-500" />
+      default:
+        return <Clock className="w-4 h-4 text-gray-500" />
+    }
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'FINALIZADO': return 'bg-green-500/10 text-green-400 border-green-500/20'
+      case 'AO_VIVO': return 'bg-red-500/10 text-red-400 border-red-500/20'
+      case 'AGENDADO': return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
+      case 'AGUARDANDO': return 'bg-gray-500/10 text-gray-400 border-gray-500/20'
+      default: return 'bg-gray-500/10 text-gray-400 border-gray-500/20'
+    }
+  }
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'FINALIZADO': return 'Finalizado'
+      case 'AO_VIVO': return 'Ao Vivo'
+      case 'AGENDADO': return 'Agendado'
+      case 'AGUARDANDO': return 'Aguardando'
+      default: return status
+    }
+  }
+
+  const getFaseLabel = (fase: string) => {
+    switch (fase) {
+      case 'WILD_CARD': return 'Wild Card'
+      case 'SEMIFINAL': return 'Semifinal'
+      case 'FINAL': return 'Final'
+      case 'SEMIFINAL_NACIONAL': return 'Semifinal Nacional'
+      case 'FINAL_NACIONAL': return 'Final Nacional'
+      default: return fase
+    }
+  }
+
+  const getConferenciaIcon = (tipo: string) => {
+    switch (tipo) {
+      case 'SUDESTE': return '🏭'
+      case 'SUL': return '🧊'
+      case 'NORDESTE': return '🌵'
+      case 'CENTRO_NORTE': return '🌲'
+      default: return '⚽'
+    }
+  }
+
+  // Filtrar jogos
+  const jogosFiltrados = playoffJogos?.filter(jogo => {
+    const conferenciaMatch = selectedConferencia === 'all' || 
+      jogo.conferencia?.tipo === selectedConferencia ||
+      (selectedConferencia === 'nacional' && !jogo.conferenciaId)
+    
+    const faseMatch = selectedFase === 'all' || jogo.fase === selectedFase
+    
+    return conferenciaMatch && faseMatch
+  }) || []
+
+  // Agrupar por conferência
+  const jogosPorConferencia = jogosFiltrados.reduce((acc, jogo) => {
+    const key = jogo.conferencia?.tipo || 'nacional'
+    if (!acc[key]) acc[key] = []
+    acc[key].push(jogo)
+    return acc
+  }, {} as Record<string, PlayoffJogo[]>)
+
+  // Estatísticas
+  const stats = {
+    total: playoffJogos?.length || 0,
+    finalizados: playoffJogos?.filter(j => j.status === 'FINALIZADO').length || 0,
+    emAndamento: playoffJogos?.filter(j => j.status === 'AO_VIVO').length || 0,
+    agendados: playoffJogos?.filter(j => j.status === 'AGENDADO').length || 0
+  }
+
+  const renderJogoCard = (jogo: PlayoffJogo) => (
+    <div key={jogo.id} className="bg-[#272731] rounded-lg border border-gray-700 p-4">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          {jogo.conferencia && (
+            <span className="text-lg">{getConferenciaIcon(jogo.conferencia.tipo)}</span>
+          )}
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Gerenciador de Playoffs</h1>
-            <p className="text-gray-400">Gerencie o chaveamento e resultados dos playoffs</p>
+            <h4 className="text-white font-medium text-sm">{jogo.nome}</h4>
+            <p className="text-gray-400 text-xs">{getFaseLabel(jogo.fase)} - Rodada {jogo.rodada}</p>
           </div>
+        </div>
+        
+        <div className={`px-2 py-1 rounded border text-xs ${getStatusColor(jogo.status)}`}>
+          <div className="flex items-center gap-1">
+            {getStatusIcon(jogo.status)}
+            {getStatusLabel(jogo.status)}
+          </div>
+        </div>
+      </div>
 
-          {!brackets || brackets.length === 0 ? (
-            <button
-              onClick={handleGerarPlayoffs}
-              disabled={gerandoPlayoffs}
-              className="flex items-center gap-2 bg-[#63E300] text-black px-6 py-3 rounded-md font-semibold hover:bg-[#50B800] transition-colors disabled:opacity-50"
-            >
-              <Zap className="w-5 h-5" />
-              {gerandoPlayoffs ? 'Gerando...' : 'Gerar Playoffs'}
-            </button>
-          ) : (
-            <div className="flex gap-3">
-              <Link
-                href={`/superliga/${new Date().getFullYear() + 1}/playoffs`}
-                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 transition-colors"
-              >
-                <Eye className="w-4 h-4" />
-                Ver Público
-              </Link>
-            </div>
+      {/* Times */}
+      <div className="space-y-2">
+        {/* Time 1 */}
+        <div className="flex items-center justify-between p-2 bg-[#1C1C24] rounded">
+          <div className="flex items-center gap-2">
+            {jogo.timeClassificado1 ? (
+              <>
+                <div className="w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center">
+                  <span className="text-xs font-bold text-white">
+                    {jogo.timeClassificado1.sigla}
+                  </span>
+                </div>
+                <span className="text-white text-sm">{jogo.timeClassificado1.nome}</span>
+              </>
+            ) : (
+              <span className="text-gray-400 text-sm italic">Aguardando</span>
+            )}
+          </div>
+          
+          {jogo.status === 'FINALIZADO' && jogo.placarTime1 !== undefined && (
+            <span className={`text-sm font-bold ${
+              jogo.timeVencedor?.id === jogo.timeClassificado1?.id ? 'text-[#63E300]' : 'text-gray-400'
+            }`}>
+              {jogo.placarTime1}
+            </span>
+          )}
+        </div>
+
+        {/* Time 2 */}
+        <div className="flex items-center justify-between p-2 bg-[#1C1C24] rounded">
+          <div className="flex items-center gap-2">
+            {jogo.timeClassificado2 ? (
+              <>
+                <div className="w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center">
+                  <span className="text-xs font-bold text-white">
+                    {jogo.timeClassificado2.sigla}
+                  </span>
+                </div>
+                <span className="text-white text-sm">{jogo.timeClassificado2.nome}</span>
+              </>
+            ) : (
+              <span className="text-gray-400 text-sm italic">Aguardando</span>
+            )}
+          </div>
+          
+          {jogo.status === 'FINALIZADO' && jogo.placarTime2 !== undefined && (
+            <span className={`text-sm font-bold ${
+              jogo.timeVencedor?.id === jogo.timeClassificado2?.id ? 'text-[#63E300]' : 'text-gray-400'
+            }`}>
+              {jogo.placarTime2}
+            </span>
           )}
         </div>
       </div>
 
-      {!brackets || brackets.length === 0 ? (
-        <div className="text-center py-16">
-          <Trophy className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-white mb-2">Playoffs ainda não foram gerados</h3>
-          <p className="text-gray-400 mb-6">
-            Os playoffs serão gerados automaticamente quando a temporada regular terminar
-          </p>
-
-          <div className="bg-[#272731] rounded-lg border border-gray-700 p-6 max-w-md mx-auto">
-            <h4 className="font-semibold text-white mb-3">Pré-requisitos:</h4>
-            <ul className="text-sm text-gray-300 space-y-2 text-left">
-              <li className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-400" />
-                Temporada regular finalizada
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-400" />
-                Todos os jogos com resultado
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-green-400" />
-                Classificação definida
-              </li>
-            </ul>
+      {/* Vencedor */}
+      {jogo.status === 'FINALIZADO' && jogo.timeVencedor && (
+        <div className="mt-2 p-2 bg-[#63E300]/10 border border-[#63E300]/20 rounded">
+          <div className="flex items-center gap-2">
+            <Award className="w-4 h-4 text-[#63E300]" />
+            <span className="text-[#63E300] text-xs font-medium">
+              Vencedor: {jogo.timeVencedor.nome}
+            </span>
           </div>
         </div>
-      ) : (
-        <>
-          <div className="mb-8">
-            <div className="flex flex-wrap gap-4">
-              {conferencias.map((conf) => (
-                <button
-                  key={conf.tipo}
-                  onClick={() => setConferenciaAtiva(conf.tipo)}
-                  className={`flex items-center gap-3 px-6 py-3 rounded-lg border transition-all ${conferenciaAtiva === conf.tipo
-                      ? 'border-[#63E300] bg-[#63E300]/10 text-white'
-                      : 'border-gray-700 bg-[#272731] text-gray-300 hover:border-gray-600'
-                    }`}
-                >
-                  <span className="text-xl">{conf.icone}</span>
-                  <div className="text-left">
-                    <div className="font-semibold">{conf.nome}</div>
-                    <div className="text-xs opacity-80">
-                      {brackets.find(b => b.conferencia === conf.tipo)?.wildcards?.length || 0} jogos
-                    </div>
-                  </div>
-                </button>
-              ))}
+      )}
+
+      {/* Data */}
+      {jogo.dataJogo && (
+        <div className="mt-2 text-xs text-gray-400">
+          {new Date(jogo.dataJogo).toLocaleDateString('pt-BR')}
+        </div>
+      )}
+    </div>
+  )
+
+  const renderConferenciaSection = (tipo: string, jogos: PlayoffJogo[]) => {
+    const conferencia = conferenciasData?.find(c => c.tipo === tipo)
+    const nome = tipo === 'nacional' ? 'Fase Nacional' : conferencia?.nome || tipo
+    const icone = tipo === 'nacional' ? '🏆' : getConferenciaIcon(tipo)
+
+    // Agrupar por fase
+    const jogosPorFase = jogos.reduce((acc, jogo) => {
+      if (!acc[jogo.fase]) acc[jogo.fase] = []
+      acc[jogo.fase].push(jogo)
+      return acc
+    }, {} as Record<string, PlayoffJogo[]>)
+
+    return (
+      <div key={tipo} className="space-y-4">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">{icone}</span>
+          <div>
+            <h3 className="text-white font-semibold">{nome}</h3>
+            <p className="text-gray-400 text-sm">{jogos.length} jogos</p>
+          </div>
+        </div>
+
+        {Object.entries(jogosPorFase).map(([fase, jogos]) => (
+          <div key={fase}>
+            <h4 className="text-gray-300 font-medium mb-2 text-sm">{getFaseLabel(fase)}</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {jogos.map(renderJogoCard)}
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-[#1C1C24] p-6">
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-6">
+        <Link 
+          href={`/admin/superliga/${superligaId}`}
+          className="p-2 rounded-lg bg-[#272731] border border-gray-700 hover:border-gray-600 transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5 text-white" />
+        </Link>
+        
+        <div>
+          <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+            <Trophy className="w-8 h-8 text-orange-500" />
+            Playoffs
+          </h1>
+          <p className="text-gray-400">{superligaData?.nome} - Temporada {superligaData?.temporada}</p>
+        </div>
+      </div>
+
+      {/* Estatísticas */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="bg-[#272731] rounded-lg border border-gray-700 p-4">
+          <div className="text-center">
+            <p className="text-2xl font-bold text-[#63E300]">{stats.total}</p>
+            <p className="text-sm text-gray-400">Total de Jogos</p>
+          </div>
+        </div>
+        
+        <div className="bg-[#272731] rounded-lg border border-gray-700 p-4">
+          <div className="text-center">
+            <p className="text-2xl font-bold text-green-400">{stats.finalizados}</p>
+            <p className="text-sm text-gray-400">Finalizados</p>
+          </div>
+        </div>
+        
+        <div className="bg-[#272731] rounded-lg border border-gray-700 p-4">
+          <div className="text-center">
+            <p className="text-2xl font-bold text-red-400">{stats.emAndamento}</p>
+            <p className="text-sm text-gray-400">Em Andamento</p>
+          </div>
+        </div>
+        
+        <div className="bg-[#272731] rounded-lg border border-gray-700 p-4">
+          <div className="text-center">
+            <p className="text-2xl font-bold text-yellow-400">{stats.agendados}</p>
+            <p className="text-sm text-gray-400">Agendados</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Controles */}
+      <div className="bg-[#272731] rounded-lg border border-gray-700 p-6 mb-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          {/* Filtros */}
+          <div className="flex flex-wrap gap-4">
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Conferência</label>
+              <select
+                value={selectedConferencia}
+                onChange={(e) => setSelectedConferencia(e.target.value)}
+                className="px-3 py-2 bg-[#1C1C24] text-white rounded-md border border-gray-700 focus:border-[#63E300] focus:outline-none"
+              >
+                <option value="all">Todas</option>
+                <option value="SUDESTE">🏭 Sudeste</option>
+                <option value="SUL">🧊 Sul</option>
+                <option value="NORDESTE">🌵 Nordeste</option>
+                <option value="CENTRO_NORTE">🌲 Centro-Norte</option>
+                <option value="nacional">🏆 Nacional</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm text-gray-400 mb-1">Fase</label>
+              <select
+                value={selectedFase}
+                onChange={(e) => setSelectedFase(e.target.value)}
+                className="px-3 py-2 bg-[#1C1C24] text-white rounded-md border border-gray-700 focus:border-[#63E300] focus:outline-none"
+              >
+                <option value="all">Todas</option>
+                <option value="WILD_CARD">Wild Card</option>
+                <option value="SEMIFINAL">Semifinal</option>
+                <option value="FINAL">Final</option>
+                <option value="SEMIFINAL_NACIONAL">Semifinal Nacional</option>
+                <option value="FINAL_NACIONAL">Final Nacional</option>
+              </select>
             </div>
           </div>
 
-          {bracketAtivo && (
-            <div className="space-y-8">
-              {bracketAtivo.wildcards && bracketAtivo.wildcards.length > 0 && (
-                <div>
-                  <h3 className="text-xl font-bold text-white mb-4">Wild Card</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {bracketAtivo.wildcards.map((jogo: any) => renderJogoCard(jogo))}
-                  </div>
-                </div>
-              )}
+          {/* Ações */}
+          <div className="flex gap-3">
+            {(!playoffJogos || playoffJogos.length === 0) ? (
+              <button
+                onClick={handleGerarPlayoffs}
+                disabled={gerandoPlayoffs}
+                className="bg-[#63E300] text-black px-6 py-2 rounded-md font-medium hover:bg-[#50B800] transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                {gerandoPlayoffs ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                    Gerando...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-4 h-4" />
+                    Gerar Playoffs
+                  </>
+                )}
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={handleResetarPlayoffs}
+                  disabled={resetandoPlayoffs}
+                  className="bg-red-600 text-white px-4 py-2 rounded-md font-medium hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                >
+                  {resetandoPlayoffs ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Resetando...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="w-4 h-4" />
+                      Resetar
+                    </>
+                  )}
+                </button>
+                
+                <button
+                  onClick={() => refetch()}
+                  className="bg-[#1C1C24] text-white px-4 py-2 rounded-md border border-gray-700 hover:border-gray-600 transition-colors flex items-center gap-2"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  Atualizar
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
 
-              {bracketAtivo.semifinais && bracketAtivo.semifinais.length > 0 && (
-                <div>
-                  <h3 className="text-xl font-bold text-white mb-4">Semifinais</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {bracketAtivo.semifinais.map((jogo: any) => renderJogoCard(jogo))}
-                  </div>
-                </div>
-              )}
-
-              {bracketAtivo.final && (
-                <div>
-                  <h3 className="text-xl font-bold text-white mb-4">Final da Conferência</h3>
-                  <div className="max-w-md mx-auto">
-                    {renderJogoCard(bracketAtivo.final)}
-                  </div>
-                </div>
-              )}
-
-              <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
-                <h4 className="font-semibold text-white mb-4">Estatísticas da Conferência {conferenciaAtiva}</h4>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-400">
-                      {bracketAtivo.wildcards?.length || 0}
-                    </div>
-                    <div className="text-sm text-gray-400">Wild Cards</div>
-                  </div>
-
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-orange-400">
-                      {bracketAtivo.semifinais?.length || 0}
-                    </div>
-                    <div className="text-sm text-gray-400">Semifinais</div>
-                  </div>
-
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-green-400">
-                      {bracketAtivo.final ? 1 : 0}
-                    </div>
-                    <div className="text-sm text-gray-400">Final</div>
-                  </div>
-
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-purple-400">
-                      {[
-                        ...(bracketAtivo.wildcards || []),
-                        ...(bracketAtivo.semifinais || []),
-                        ...(bracketAtivo.final ? [bracketAtivo.final] : [])
-                      ].filter(j => j.status === 'FINALIZADO').length}
-                    </div>
-                    <div className="text-sm text-gray-400">Finalizados</div>
-                  </div>
-                </div>
-              </div>
-            </div>
+      {/* Conteúdo Principal */}
+      {!playoffJogos || playoffJogos.length === 0 ? (
+        <div className="text-center py-12">
+          <Trophy className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-white mb-2">Playoffs não configurados</h3>
+          <p className="text-gray-400 mb-6">
+            Os playoffs serão gerados automaticamente quando a temporada regular for concluída.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-8">
+          {Object.entries(jogosPorConferencia).map(([tipo, jogos]) => 
+            renderConferenciaSection(tipo, jogos)
           )}
-        </>
+        </div>
       )}
+
+      {/* Ações Rápidas */}
+      <div className="mt-8 bg-[#272731] rounded-lg border border-gray-700 p-6">
+        <h3 className="text-white font-semibold mb-4">Ações Rápidas</h3>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href={`/admin/superliga/${superligaId}/fase-nacional`}
+            className="flex items-center gap-2 bg-[#1C1C24] text-white px-4 py-2 rounded-md border border-gray-700 hover:border-gray-600 transition-colors"
+          >
+            <Trophy className="w-4 h-4" />
+            Fase Nacional
+          </Link>
+
+          <Link
+            href={`/admin/superliga/${superligaId}/status`}
+            className="flex items-center gap-2 bg-[#1C1C24] text-white px-4 py-2 rounded-md border border-gray-700 hover:border-gray-600 transition-colors"
+          >
+            <Settings className="w-4 h-4" />
+            Status da Superliga
+          </Link>
+
+          <Link
+            href={`/superliga/${superligaData?.temporada}`}
+            className="flex items-center gap-2 bg-[#1C1C24] text-white px-4 py-2 rounded-md border border-gray-700 hover:border-gray-600 transition-colors"
+          >
+            <Eye className="w-4 h-4" />
+            Visualização Pública
+          </Link>
+        </div>
+      </div>
     </div>
   )
 }
