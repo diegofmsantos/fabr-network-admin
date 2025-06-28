@@ -3,7 +3,8 @@ import { BaseService } from './base.service'
 
 export class SuperligaService extends BaseService {
   
-  // ✅ CORRIGIDO: Rota deve ser /superliga/criar
+  // ==================== CRIAÇÃO E CONFIGURAÇÃO ====================
+  
   static async criarSuperliga(temporada: string) {
     const service = new SuperligaService()
     return service.post('/superliga/criar', {
@@ -16,8 +17,8 @@ export class SuperligaService extends BaseService {
 
   static async configurarConferencias(campeonatoId: number, config: ConferenciaConfig[]) {
     const service = new SuperligaService()
-    return service.post(`/superliga/campeonatos/${campeonatoId}/distribuir-times-superliga`, {
-      distribuicao: config
+    return service.post(`/superliga/campeonatos/${campeonatoId}/configurar-conferencias`, {
+      config
     })
   }
 
@@ -28,10 +29,12 @@ export class SuperligaService extends BaseService {
     })
   }
 
-  static async distribuirTimesAutomatico(campeonatoId: number) {
+  static async distribuirTimesAutomaticamente(campeonatoId: number) {
     const service = new SuperligaService()
     return service.post(`/superliga/campeonatos/${campeonatoId}/distribuir-times-automatico`)
   }
+
+  // ==================== GERAÇÃO DE JOGOS ====================
 
   static async gerarJogosTemporada(campeonatoId: number, rodadas: number = 4) {
     const service = new SuperligaService()
@@ -50,9 +53,38 @@ export class SuperligaService extends BaseService {
     return service.post(`/superliga/campeonatos/${campeonatoId}/gerar-fase-nacional`)
   }
 
+  static async resetarPlayoffs(campeonatoId: number) {
+    const service = new SuperligaService()
+    return service.post(`/superliga/campeonatos/${campeonatoId}/resetar-playoffs`)
+  }
+
+  // ==================== CONSULTAS GERAIS ====================
+
   static async getSuperliga(campeonatoId: number) {
     const service = new SuperligaService()
     return service.get(`/superliga/campeonatos/${campeonatoId}`)
+  }
+
+  static async getStatusSuperliga(campeonatoId: number) {
+    const service = new SuperligaService()
+    return service.get(`/superliga/campeonatos/${campeonatoId}/status`)
+  }
+
+  static async getConferencias(campeonatoId: number) {
+    const service = new SuperligaService()
+    return service.get(`/superliga/campeonatos/${campeonatoId}/conferencias`)
+  }
+
+  static async getTimesPorConferencia(campeonatoId: number) {
+    const service = new SuperligaService()
+    return service.get(`/superliga/campeonatos/${campeonatoId}/times-por-conferencia`)
+  }
+
+  // ==================== CLASSIFICAÇÕES ====================
+
+  static async getClassificacaoGeral(campeonatoId: number) {
+    const service = new SuperligaService()
+    return service.get(`/superliga/campeonatos/${campeonatoId}/classificacao-geral`)
   }
 
   static async getClassificacaoConferencia(campeonatoId: number, conferencia: TipoConferencia) {
@@ -65,16 +97,6 @@ export class SuperligaService extends BaseService {
     return service.get(`/superliga/campeonatos/${campeonatoId}/classificacao-regional/${regional}`)
   }
 
-  static async getPlayoffsConferencia(campeonatoId: number, conferencia: TipoConferencia) {
-    const service = new SuperligaService()
-    return service.get(`/superliga/campeonatos/${campeonatoId}/playoffs/${conferencia}`)
-  }
-
-  static async getFaseNacional(campeonatoId: number) {
-    const service = new SuperligaService()
-    return service.get(`/superliga/campeonatos/${campeonatoId}/fase-nacional`)
-  }
-
   static async getRankingGeral(campeonatoId: number) {
     const service = new SuperligaService()
     return service.get(`/superliga/campeonatos/${campeonatoId}/ranking-geral`)
@@ -85,22 +107,8 @@ export class SuperligaService extends BaseService {
     return service.get(`/superliga/campeonatos/${campeonatoId}/wild-card-ranking/${conferencia}`)
   }
 
-  static async validarIntegridade(campeonatoId: number) {
-    const service = new SuperligaService()
-    return service.get(`/superliga/campeonatos/${campeonatoId}/validar-integridade`)
-  }
+  // ==================== PLAYOFFS ====================
 
-  static async repararIntegridade(campeonatoId: number) {
-    const service = new SuperligaService()
-    return service.post(`/superliga/campeonatos/${campeonatoId}/reparar-integridade`)
-  }
-
-  static async validarEstrutura(campeonatoId: number) {
-    const service = new SuperligaService()
-    return service.get(`/superliga/campeonatos/${campeonatoId}/validar-estrutura`)
-  }
-
-  // ✅ ADICIONANDO MÉTODOS QUE FALTAVAM:
   static async getPlayoffBracket(campeonatoId: number) {
     const service = new SuperligaService()
     return service.get(`/superliga/campeonatos/${campeonatoId}/bracket`)
@@ -109,6 +117,16 @@ export class SuperligaService extends BaseService {
   static async getBracketPlayoffs(campeonatoId: number) {
     const service = new SuperligaService()
     return service.get(`/superliga/campeonatos/${campeonatoId}/bracket`)
+  }
+
+  static async getPlayoffsConferencia(campeonatoId: number, conferencia: TipoConferencia) {
+    const service = new SuperligaService()
+    return service.get(`/superliga/campeonatos/${campeonatoId}/playoffs/${conferencia}`)
+  }
+
+  static async getFaseNacional(campeonatoId: number) {
+    const service = new SuperligaService()
+    return service.get(`/superliga/campeonatos/${campeonatoId}/fase-nacional`)
   }
 
   static async atualizarResultadoPlayoff(jogoId: number, placarTime1: number, placarTime2: number) {
@@ -124,27 +142,14 @@ export class SuperligaService extends BaseService {
     return service.post(`/superliga/playoff-jogos/${jogoId}/finalizar`)
   }
 
-  static async getConferencias(campeonatoId: number) {
-    const service = new SuperligaService()
-    return service.get(`/superliga/campeonatos/${campeonatoId}/conferencias`)
-  }
+  // ==================== JOGOS ====================
 
-  static async simularPlayoffs(campeonatoId: number) {
-    const service = new SuperligaService()
-    return service.post(`/superliga/campeonatos/${campeonatoId}/simular-playoffs`)
-  }
-
-  static async getPrevisoes(campeonatoId: number) {
-    const service = new SuperligaService()
-    return service.get(`/superliga/campeonatos/${campeonatoId}/previsoes`)
-  }
-
-  static async getEstatisticasSuperliga(campeonatoId: number) {
-    const service = new SuperligaService()
-    return service.get(`/superliga/campeonatos/${campeonatoId}/estatisticas`)
-  }
-
-  static async getJogosSuperliga(campeonatoId: number, filters?: any) {
+  static async getJogosSuperliga(campeonatoId: number, filters?: {
+    conferencia?: string
+    fase?: string
+    rodada?: number
+    status?: string
+  }) {
     const service = new SuperligaService()
     return service.get(`/superliga/campeonatos/${campeonatoId}/jogos`, filters)
   }
@@ -159,13 +164,67 @@ export class SuperligaService extends BaseService {
     return service.get(`/superliga/campeonatos/${campeonatoId}/ultimos-resultados`, { limite })
   }
 
-  static async getHistoricoSuperliga(temporadas: string[]) {
+  // ==================== ESTATÍSTICAS E ANÁLISES ====================
+
+  static async getEstatisticasSuperliga(campeonatoId: number) {
     const service = new SuperligaService()
-    return service.get(`/superliga/historico`, { temporadas: temporadas.join(',') })
+    return service.get(`/superliga/campeonatos/${campeonatoId}/estatisticas`)
   }
 
-  static async getTimesPorConferencia(campeonatoId: number) {
+  static async getHistoricoSuperliga(temporadas: string[]) {
     const service = new SuperligaService()
-    return service.get(`/superliga/campeonatos/${campeonatoId}/times-por-conferencia`)
+    return service.get(`/superliga/historico`, { 
+      temporadas: temporadas.join(',') 
+    })
+  }
+
+  static async getPrevisoes(campeonatoId: number) {
+    const service = new SuperligaService()
+    return service.get(`/superliga/campeonatos/${campeonatoId}/previsoes`)
+  }
+
+  // ==================== VALIDAÇÃO E INTEGRIDADE ====================
+
+  static async validarEstruturaSuperliga(campeonatoId: number) {
+    const service = new SuperligaService()
+    return service.get(`/superliga/campeonatos/${campeonatoId}/validar-integridade`)
+  }
+
+  static async validarEstrutura(campeonatoId: number) {
+    const service = new SuperligaService()
+    return service.get(`/superliga/campeonatos/${campeonatoId}/validar-estrutura`)
+  }
+
+  static async validarIntegridade(campeonatoId: number) {
+    const service = new SuperligaService()
+    return service.get(`/superliga/campeonatos/${campeonatoId}/validar-integridade`)
+  }
+
+  static async repararIntegridade(campeonatoId: number) {
+    const service = new SuperligaService()
+    return service.post(`/superliga/campeonatos/${campeonatoId}/reparar-integridade`)
+  }
+
+  // ==================== SIMULAÇÃO E TESTES ====================
+
+  static async simularPlayoffs(campeonatoId: number) {
+    const service = new SuperligaService()
+    return service.post(`/superliga/campeonatos/${campeonatoId}/simular-playoffs`)
+  }
+
+  static async simularTemporadaCompleta(campeonatoId: number) {
+    const service = new SuperligaService()
+    return service.post(`/superliga/campeonatos/${campeonatoId}/simular-temporada`)
+  }
+
+  // ==================== GERAÇÃO AUTOMÁTICA ====================
+
+  static async gerarTemporadaCompleta(campeonatoId: number, configuracao: {
+    rodadas?: number
+    incluirPlayoffs?: boolean
+    incluirFaseNacional?: boolean
+  }) {
+    const service = new SuperligaService()
+    return service.post(`/superliga/campeonatos/${campeonatoId}/gerar-temporada-completa`, configuracao)
   }
 }

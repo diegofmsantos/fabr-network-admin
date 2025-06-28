@@ -34,7 +34,7 @@ export default function SuperligaPage() {
     criarSuperliga(proximoAno.toString(), {
       onSuccess: (novaSuperlgia) => {
         setIsCreating(false)
-        router.push(`/admin/superliga/${novaSuperlgia.id}`)
+        router.push(`/admin/superliga/criar`)
       },
       onError: () => {
         setIsCreating(false)
