@@ -1,240 +1,159 @@
-"use client"
+// Arquivo: src/hooks/useJogos.ts
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useNotifications } from '@/hooks/useNotifications'
+import { BaseService } from '@/services/base.service'
 import { queryKeys } from './queryKeys'
-import { FiltroJogos } from '@/types'
-import { CampeonatosService } from '@/services/campeonatos.service'
+import { useNotifications } from './useNotifications'
 
-export function useJogos(filters: FiltroJogos) {
+interface JogosFilters {
+  temporada?: string
+  status?: string
+  fase?: string
+  rodada?: number
+  conferencia?: string
+  limite?: number
+}
+
+interface Time {
+  id: number
+  nome: string
+  sigla: string
+  logo?: string
+  cor?: string
+  presidente?: string
+  head_coach?: string
+  estadio?: string
+}
+
+interface Campeonato {
+  id: number
+  nome: string
+  temporada: string
+  isSuperliga?: boolean
+}
+
+interface EstatisticaJogo {
+  id: number
+  jogadorId: number
+  timeId: number
+  estatisticas: any
+  jogador: {
+    id: number
+    nome: string
+    posicao: string
+  }
+  time: {
+    id: number
+    nome: string
+    sigla: string
+  }
+}
+
+export interface Jogo {
+  id: number
+  campeonatoId: number
+  timeCasaId: number
+  timeVisitanteId: number
+  dataJogo: string
+  local?: string
+  rodada: number
+  fase: string
+  status: 'AGENDADO' | 'AO_VIVO' | 'FINALIZADO' | 'ADIADO'
+  placarCasa?: number
+  placarVisitante?: number
+  observacoes?: string
+  estatisticasProcessadas: boolean
+  
+  // Relacionamentos
+  timeCasa: Time
+  timeVisitante: Time
+  campeonato: Campeonato
+  estatisticas?: EstatisticaJogo[]
+}
+
+class JogosService extends BaseService {
+  static async getJogos(filters?: JogosFilters): Promise<Jogo[]> {
+    const service = new JogosService()
+    
+    // Construir query params
+    const params = new URLSearchParams()
+    if (filters?.temporada) params.append('temporada', filters.temporada)
+    if (filters?.status) params.append('status', filters.status)
+    if (filters?.fase) params.append('fase', filters.fase)
+    if (filters?.rodada) params.append('rodada', filters.rodada.toString())
+    if (filters?.conferencia) params.append('conferencia', filters.conferencia)
+    if (filters?.limite) params.append('limite', filters.limite.toString())
+
+    const queryString = params.toString()
+    const url = `/admin/jogos${queryString ? `?${queryString}` : ''}`
+    
+    return service.get<Jogo[]>(url)
+  }
+
+  static async getJogo(id: number): Promise<Jogo> {
+    const service = new JogosService()
+    return service.get<Jogo>(`/admin/jogos/${id}`)
+  }
+
+  static async atualizarResultado(id: number, dados: {
+    placarCasa: number
+    placarVisitante: number
+    status?: string
+    observacoes?: string
+  }): Promise<{ message: string; jogo: Jogo }> {
+    const service = new JogosService()
+    return service.put(`/admin/jogos/${id}/resultado`, dados)
+  }
+}
+
+export function useJogos(filters?: JogosFilters) {
   return useQuery({
-    queryKey: queryKeys.jogos.list(filters),
-    queryFn: () => CampeonatosService.getJogos(filters),
-    staleTime: 1000 * 60 * 2, 
+    queryKey: queryKeys.jogos.list(filters || {}),
+    queryFn: () => JogosService.getJogos(filters),
+    staleTime: 1000 * 60 * 5, // 5 minutos
     retry: 2,
+    refetchOnWindowFocus: false,
+    throwOnError: false
   })
 }
 
-export function useJogo(jogoId: number) {
+export function useJogo(id: number) {
   return useQuery({
-    queryKey: queryKeys.jogos.detail(jogoId),
-    queryFn: () => CampeonatosService.getJogo(jogoId),
-    enabled: !!jogoId,
-    staleTime: 1000 * 60 * 2,
+    queryKey: queryKeys.jogos.detail(id),
+    queryFn: () => JogosService.getJogo(id),
+    enabled: !!id,
+    staleTime: 1000 * 60 * 5,
+    retry: 2,
+    refetchOnWindowFocus: false,
+    throwOnError: false
   })
 }
 
-export function useJogosTime(timeId: number, campeonatoId?: number, limit: number = 20) {
-  return useQuery({
-    queryKey: [...queryKeys.jogos.all, 'jogos-time', timeId, campeonatoId, limit] as const,
-    queryFn: () => CampeonatosService.getJogos({
-      timeId,
-      campeonatoId,
-      limit
-    }),
-    enabled: !!timeId,
-    staleTime: 1000 * 60 * 3,
-  })
-}
-
-export function useCreateJogo() {
+export function useAtualizarResultadoJogo() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: (data: any) => CampeonatosService.createJogo(data),
-    onSuccess: (newJogo) => {
-      queryClient.invalidateQueries({ 
-        queryKey: queryKeys.jogos.lists() 
-      })
-      
-      queryClient.invalidateQueries({ 
-        queryKey: queryKeys.campeonatos.detail(newJogo.campeonatoId) 
-      })
-      
-      queryClient.setQueryData(queryKeys.jogos.detail(newJogo.id), newJogo)
-      
-      notifications.success('Jogo criado!', 'Jogo foi criado com sucesso')
-    },
-    onError: (error: any) => {
-      notifications.error('Erro ao criar jogo', error.message || 'Tente novamente')
-    },
-  })
-}
-
-export function useUpdateJogo() {
-  const queryClient = useQueryClient()
-  const notifications = useNotifications()
-
-  return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) =>
-      CampeonatosService.updateJogo(id, data),
-    onSuccess: (updatedJogo, { id }) => {
-      queryClient.setQueryData(queryKeys.jogos.detail(id), updatedJogo)
-      
-      queryClient.invalidateQueries({ 
-        queryKey: queryKeys.jogos.lists() 
-      })
-      
-      if (updatedJogo.campeonatoId) {
-        queryClient.invalidateQueries({ 
-          queryKey: queryKeys.campeonatos.detail(updatedJogo.campeonatoId) 
-        })
+    mutationFn: ({ id, dados }: { 
+      id: number, 
+      dados: {
+        placarCasa: number
+        placarVisitante: number
+        status?: string
+        observacoes?: string
       }
-      
-      notifications.success('Jogo atualizado!', 'Jogo foi atualizado com sucesso')
+    }) => JogosService.atualizarResultado(id, dados),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.jogos.detail(id)
+      })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.jogos.lists()
+      })
+      notifications.success('Resultado atualizado!', 'Placar do jogo foi salvo com sucesso')
     },
     onError: (error: any) => {
-      notifications.error('Erro ao atualizar jogo', error.message || 'Tente novamente')
-    },
-  })
-}
-
-export function useDeleteJogo() {
-  const queryClient = useQueryClient()
-  const notifications = useNotifications()
-
-  return useMutation({
-    mutationFn: (id: number) => CampeonatosService.deleteJogo(id),
-    onSuccess: (_, id) => {
-      queryClient.removeQueries({ 
-        queryKey: queryKeys.jogos.detail(id) 
-      })
-      
-      queryClient.invalidateQueries({ 
-        queryKey: queryKeys.jogos.lists() 
-      })
-      
-      queryClient.invalidateQueries({ 
-        queryKey: queryKeys.campeonatos.lists() 
-      })
-      
-      notifications.success('Jogo removido!', 'Jogo foi excluído com sucesso')
-    },
-    onError: (error: any) => {
-      notifications.error('Erro ao remover jogo', error.message || 'Tente novamente')
-    },
-  })
-}
-
-export function useGerarJogos() {
-  const queryClient = useQueryClient()
-  const notifications = useNotifications()
-
-  return useMutation({
-    mutationFn: (campeonatoId: number) => CampeonatosService.gerarJogos(campeonatoId),
-    onSuccess: (result, campeonatoId) => {
-      queryClient.invalidateQueries({ 
-        queryKey: queryKeys.campeonatos.detail(campeonatoId) 
-      })
-      
-      queryClient.invalidateQueries({ 
-        queryKey: queryKeys.jogos.lists() 
-      })
-      
-      notifications.success(
-        'Jogos gerados!', 
-        `${result.jogosGerados || 0} jogos foram criados automaticamente`
-      )
-    },
-    onError: (error: any) => {
-      notifications.error('Erro ao gerar jogos', error.message || 'Tente novamente')
-    },
-  })
-}
-
-export function useAtualizarResultado() {
-  const queryClient = useQueryClient()
-  const notifications = useNotifications()
-
-  return useMutation({
-    mutationFn: ({ 
-      jogoId, 
-      placarCasa, 
-      placarVisitante 
-    }: { 
-      jogoId: number
-      placarCasa: number
-      placarVisitante: number 
-    }) => CampeonatosService.atualizarResultadoJogo(jogoId, placarCasa, placarVisitante),
-    onSuccess: (updatedJogo) => {
-      queryClient.setQueryData(queryKeys.jogos.detail(updatedJogo.id), updatedJogo)
-      
-      queryClient.invalidateQueries({ 
-        queryKey: queryKeys.jogos.lists() 
-      })
-      
-      if (updatedJogo.campeonatoId) {
-        queryClient.invalidateQueries({ 
-          queryKey: queryKeys.campeonatos.detail(updatedJogo.campeonatoId) 
-        })
-        
-        if (updatedJogo.grupoId) {
-          queryClient.invalidateQueries({ 
-            queryKey: queryKeys.classificacao.grupo(updatedJogo.grupoId) 
-          })
-        }
-      }
-      
-      notifications.success('Resultado atualizado!', 'Placar do jogo foi atualizado')
-    },
-    onError: (error: any) => {
-      notifications.error('Erro ao atualizar resultado', error.message || 'Tente novamente')
-    },
-  })
-}
-
-export function useFinalizarJogo() {
-  const queryClient = useQueryClient()
-  const notifications = useNotifications()
-
-  return useMutation({
-    mutationFn: (jogoId: number) => CampeonatosService.finalizarJogo(jogoId),
-    onSuccess: (updatedJogo) => {
-      queryClient.setQueryData(queryKeys.jogos.detail(updatedJogo.id), updatedJogo)
-      
-      queryClient.invalidateQueries({ 
-        queryKey: queryKeys.jogos.lists() 
-      })
-      
-      if (updatedJogo.campeonatoId) {
-        queryClient.invalidateQueries({ 
-          queryKey: queryKeys.campeonatos.detail(updatedJogo.campeonatoId) 
-        })
-      }
-      
-      notifications.success('Jogo finalizado!', 'Jogo foi marcado como finalizado')
-    },
-    onError: (error: any) => {
-      notifications.error('Erro ao finalizar jogo', error.message || 'Tente novamente')
-    },
-  })
-}
-
-export function useAdiarJogo() {
-  const queryClient = useQueryClient()
-  const notifications = useNotifications()
-
-  return useMutation({
-    mutationFn: ({ jogoId, novaData }: { jogoId: number; novaData?: string }) =>
-      CampeonatosService.adiarJogo(jogoId, novaData),
-    onSuccess: (updatedJogo) => {
-      queryClient.setQueryData(queryKeys.jogos.detail(updatedJogo.id), updatedJogo)
-      
-      queryClient.invalidateQueries({ 
-        queryKey: queryKeys.jogos.lists() 
-      })
-      
-      if (updatedJogo.campeonatoId) {
-        queryClient.invalidateQueries({ 
-          queryKey: queryKeys.campeonatos.detail(updatedJogo.campeonatoId) 
-        })
-      }
-      
-      notifications.success('Jogo adiado!', 'Jogo foi adiado com sucesso')
-    },
-    onError: (error: any) => {
-      notifications.error('Erro ao adiar jogo', error.message || 'Tente novamente')
-    },
+      notifications.error('Erro ao atualizar resultado', error.message)
+    }
   })
 }

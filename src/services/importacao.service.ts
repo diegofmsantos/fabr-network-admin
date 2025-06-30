@@ -69,7 +69,7 @@ export class ImportacaoService extends BaseService {
     })
   }
 
-   static async validarPlanilhaTimes(arquivo: File): Promise<ImportResult> {
+  static async validarPlanilhaTimes(arquivo: File): Promise<ImportResult> {
     const service = new ImportacaoService()
     return service.upload('/admin/validar-times', arquivo) as Promise<ImportResult>
   }
@@ -97,4 +97,12 @@ export class ImportacaoService extends BaseService {
     const service = new ImportacaoService()
     return service.get(`/admin/estatisticas-importacao`, { temporada })
   }
+
+  static async importarAgendaJogos(arquivo: File) {
+  const formData = new FormData()
+  formData.append('arquivo', arquivo)
+  
+  const service = new ImportacaoService()
+  return service.post('/admin/importar-agenda-jogos', formData)
+}
 }

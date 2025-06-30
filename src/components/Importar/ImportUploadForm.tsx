@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Upload, FileText, Check, AlertTriangle, Loader2 } from 'lucide-react'
-import { useImportarTimes, useImportarJogadores, useAtualizarEstatisticas } from '@/hooks/useImportacao'
+import { useImportarTimes, useImportarJogadores, useImportarAgendaJogos, useAtualizarEstatisticas } from '@/hooks/useImportacao'
 
 const AdminUploadForm = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -12,18 +12,22 @@ const AdminUploadForm = () => {
 
   const importTimesMutation = useImportarTimes()
   const importJogadoresMutation = useImportarJogadores()
+  const importAgendaMutation = useImportarAgendaJogos()
   const atualizarEstatisticasMutation = useAtualizarEstatisticas()
 
   const isUploading = importTimesMutation.isPending ||
     importJogadoresMutation.isPending ||
+    importAgendaMutation.isPending ||
     atualizarEstatisticasMutation.isPending
 
   const error = importTimesMutation.error ||
     importJogadoresMutation.error ||
+    importAgendaMutation.error ||
     atualizarEstatisticasMutation.error
 
   const isSuccess = importTimesMutation.isSuccess ||
     importJogadoresMutation.isSuccess ||
+    importAgendaMutation.isSuccess ||
     atualizarEstatisticasMutation.isSuccess
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,6 +66,10 @@ const AdminUploadForm = () => {
           await importJogadoresMutation.mutateAsync(selectedFile)
           break
 
+        case 'agenda':
+          await importAgendaMutation.mutateAsync(selectedFile)
+          break
+
         case 'estatisticas':
           if (!formData.id_jogo || !formData.data_jogo) {
             alert('Para estatísticas, preencha o ID do jogo e a data')
@@ -85,6 +93,7 @@ const AdminUploadForm = () => {
 
     importTimesMutation.reset()
     importJogadoresMutation.reset()
+    importAgendaMutation.reset()
     atualizarEstatisticasMutation.reset()
   }
 
@@ -105,6 +114,7 @@ const AdminUploadForm = () => {
           >
             <option value="times">Importar Times</option>
             <option value="jogadores">Importar Jogadores</option>
+            <option value="agenda">Importar Agenda de Jogos</option>
             <option value="estatisticas">Atualizar Estatísticas de Jogo</option>
           </select>
         </div>

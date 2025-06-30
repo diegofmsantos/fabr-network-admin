@@ -246,3 +246,46 @@ export function useValidarPlanilhaJogadores() {
     },
   })
 }
+
+
+// Adicionar este hook em src/hooks/useImportacao.ts
+
+export function useImportarAgendaJogos() {
+  const queryClient = useQueryClient()
+  const notifications = useNotifications()
+
+  return useMutation({
+    mutationFn: (arquivo: File) => ImportacaoService.importarAgendaJogos(arquivo),
+    onSuccess: (result: any) => {
+      // Invalida queries relacionadas a jogos
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.jogos?.lists?.() || ['jogos']
+      })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.admin?.all || ['admin']
+      })
+
+      notifications.success(
+        'Agenda importada!',
+        `${result.sucesso || 0} jogos cadastrados com sucesso`
+      )
+
+      if (result.erros && result.erros.length > 0) {
+        notifications.warning(
+          'Importação com avisos',
+          `${result.erros.length} jogos com problemas. Verifique o console.`
+        )
+        console.warn('Erros na importação de agenda:', result.erros)
+      }
+    },
+    onError: (error: any) => {
+      notifications.error(
+        'Erro na importação de agenda',
+        error.message || 'Verifique o arquivo e tente novamente'
+      )
+    },
+    meta: {
+      timeout: 60000,
+    }
+  })
+}
