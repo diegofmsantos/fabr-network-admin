@@ -99,10 +99,10 @@ export class ImportacaoService extends BaseService {
   }
 
   static async importarAgendaJogos(arquivo: File) {
-  const formData = new FormData()
-  formData.append('arquivo', arquivo)
-  
-  const service = new ImportacaoService()
-  return service.post('/admin/importar-agenda-jogos', formData)
-}
+    const formData = new FormData()
+    formData.append('arquivo', arquivo)
+
+    const service = new ImportacaoService()
+    return service.post('/admin/importar-agenda-jogos', formData)
+  }
 }
