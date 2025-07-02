@@ -98,11 +98,8 @@ export class ImportacaoService extends BaseService {
     return service.get(`/admin/estatisticas-importacao`, { temporada })
   }
 
-  static async importarAgendaJogos(arquivo: File) {
-    const formData = new FormData()
-    formData.append('arquivo', arquivo)
-
+  static async importarAgendaJogos(arquivo: File): Promise<ImportResult> {
     const service = new ImportacaoService()
-    return service.post('/admin/importar-agenda-jogos', formData)
+    return service.upload('/admin/importar-agenda-jogos', arquivo) as Promise<ImportResult>
   }
 }

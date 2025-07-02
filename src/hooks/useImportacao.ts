@@ -255,37 +255,44 @@ export function useImportarAgendaJogos() {
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: (arquivo: File) => ImportacaoService.importarAgendaJogos(arquivo),
-    onSuccess: (result: any) => {
-      // Invalida queries relacionadas a jogos
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.jogos?.lists?.() || ['jogos']
-      })
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.admin?.all || ['admin']
-      })
-
-      notifications.success(
-        'Agenda importada!',
-        `${result.sucesso || 0} jogos cadastrados com sucesso`
-      )
-
-      if (result.erros && result.erros.length > 0) {
-        notifications.warning(
-          'Importação com avisos',
-          `${result.erros.length} jogos com problemas. Verifique o console.`
-        )
-        console.warn('Erros na importação de agenda:', result.erros)
-      }
+    mutationFn: (arquivo: File) => {
+      const formData = new FormData()
+      formData.append('arquivo', arquivo)
+      return fetch('/api/admin/importar-agenda-jogos', {
+        method: 'POST',
+        body: formData
+      }).then(res => res.json())
+    },
+    onSuccess: (result) => {
+      notifications.success('Agenda importada!', `${result.sucesso} jogos cadastrados`)
+      queryClient.invalidateQueries({ queryKey: ['jogos'] })
     },
     onError: (error: any) => {
-      notifications.error(
-        'Erro na importação de agenda',
-        error.message || 'Verifique o arquivo e tente novamente'
-      )
+      notifications.error('Erro na importação', error.message)
+    }
+  })
+}
+
+export function useImportarResultados() {
+  const queryClient = useQueryClient()
+  const notifications = useNotifications()
+
+  return useMutation({
+    mutationFn: (arquivo: File) => {
+      const formData = new FormData()
+      formData.append('arquivo', arquivo)
+      return fetch('/api/admin/importar-resultados-jogos', {
+        method: 'POST',
+        body: formData
+      }).then(res => res.json())
     },
-    meta: {
-      timeout: 60000,
+    onSuccess: (result) => {
+      notifications.success('Resultados importados!', `${result.sucesso} jogos atualizados`)
+      queryClient.invalidateQueries({ queryKey: ['jogos'] })
+      queryClient.invalidateQueries({ queryKey: ['superliga'] })
+    },
+    onError: (error: any) => {
+      notifications.error('Erro na importação', error.message)
     }
   })
 }
