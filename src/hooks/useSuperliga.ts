@@ -410,3 +410,17 @@ export function useTemporadaAtual() {
     staleTime: 1000 * 60 * 30, // 30 minutos
   })
 }
+
+// ADICIONAR este hook ao arquivo src/hooks/useSuperliga.ts
+
+export function useClassificacaoSuperliga(temporada: string) {
+  return useQuery({
+    queryKey: [...superligaQueryKeys.classificacao(temporada)],
+    queryFn: () => SuperligaService.getClassificacaoGeral(temporada),
+    enabled: !!temporada,
+    staleTime: 1000 * 60 * 5, // 5 minutos (dados mudam com jogos)
+    retry: 2,
+    refetchOnWindowFocus: false,
+  })
+}
+

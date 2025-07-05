@@ -258,7 +258,7 @@ export function useImportarAgendaJogos() {
     mutationFn: (arquivo: File) => {
       const formData = new FormData()
       formData.append('arquivo', arquivo)
-      return fetch('/api/admin/importar-agenda-jogos', {
+      return fetch('/admin/importar-agenda-jogos', {
         method: 'POST',
         body: formData
       }).then(res => res.json())
@@ -281,7 +281,7 @@ export function useImportarResultados() {
     mutationFn: (arquivo: File) => {
       const formData = new FormData()
       formData.append('arquivo', arquivo)
-      return fetch('/api/admin/importar-resultados-jogos', {
+      return fetch('/admin/importar-resultados-jogos', {
         method: 'POST',
         body: formData
       }).then(res => res.json())

@@ -263,4 +263,9 @@ export class SuperligaService extends BaseService {
     const service = new SuperligaService()
     return service.get(`/superliga/${temporada}/exportar`, { formato })
   }
+
+  static async getClassificacao(temporada: string) {
+  const service = new SuperligaService()
+  return service.get(`/superliga/${temporada}/classificacao`)
+}
 }
