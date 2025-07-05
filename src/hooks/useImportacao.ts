@@ -255,20 +255,14 @@ export function useImportarAgendaJogos() {
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: (arquivo: File) => {
-      const formData = new FormData()
-      formData.append('arquivo', arquivo)
-      return fetch('/admin/importar-agenda-jogos', {
-        method: 'POST',
-        body: formData
-      }).then(res => res.json())
-    },
-    onSuccess: (result) => {
+    mutationFn: (arquivo: File) => ImportacaoService.importarAgendaJogos(arquivo),
+    onSuccess: (result: any) => {
       notifications.success('Agenda importada!', `${result.sucesso} jogos cadastrados`)
       queryClient.invalidateQueries({ queryKey: ['jogos'] })
+      queryClient.invalidateQueries({ queryKey: ['superliga'] })
     },
     onError: (error: any) => {
-      notifications.error('Erro na importação', error.message)
+      notifications.error('Erro na importação', error.message || 'Erro ao importar agenda')
     }
   })
 }
