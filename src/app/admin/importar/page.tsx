@@ -11,7 +11,7 @@ import {
   useImportarJogadores, 
   useImportarAgendaJogos, 
   useAtualizarEstatisticas,
-  useImportarResultados
+  useImportarResultados // ✅ ADICIONADO - estava faltando
 } from '@/hooks/useImportacao'
 
 type ImportStep = 'times' | 'jogadores' | 'agenda' | 'resultados' | 'estatisticas'
@@ -41,6 +41,7 @@ export default function AdminImportarPage() {
   const importTimesMutation = useImportarTimes()
   const importJogadoresMutation = useImportarJogadores()
   const importAgendaMutation = useImportarAgendaJogos()
+  const importResultadosMutation = useImportarResultados() // ✅ CORRIGIDO - agora está definido
   const atualizarEstatisticasMutation = useAtualizarEstatisticas()
 
   const steps: ImportStepConfig[] = [
@@ -87,7 +88,7 @@ export default function AdminImportarPage() {
       icon: Trophy,
       color: 'yellow',
       required: false,
-      status: 'pending',
+      status: importResultadosMutation?.isSuccess ? 'success' : 'pending', // ✅ CORRIGIDO - agora funciona
       fileFormat: 'Excel (.xlsx)',
       columns: ['id_jogo', 'placar_mandante', 'placar_visitante', 'status', 'observacoes'],
       examples: ['1', '21', '14', 'FINALIZADO', 'Jogo bem disputado']
@@ -99,7 +100,7 @@ export default function AdminImportarPage() {
       icon: BarChart3,
       color: 'orange',
       required: false,
-      status: 'pending',
+      status: atualizarEstatisticasMutation.isSuccess ? 'success' : 'pending',
       fileFormat: 'Excel (.xlsx)',
       columns: ['id_jogo', 'data_jogo', 'jogador_nome', 'time_nome', 'passes_completos', 'passes_tentados', 'jardas_de_passe', 'td_passados', 'corridas', 'jardas_corridas', 'tds_corridos', 'recepcoes', 'jardas_recebidas', 'tds_recebidos', 'tackles_totais', 'sacks_forcado'],
       examples: ['1', '2025-07-06', 'João Silva', 'Flamengo Imperadores', '15', '20', '250', '2']
@@ -107,9 +108,11 @@ export default function AdminImportarPage() {
   ]
 
   const currentStep = steps.find(step => step.id === activeStep)!
+
   const isUploading = importTimesMutation.isPending || 
                      importJogadoresMutation.isPending ||
                      importAgendaMutation.isPending ||
+                     importResultadosMutation?.isPending || // ✅ CORRIGIDO - agora funciona
                      atualizarEstatisticasMutation.isPending
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -138,17 +141,21 @@ export default function AdminImportarPage() {
           await importAgendaMutation.mutateAsync(selectedFile)
           break
         case 'resultados':
-          await importResultadosMutation?.mutateAsync(selectedFile)
+          await importResultadosMutation?.mutateAsync(selectedFile) // ✅ CORRIGIDO - agora funciona
           break
+        case 'estatisticas':
           if (!formData.id_jogo || !formData.data_jogo) {
             alert('Preencha o ID do jogo e a data')
             return
           }
-          await atualizarEstatisticasMutation.mutateAsync({
-            arquivo: selectedFile,
-            idJogo: formData.id_jogo,
-            dataJogo: formData.data_jogo
-          })
+          // ✅ CORRIGIDO - tratamento correto do File | null
+          if (selectedFile) {
+            await atualizarEstatisticasMutation.mutateAsync({
+              arquivo: selectedFile, // Agora TypeScript sabe que não é null
+              idJogo: formData.id_jogo,
+              dataJogo: formData.data_jogo
+            })
+          }
           break
       }
       
@@ -170,7 +177,7 @@ export default function AdminImportarPage() {
       case 'agenda':
         return importAgendaMutation.isSuccess ? 'success' : 'pending'
       case 'resultados':
-        return importResultadosMutation?.isSuccess ? 'success' : 'pending'
+        return importResultadosMutation?.isSuccess ? 'success' : 'pending' // ✅ CORRIGIDO
       case 'estatisticas':
         return atualizarEstatisticasMutation.isSuccess ? 'success' : 'pending'
       default:
@@ -178,214 +185,148 @@ export default function AdminImportarPage() {
     }
   }
 
-  const getStepIcon = (step: ImportStepConfig) => {
-    const status = getStepStatus(step)
-    if (status === 'success') return <CheckCircle className="w-5 h-5 text-green-400" />
-    if (isUploading && activeStep === step.id) return <Clock className="w-5 h-5 text-yellow-400 animate-spin" />
-    return <step.icon className="w-5 h-5 text-gray-400" />
-  }
-
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Importação de Dados</h1>
+          <h1 className="text-2xl font-bold text-white">Importar Dados</h1>
           <p className="mt-1 text-sm text-gray-400">
-            Faça upload das planilhas para configurar a Superliga
+            Upload das planilhas para popular a base de dados da Superliga
           </p>
         </div>
-        
+
         <div className="mt-4 sm:mt-0 flex gap-3">
           <button className="flex items-center gap-2 bg-[#1C1C24] text-white px-4 py-2 rounded-md border border-gray-700 hover:border-gray-600 transition-colors">
             <Download className="w-4 h-4" />
-            Baixar Modelos
+            Baixar Templates
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Sidebar com Steps */}
-        <div className="lg:col-span-1">
-          <div className="bg-[#272731] rounded-lg border border-gray-700 p-4">
-            <h3 className="font-semibold text-white mb-4">Etapas de Importação</h3>
-            
-            <div className="space-y-2">
-              {steps.map((step, index) => (
-                <button
-                  key={step.id}
-                  onClick={() => setActiveStep(step.id)}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
-                    activeStep === step.id 
-                      ? 'bg-[#63E300]/20 border border-[#63E300]/50' 
-                      : 'hover:bg-[#1C1C24]'
-                  }`}
-                >
-                  <div className="flex-shrink-0">
-                    {getStepIcon(step)}
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className={`text-sm font-medium ${
-                        activeStep === step.id ? 'text-[#63E300]' : 'text-white'
-                      }`}>
-                        {step.title}
-                      </span>
-                      {step.required && (
-                        <span className="text-xs text-red-400">*</span>
-                      )}
-                    </div>
-                    <p className="text-xs text-gray-400 truncate">
-                      {step.description}
-                    </p>
-                  </div>
-                  
-                  {getStepStatus(step) === 'success' && (
-                    <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
+      {/* Step Navigation */}
+      <div className="bg-[#272731] rounded-lg border border-gray-700 p-4">
+        <div className="flex flex-wrap gap-2">
+          {steps.map((step) => (
+            <button
+              key={step.id}
+              onClick={() => setActiveStep(step.id)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                activeStep === step.id
+                  ? 'bg-[#63E300] text-black'
+                  : getStepStatus(step) === 'success'
+                  ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                  : 'bg-[#1C1C24] text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              <step.icon className="w-4 h-4" />
+              {step.title}
+              {getStepStatus(step) === 'success' && <CheckCircle className="w-4 h-4" />}
+            </button>
+          ))}
         </div>
+      </div>
 
-        {/* Conteúdo Principal */}
-        <div className="lg:col-span-3">
+      {/* Main Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Upload Form */}
+        <div className="lg:col-span-2">
           <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
-            {/* Cabeçalho da Etapa */}
             <div className="flex items-center gap-3 mb-6">
-              <div className={`p-2 bg-${currentStep.color}-500/20 rounded-lg`}>
-                <currentStep.icon className={`w-6 h-6 text-${currentStep.color}-400`} />
-              </div>
+              <currentStep.icon className={`w-8 h-8 text-${currentStep.color}-400`} />
               <div>
-                <h2 className="text-xl font-bold text-white">{currentStep.title}</h2>
+                <h3 className="text-xl font-bold text-white">{currentStep.title}</h3>
                 <p className="text-gray-400">{currentStep.description}</p>
               </div>
             </div>
 
-            {/* Formulário de Upload */}
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Campos especiais para estatísticas */}
+              {/* File Upload */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">
+                  Arquivo ({currentStep.fileFormat})
+                </label>
+                <div className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center hover:border-gray-500 transition-colors">
+                  <FileSpreadsheet className="w-12 h-12 text-gray-500 mx-auto mb-3" />
+                  <div className="space-y-2">
+                    <label htmlFor="file-upload" className="cursor-pointer">
+                      <span className="text-[#63E300] hover:text-[#50B800]">
+                        Clique para selecionar
+                      </span>
+                      <span className="text-gray-400"> ou arraste o arquivo aqui</span>
+                    </label>
+                    <input
+                      id="file-upload"
+                      type="file"
+                      accept=".xlsx,.xls"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                    <p className="text-xs text-gray-500">
+                      Apenas arquivos Excel (.xlsx, .xls)
+                    </p>
+                  </div>
+                  
+                  {selectedFile && (
+                    <div className="mt-4 p-3 bg-[#1C1C24] rounded-md">
+                      <p className="text-sm text-white">
+                        Arquivo selecionado: <span className="font-medium">{selectedFile.name}</span>
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Campos extras para estatísticas */}
               {activeStep === 'estatisticas' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      ID do Jogo
-                    </label>
+                    <label className="block text-sm text-gray-400 mb-2">ID do Jogo *</label>
                     <input
                       type="text"
                       value={formData.id_jogo}
-                      onChange={(e) => setFormData(prev => ({ ...prev, id_jogo: e.target.value }))}
-                      className="w-full p-3 bg-[#1C1C24] border border-gray-600 rounded-lg text-white"
-                      placeholder="Ex: 123"
-                      required
+                      onChange={(e) => setFormData({ ...formData, id_jogo: e.target.value })}
+                      placeholder="Ex: 1"
+                      className="w-full px-4 py-3 bg-[#1C1C24] text-white rounded-md border border-gray-700 focus:border-[#63E300] focus:outline-none"
                     />
                   </div>
-                  
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Data do Jogo
-                    </label>
+                    <label className="block text-sm text-gray-400 mb-2">Data do Jogo *</label>
                     <input
                       type="date"
                       value={formData.data_jogo}
-                      onChange={(e) => setFormData(prev => ({ ...prev, data_jogo: e.target.value }))}
-                      className="w-full p-3 bg-[#1C1C24] border border-gray-600 rounded-lg text-white"
-                      required
+                      onChange={(e) => setFormData({ ...formData, data_jogo: e.target.value })}
+                      className="w-full px-4 py-3 bg-[#1C1C24] text-white rounded-md border border-gray-700 focus:border-[#63E300] focus:outline-none"
                     />
                   </div>
                 </div>
               )}
 
-              {/* Área de Upload */}
-              <div className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                selectedFile 
-                  ? 'border-[#63E300] bg-[#63E300]/5' 
-                  : 'border-gray-600 bg-[#1C1C24]'
-              }`}>
-                <input
-                  id="file-input"
-                  type="file"
-                  accept=".xlsx,.xls"
-                  onChange={handleFileChange}
-                  className="hidden"
-                  disabled={isUploading}
-                />
-                
-                <label htmlFor="file-input" className="cursor-pointer">
-                  <div className="flex flex-col items-center gap-3">
-                    <FileSpreadsheet className="w-12 h-12 text-[#63E300]" />
-                    
-                    {selectedFile ? (
-                      <div>
-                        <div className="font-medium text-[#63E300] mb-1">
-                          {selectedFile.name}
-                        </div>
-                        <div className="text-sm text-gray-400">
-                          {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                        </div>
-                      </div>
-                    ) : (
-                      <div>
-                        <div className="font-medium text-white mb-1">
-                          Clique para selecionar arquivo
-                        </div>
-                        <div className="text-sm text-gray-400">
-                          {currentStep.fileFormat} - Máximo 10MB
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </label>
-              </div>
-
-              {/* Botão de Upload */}
+              {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isUploading || !selectedFile}
-                className="w-full bg-[#63E300] text-black py-3 px-6 rounded-lg font-semibold hover:bg-[#50B800] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                disabled={!selectedFile || isUploading}
+                className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-md font-semibold transition-colors ${
+                  !selectedFile || isUploading
+                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                    : 'bg-[#63E300] text-black hover:bg-[#50B800]'
+                }`}
               >
                 {isUploading ? (
                   <>
-                    <Clock className="w-5 h-5 animate-spin" />
-                    Processando...
+                    <RefreshCw className="w-5 h-5 animate-spin" />
+                    Importando...
                   </>
                 ) : (
                   <>
                     <Upload className="w-5 h-5" />
-                    {currentStep.title}
+                    Importar {currentStep.title}
                   </>
                 )}
               </button>
             </form>
 
-            {/* Informações da Planilha */}
-            <div className="mt-6 p-4 bg-[#1C1C24] rounded-lg">
-              <h4 className="font-semibold text-white mb-3">Formato da Planilha</h4>
-              
-              <div className="space-y-3">
-                <div>
-                  <span className="text-sm text-gray-400">Colunas obrigatórias:</span>
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {currentStep.columns.map((column, index) => (
-                      <span key={index} className="text-xs bg-[#272731] text-[#63E300] px-2 py-1 rounded">
-                        {column}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                
-                <div>
-                  <span className="text-sm text-gray-400">Exemplo de dados:</span>
-                  <div className="text-xs text-gray-300 mt-1 font-mono">
-                    {currentStep.examples.join(' | ')}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Mensagens de Status */}
+            {/* Success Messages */}
             {importTimesMutation.isSuccess && activeStep === 'times' && (
               <div className="mt-4 p-4 bg-green-900/20 border border-green-500 rounded-lg">
                 <div className="flex items-center gap-2 text-green-400">
@@ -431,23 +372,65 @@ export default function AdminImportarPage() {
               </div>
             )}
 
-            {/* Mensagens de Erro */}
-            {(importTimesMutation.error || importJogadoresMutation.error || importAgendaMutation.error || atualizarEstatisticasMutation.error) && (
+            {/* Error Messages */}
+            {(importTimesMutation.error || importJogadoresMutation.error || importAgendaMutation.error || importResultadosMutation?.error || atualizarEstatisticasMutation.error) && (
               <div className="mt-4 p-4 bg-red-900/20 border border-red-500 rounded-lg">
                 <div className="flex items-center gap-2 text-red-400">
                   <AlertTriangle className="w-5 h-5" />
                   <span className="font-semibold">Erro na importação</span>
                 </div>
                 <p className="text-red-300 text-sm mt-1">
-                  {(importTimesMutation.error || importJogadoresMutation.error || importAgendaMutation.error || atualizarEstatisticasMutation.error)?.message}
+                  {(importTimesMutation.error || importJogadoresMutation.error || importAgendaMutation.error || importResultadosMutation?.error || atualizarEstatisticasMutation.error)?.message}
                 </p>
               </div>
             )}
           </div>
         </div>
+
+        {/* Info Panel */}
+        <div className="space-y-6">
+          {/* Step Info */}
+          <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
+            <h4 className="text-white font-semibold mb-4">Informações da Planilha</h4>
+            
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-gray-400 mb-2">Formato do arquivo</p>
+                <p className="text-white text-sm">{currentStep.fileFormat}</p>
+              </div>
+              
+              <div>
+                <p className="text-sm text-gray-400 mb-2">Colunas obrigatórias</p>
+                <div className="space-y-1">
+                  {currentStep.columns.slice(0, 5).map((col) => (
+                    <p key={col} className="text-xs text-gray-300 font-mono bg-[#1C1C24] px-2 py-1 rounded">
+                      {col}
+                    </p>
+                  ))}
+                  {currentStep.columns.length > 5 && (
+                    <p className="text-xs text-gray-500">
+                      +{currentStep.columns.length - 5} colunas adicionais
+                    </p>
+                  )}
+                </div>
+              </div>
+              
+              <div>
+                <p className="text-sm text-gray-400 mb-2">Exemplo de dados</p>
+                <div className="space-y-1">
+                  {currentStep.examples.map((example, index) => (
+                    <p key={index} className="text-xs text-gray-300 font-mono bg-[#1C1C24] px-2 py-1 rounded">
+                      {example}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Próximos Passos */}
+      {/* Progress Steps */}
       <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
         <h3 className="text-lg font-bold text-white mb-4">Sequência Recomendada</h3>
         
