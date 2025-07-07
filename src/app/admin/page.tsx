@@ -1,3 +1,4 @@
+// src/app/admin/page.tsx
 "use client"
 
 import { useState } from 'react'
@@ -100,145 +101,29 @@ export default function AdminDashboard() {
         <div className="bg-gradient-to-r from-[#272731] to-[#1C1C24] rounded-lg border border-gray-700 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-xl font-bold text-white mb-1">
-                {superliga.nome}
+              <h3 className="text-lg font-semibold text-white mb-2">
+                Status da Superliga {selectedTemporada}
               </h3>
-              <p className="text-gray-400">
-                Status: <span className="text-[#63E300] font-semibold">{status?.fase || 'Configuração'}</span>
-              </p>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-[#63E300]">{stats.totalJogos}</div>
-                <div className="text-xs text-gray-400">Total Jogos</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-400">{stats.jogosFinalizados}</div>
-                <div className="text-xs text-gray-400">Finalizados</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-400">{stats.jogosAgendados}</div>
-                <div className="text-xs text-gray-400">Agendados</div>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span className="text-sm text-gray-300">Superliga Criada</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-blue-400" />
+                  <span className="text-sm text-gray-300">{stats.totalJogos} jogos cadastrados</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Trophy className="w-4 h-4 text-yellow-400" />
+                  <span className="text-sm text-gray-300">
+                    Status: {status ? 'Ativa' : 'Não Criada'}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       )}
-
-      {/* Alertas e Status */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-[#272731] rounded-lg border border-gray-700 p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-500/20 rounded-lg">
-              <Calendar className="w-5 h-5 text-blue-400" />
-            </div>
-            <div>
-              <div className="text-lg font-bold text-white">{stats.totalJogos}</div>
-              <div className="text-sm text-gray-400">Total de Jogos</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-[#272731] rounded-lg border border-gray-700 p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-500/20 rounded-lg">
-              <CheckCircle className="w-5 h-5 text-green-400" />
-            </div>
-            <div>
-              <div className="text-lg font-bold text-white">{stats.jogosFinalizados}</div>
-              <div className="text-sm text-gray-400">Finalizados</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-[#272731] rounded-lg border border-gray-700 p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-yellow-500/20 rounded-lg">
-              <Clock className="w-5 h-5 text-yellow-400" />
-            </div>
-            <div>
-              <div className="text-lg font-bold text-white">{stats.jogosAgendados}</div>
-              <div className="text-sm text-gray-400">Agendados</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-[#272731] rounded-lg border border-gray-700 p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-red-500/20 rounded-lg">
-              <Play className="w-5 h-5 text-red-400" />
-            </div>
-            <div>
-              <div className="text-lg font-bold text-white">{stats.jogosAoVivo}</div>
-              <div className="text-sm text-gray-400">Ao Vivo</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Ações Rápidas */}
-      <div>
-        <h2 className="text-xl font-bold text-white mb-4">Ações Rápidas</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {quickActions.map((action, index) => (
-            <Link
-              key={index}
-              href={action.href}
-              className="group bg-[#272731] rounded-lg border border-gray-700 p-6 hover:border-gray-600 transition-all hover:transform hover:scale-105"
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <div className={`p-2 ${action.color}/20 rounded-lg`}>
-                  <action.icon className={`w-5 h-5 text-white`} />
-                </div>
-                {action.priority === 'primary' && (
-                  <Zap className="w-4 h-4 text-[#63E300]" />
-                )}
-              </div>
-              
-              <h3 className="font-semibold text-white group-hover:text-[#63E300] transition-colors mb-1">
-                {action.title}
-              </h3>
-              <p className="text-sm text-gray-400">
-                {action.description}
-              </p>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* Status de Importações */}
-      <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
-        <h3 className="text-lg font-bold text-white mb-4">Status do Sistema</h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="flex items-center justify-between p-3 bg-[#1C1C24] rounded-lg">
-            <div className="flex items-center gap-3">
-              <Users className="w-5 h-5 text-blue-400" />
-              <span className="text-gray-300">Times Cadastrados</span>
-            </div>
-            <span className="font-bold text-white">32</span>
-          </div>
-          
-          <div className="flex items-center justify-between p-3 bg-[#1C1C24] rounded-lg">
-            <div className="flex items-center gap-3">
-              <Users className="w-5 h-5 text-green-400" />
-              <span className="text-gray-300">Jogadores Ativos</span>
-            </div>
-            <span className="font-bold text-white">1568</span>
-          </div>
-          
-          <div className="flex items-center justify-between p-3 bg-[#1C1C24] rounded-lg">
-            <div className="flex items-center gap-3">
-              <Trophy className="w-5 h-5 text-yellow-400" />
-              <span className="text-gray-300">Superliga</span>
-            </div>
-            <span className="font-bold text-[#63E300]">
-              {superliga ? 'Ativa' : 'Não Criada'}
-            </span>
-          </div>
-        </div>
-      </div>
 
       {/* Próximos Passos */}
       {!superliga && (
@@ -269,6 +154,188 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {/* Estatísticas Rápidas */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-400 text-sm mb-1">Total de Jogos</p>
+              <p className="text-2xl font-bold text-white">{stats.totalJogos}</p>
+            </div>
+            <Calendar className="w-8 h-8 text-blue-400" />
+          </div>
+        </div>
+
+        <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-400 text-sm mb-1">Jogos Finalizados</p>
+              <p className="text-2xl font-bold text-green-400">{stats.jogosFinalizados}</p>
+            </div>
+            <CheckCircle className="w-8 h-8 text-green-400" />
+          </div>
+        </div>
+
+        <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-400 text-sm mb-1">Jogos Agendados</p>
+              <p className="text-2xl font-bold text-yellow-400">{stats.jogosAgendados}</p>
+            </div>
+            <Clock className="w-8 h-8 text-yellow-400" />
+          </div>
+        </div>
+
+        <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-400 text-sm mb-1">Ao Vivo</p>
+              <p className="text-2xl font-bold text-red-400">{stats.jogosAoVivo}</p>
+            </div>
+            <Play className="w-8 h-8 text-red-400" />
+          </div>
+        </div>
+      </div>
+
+      {/* Ações Rápidas */}
+      <div>
+        <h2 className="text-xl font-bold text-white mb-4">Ações Rápidas</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {quickActions.map((action) => (
+            <Link
+              key={action.title}
+              href={action.href}
+              className={`group p-6 rounded-lg border border-gray-700 hover:border-gray-600 transition-all duration-200 ${
+                action.priority === 'primary' 
+                  ? 'bg-gradient-to-br from-[#63E300]/10 to-[#50B800]/5 hover:from-[#63E300]/20 hover:to-[#50B800]/10' 
+                  : 'bg-[#272731] hover:bg-[#2A2A35]'
+              }`}
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <div className={`p-2 rounded-lg ${action.color}`}>
+                  <action.icon className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="font-semibold text-white group-hover:text-[#63E300] transition-colors">
+                  {action.title}
+                </h3>
+              </div>
+              <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">
+                {action.description}
+              </p>
+              {action.priority === 'primary' && (
+                <div className="mt-3">
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-[#63E300]">
+                    Recomendado
+                    <TrendingUp className="w-3 h-3" />
+                  </span>
+                </div>
+              )}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Progresso do Setup */}
+      <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
+        <h3 className="text-lg font-semibold text-white mb-4">Progresso da Configuração</h3>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between p-3 bg-[#1C1C24] rounded border border-gray-600">
+            <div className="flex items-center gap-3">
+              <CheckCircle className="w-5 h-5 text-green-400" />
+              <span className="text-white">Importar Times</span>
+            </div>
+            <span className="text-sm text-green-400">Concluído</span>
+          </div>
+
+          <div className="flex items-center justify-between p-3 bg-[#1C1C24] rounded border border-gray-600">
+            <div className="flex items-center gap-3">
+              <CheckCircle className="w-5 h-5 text-green-400" />
+              <span className="text-white">Importar Jogadores</span>
+            </div>
+            <span className="text-sm text-green-400">Concluído</span>
+          </div>
+
+          <div className="flex items-center justify-between p-3 bg-[#1C1C24] rounded border border-gray-600">
+            <div className="flex items-center gap-3">
+              {superliga ? (
+                <CheckCircle className="w-5 h-5 text-green-400" />
+              ) : (
+                <Clock className="w-5 h-5 text-yellow-400" />
+              )}
+              <span className="text-white">Criar Superliga</span>
+            </div>
+            <span className={`text-sm ${superliga ? 'text-green-400' : 'text-yellow-400'}`}>
+              {superliga ? 'Concluído' : 'Pendente'}
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between p-3 bg-[#1C1C24] rounded border border-gray-600">
+            <div className="flex items-center gap-3">
+              {stats.totalJogos > 0 ? (
+                <CheckCircle className="w-5 h-5 text-green-400" />
+              ) : (
+                <Clock className="w-5 h-5 text-yellow-400" />
+              )}
+              <span className="text-white">Importar Agenda de Jogos</span>
+            </div>
+            <span className={`text-sm ${stats.totalJogos > 0 ? 'text-green-400' : 'text-yellow-400'}`}>
+              {stats.totalJogos > 0 ? `${stats.totalJogos} jogos` : 'Pendente'}
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between p-3 bg-[#1C1C24] rounded border border-gray-600">
+            <div className="flex items-center gap-3">
+              {stats.jogosFinalizados > 0 ? (
+                <CheckCircle className="w-5 h-5 text-green-400" />
+              ) : (
+                <Clock className="w-5 h-5 text-gray-500" />
+              )}
+              <span className="text-white">Resultados dos Jogos</span>
+            </div>
+            <span className={`text-sm ${stats.jogosFinalizados > 0 ? 'text-green-400' : 'text-gray-500'}`}>
+              {stats.jogosFinalizados > 0 ? `${stats.jogosFinalizados} finalizados` : 'Aguardando'}
+            </span>
+          </div>
+        </div>
+
+        {/* Próximo Passo */}
+        <div className="mt-6 pt-4 border-t border-gray-600">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-white font-medium">Próximo Passo:</p>
+              <p className="text-sm text-gray-400">
+                {!superliga 
+                  ? 'Criar a Superliga 2025'
+                  : stats.totalJogos === 0 
+                  ? 'Importar agenda de jogos'
+                  : stats.jogosFinalizados === 0
+                  ? 'Começar a inserir resultados dos jogos'
+                  : 'Sistema configurado com sucesso!'
+                }
+              </p>
+            </div>
+            <Link
+              href={
+                !superliga 
+                  ? '/admin/superliga/criar'
+                  : stats.totalJogos === 0 
+                  ? '/admin/importar'
+                  : '/admin/importar'
+              }
+              className="flex items-center gap-2 bg-[#63E300] text-black px-4 py-2 rounded-md font-semibold hover:bg-[#50B800] transition-colors"
+            >
+              <Zap className="w-4 h-4" />
+              {!superliga 
+                ? 'Criar Superliga'
+                : stats.totalJogos === 0 
+                ? 'Importar Agenda'
+                : 'Gerenciar Jogos'
+              }
+            </Link>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

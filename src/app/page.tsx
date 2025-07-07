@@ -43,7 +43,7 @@ export default function HomePage() {
       title: 'Importação',
       description: 'Importar times, jogadores e estatísticas via planilhas',
       icon: '/globe.svg',
-      route: '/importar'
+      route: 'admin/importar'
     }
   ]
 

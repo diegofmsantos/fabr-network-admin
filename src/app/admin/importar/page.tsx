@@ -1,15 +1,15 @@
 "use client"
 
 import { useState } from 'react'
-import { 
-  Upload, FileSpreadsheet, Users, Calendar, BarChart3, 
+import {
+  Upload, FileSpreadsheet, Users, Calendar, BarChart3,
   CheckCircle, AlertTriangle, Clock, Download, RefreshCw,
   ArrowRight, FileText, Target, Trophy
 } from 'lucide-react'
-import { 
-  useImportarTimes, 
-  useImportarJogadores, 
-  useImportarAgendaJogos, 
+import {
+  useImportarTimes,
+  useImportarJogadores,
+  useImportarAgendaJogos,
   useAtualizarEstatisticas,
   useImportarResultados // ✅ ADICIONADO - estava faltando
 } from '@/hooks/useImportacao'
@@ -25,8 +25,6 @@ interface ImportStepConfig {
   required: boolean
   status: 'pending' | 'success' | 'error' | 'disabled'
   fileFormat: string
-  columns: string[]
-  examples: string[]
 }
 
 export default function AdminImportarPage() {
@@ -54,8 +52,6 @@ export default function AdminImportarPage() {
       required: true,
       status: importTimesMutation.isSuccess ? 'success' : 'pending',
       fileFormat: 'Excel (.xlsx)',
-      columns: ['id', 'nome', 'sigla', 'cor', 'cidade', 'bandeira_estado', 'fundacao', 'instagram', 'instagram2', 'logo', 'capacete', 'titulos', 'estadio', 'presidente', 'head_coach', 'instagram_coach', 'coord_ofen', 'coord_defen', 'temporada'],
-      examples: ['1', 'Bravos FA', 'BRA', '#c6973f', 'Porto Alegre/RS', 'rio-grande-do-sul.png']
     },
     {
       id: 'jogadores',
@@ -66,8 +62,6 @@ export default function AdminImportarPage() {
       required: true,
       status: importJogadoresMutation.isSuccess ? 'success' : 'pending',
       fileFormat: 'Excel (.xlsx)',
-      columns: ['id', 'nome', 'timeFormador', 'time_nome', 'posicao', 'setor', 'experiencia', 'numero', 'idade', 'altura', 'peso', 'instagram', 'instagram2', 'cidade', 'nacionalidade', 'camisa', 'temporada', 'passes_completos', 'passes_tentados', 'jardas_de_passe', 'td_passados', 'corridas', 'jardas_corridas', 'tds_corridos', 'recepcoes', 'jardas_recebidas', 'tds_recebidos', 'tackles_totais', 'sacks_forcado'],
-      examples: ['1', 'Regino Alexis', 'Mount Union Raiders', 'América Locomotiva', 'DL', 'Defesa', '2018']
     },
     {
       id: 'agenda',
@@ -78,8 +72,6 @@ export default function AdminImportarPage() {
       required: true,
       status: importAgendaMutation.isSuccess ? 'success' : 'pending',
       fileFormat: 'Excel (.xlsx)',
-      columns: ['data', 'time_mandante', 'time_visitante', 'rodada', 'fase', 'conferencia', 'temporada'],
-      examples: ['2025-07-06', 'Recife Mariners', 'Caruaru Wolves', '1', 'Temporada Regular', 'Nordeste', '2025']
     },
     {
       id: 'resultados',
@@ -90,8 +82,6 @@ export default function AdminImportarPage() {
       required: false,
       status: importResultadosMutation?.isSuccess ? 'success' : 'pending', // ✅ CORRIGIDO - agora funciona
       fileFormat: 'Excel (.xlsx)',
-      columns: ['id_jogo', 'placar_mandante', 'placar_visitante', 'status', 'observacoes'],
-      examples: ['1', '21', '14', 'FINALIZADO', 'Jogo bem disputado']
     },
     {
       id: 'estatisticas',
@@ -102,18 +92,16 @@ export default function AdminImportarPage() {
       required: false,
       status: atualizarEstatisticasMutation.isSuccess ? 'success' : 'pending',
       fileFormat: 'Excel (.xlsx)',
-      columns: ['id_jogo', 'data_jogo', 'jogador_nome', 'time_nome', 'passes_completos', 'passes_tentados', 'jardas_de_passe', 'td_passados', 'corridas', 'jardas_corridas', 'tds_corridos', 'recepcoes', 'jardas_recebidas', 'tds_recebidos', 'tackles_totais', 'sacks_forcado'],
-      examples: ['1', '2025-07-06', 'João Silva', 'Flamengo Imperadores', '15', '20', '250', '2']
     }
   ]
 
   const currentStep = steps.find(step => step.id === activeStep)!
 
-  const isUploading = importTimesMutation.isPending || 
-                     importJogadoresMutation.isPending ||
-                     importAgendaMutation.isPending ||
-                     importResultadosMutation?.isPending || // ✅ CORRIGIDO - agora funciona
-                     atualizarEstatisticasMutation.isPending
+  const isUploading = importTimesMutation.isPending ||
+    importJogadoresMutation.isPending ||
+    importAgendaMutation.isPending ||
+    importResultadosMutation?.isPending || // ✅ CORRIGIDO - agora funciona
+    atualizarEstatisticasMutation.isPending
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -123,7 +111,7 @@ export default function AdminImportarPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!selectedFile) {
       alert('Selecione um arquivo')
       return
@@ -158,11 +146,11 @@ export default function AdminImportarPage() {
           }
           break
       }
-      
+
       // Reset form after success
       setSelectedFile(null)
       setFormData({ id_jogo: '', data_jogo: '' })
-      
+
     } catch (error) {
       console.error('Erro no upload:', error)
     }
@@ -211,13 +199,12 @@ export default function AdminImportarPage() {
             <button
               key={step.id}
               onClick={() => setActiveStep(step.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                activeStep === step.id
+              className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeStep === step.id
                   ? 'bg-[#63E300] text-black'
                   : getStepStatus(step) === 'success'
-                  ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                  : 'bg-[#1C1C24] text-gray-300 hover:bg-gray-700'
-              }`}
+                    ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                    : 'bg-[#1C1C24] text-gray-300 hover:bg-gray-700'
+                }`}
             >
               <step.icon className="w-4 h-4" />
               {step.title}
@@ -228,7 +215,7 @@ export default function AdminImportarPage() {
       </div>
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         {/* Upload Form */}
         <div className="lg:col-span-2">
           <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
@@ -266,7 +253,7 @@ export default function AdminImportarPage() {
                       Apenas arquivos Excel (.xlsx, .xls)
                     </p>
                   </div>
-                  
+
                   {selectedFile && (
                     <div className="mt-4 p-3 bg-[#1C1C24] rounded-md">
                       <p className="text-sm text-white">
@@ -306,11 +293,10 @@ export default function AdminImportarPage() {
               <button
                 type="submit"
                 disabled={!selectedFile || isUploading}
-                className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-md font-semibold transition-colors ${
-                  !selectedFile || isUploading
+                className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-md font-semibold transition-colors ${!selectedFile || isUploading
                     ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                     : 'bg-[#63E300] text-black hover:bg-[#50B800]'
-                }`}
+                  }`}
               >
                 {isUploading ? (
                   <>
@@ -386,78 +372,35 @@ export default function AdminImportarPage() {
             )}
           </div>
         </div>
-
-        {/* Info Panel */}
-        <div className="space-y-6">
-          {/* Step Info */}
-          <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
-            <h4 className="text-white font-semibold mb-4">Informações da Planilha</h4>
-            
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-gray-400 mb-2">Formato do arquivo</p>
-                <p className="text-white text-sm">{currentStep.fileFormat}</p>
-              </div>
-              
-              <div>
-                <p className="text-sm text-gray-400 mb-2">Colunas obrigatórias</p>
-                <div className="space-y-1">
-                  {currentStep.columns.slice(0, 5).map((col) => (
-                    <p key={col} className="text-xs text-gray-300 font-mono bg-[#1C1C24] px-2 py-1 rounded">
-                      {col}
-                    </p>
-                  ))}
-                  {currentStep.columns.length > 5 && (
-                    <p className="text-xs text-gray-500">
-                      +{currentStep.columns.length - 5} colunas adicionais
-                    </p>
-                  )}
-                </div>
-              </div>
-              
-              <div>
-                <p className="text-sm text-gray-400 mb-2">Exemplo de dados</p>
-                <div className="space-y-1">
-                  {currentStep.examples.map((example, index) => (
-                    <p key={index} className="text-xs text-gray-300 font-mono bg-[#1C1C24] px-2 py-1 rounded">
-                      {example}
-                    </p>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Progress Steps */}
       <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
         <h3 className="text-lg font-bold text-white mb-4">Sequência Recomendada</h3>
-        
+
         <div className="flex items-center gap-4 overflow-x-auto pb-2">
           {steps.map((step, index) => (
             <div key={step.id} className="flex items-center gap-2 flex-shrink-0">
-              <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
-                getStepStatus(step) === 'success' 
-                  ? 'bg-green-500/20 text-green-400' 
+              <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${getStepStatus(step) === 'success'
+                  ? 'bg-green-500/20 text-green-400'
                   : 'bg-gray-500/20 text-gray-400'
-              }`}>
+                }`}>
                 <span className="text-sm font-medium">{index + 1}</span>
                 <span className="text-sm">{step.title}</span>
                 {getStepStatus(step) === 'success' && (
                   <CheckCircle className="w-4 h-4" />
                 )}
               </div>
-              
+
               {index < steps.length - 1 && (
                 <ArrowRight className="w-4 h-4 text-gray-600" />
               )}
             </div>
           ))}
         </div>
-        
+
         <p className="text-sm text-gray-400 mt-3">
-          Siga esta sequência para configurar corretamente a Superliga. 
+          Siga esta sequência para configurar corretamente a Superliga.
           Após importar times, jogadores e agenda, você poderá criar a Superliga.
         </p>
       </div>

@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ImportacaoService, } from '@/services/importacao.service'
 import { queryKeys } from './queryKeys'
 import { useNotifications } from './useNotifications'
+import { BaseService } from '@/services/base.service'
 
 export interface ImportResult {
   sucesso?: number
@@ -272,21 +273,36 @@ export function useImportarResultados() {
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: (arquivo: File) => {
-      const formData = new FormData()
-      formData.append('arquivo', arquivo)
-      return fetch('/admin/importar-resultados-jogos', {
-        method: 'POST',
-        body: formData
-      }).then(res => res.json())
-    },
-    onSuccess: (result) => {
-      notifications.success('Resultados importados!', `${result.sucesso} jogos atualizados`)
-      queryClient.invalidateQueries({ queryKey: ['jogos'] })
-      queryClient.invalidateQueries({ queryKey: ['superliga'] })
+    mutationFn: (arquivo: File) => ImportacaoService.importarResultados(arquivo),
+    onSuccess: (result: ImportResult) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.jogos.lists()
+      })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.admin.all
+      })
+
+      notifications.success(
+        'Resultados importados!',
+        `${result.sucesso || 0} jogos atualizados com sucesso`
+      )
+
+      if (result.erros && result.erros.length > 0) {
+        notifications.warning(
+          'Importação com avisos',
+          `${result.erros.length} jogos com problemas. Verifique o console.`
+        )
+        console.warn('Erros na importação de resultados:', result.erros)
+      }
     },
     onError: (error: any) => {
-      notifications.error('Erro na importação', error.message)
+      notifications.error(
+        'Erro na importação de resultados',
+        error.message || 'Verifique o arquivo e tente novamente'
+      )
+    },
+    meta: {
+      timeout: 60000,
     }
   })
 }

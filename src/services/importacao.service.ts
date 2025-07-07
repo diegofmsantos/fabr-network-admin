@@ -13,15 +13,6 @@ export class ImportacaoService extends BaseService {
     return service.upload('/admin/importar-jogadores', arquivo) as Promise<ImportResult>
   }
 
-  static async atualizarEstatisticas(arquivo: File, idJogo: string, dataJogo: string): Promise<ImportResult> {
-    const service = new ImportacaoService()
-    return service.upload('/admin/atualizar-estatisticas', arquivo, {
-      id_jogo: idJogo,
-      data_jogo: dataJogo
-    }) as Promise<ImportResult>
-  }
-
-
   static async iniciarTemporada(
     ano: string,
     alteracoes: {
@@ -101,5 +92,18 @@ export class ImportacaoService extends BaseService {
   static async importarAgendaJogos(arquivo: File): Promise<ImportResult> {
     const service = new ImportacaoService()
     return service.upload('/admin/importar-agenda-jogos', arquivo) as Promise<ImportResult>
+  }
+
+   static async importarResultados(arquivo: File): Promise<ImportResult> {
+    const service = new ImportacaoService()
+    return service.upload('/admin/importar-resultados-jogos', arquivo) as Promise<ImportResult>
+  }
+
+  static async atualizarEstatisticas(arquivo: File, idJogo: string, dataJogo: string): Promise<ImportResult> {
+    const service = new ImportacaoService()
+    return service.upload('/admin/atualizar-estatisticas', arquivo, {
+      id_jogo: idJogo,
+      data_jogo: dataJogo
+    }) as Promise<ImportResult>
   }
 }

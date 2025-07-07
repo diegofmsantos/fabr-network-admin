@@ -1,3 +1,4 @@
+// src/app/admin/superliga/temporada-regular/page.tsx
 "use client"
 
 import { useState } from 'react'
@@ -9,7 +10,7 @@ import {
 } from 'lucide-react'
 import { Loading } from '@/components/ui/Loading'
 import { useJogos } from '@/hooks/useJogos'
-import { useClassificacaoSuperliga } from '@/hooks/useSuperliga'
+import { useClassificacaoSuperliga, useSuperliga } from '@/hooks/useSuperliga'
 
 type FilterStatus = 'todos' | 'AGENDADO' | 'AO_VIVO' | 'FINALIZADO' | 'ADIADO'
 type FilterRodada = 'todas' | number
@@ -21,23 +22,129 @@ export default function AdminTemporadaRegularPage() {
   
   const temporada = '2025'
   
-  const { data: jogos = [], isLoading: loadingJogos, refetch } = useJogos({ 
+  // ✅ CORREÇÃO: Usar hook correto e adicionar tratamento de erro
+  const { data: superliga } = useSuperliga(temporada)
+  const { 
+    data: jogos = [], 
+    isLoading: loadingJogos, 
+    error: jogosError,
+    refetch 
+  } = useJogos({ 
     temporada,
     fase: 'TEMPORADA_REGULAR'
   })
   
-  const { data: classificacao, isLoading: loadingClassificacao } = useClassificacaoSuperliga(temporada)
+  const { 
+    data: classificacao, 
+    isLoading: loadingClassificacao,
+    error: classificacaoError 
+  } = useClassificacaoSuperliga(temporada)
 
   const isLoading = loadingJogos || loadingClassificacao
 
+  // ✅ NOVO: Tratamento de erro específico
+  const hasError = jogosError || classificacaoError
+  const isEmpty = jogos.length === 0 && !isLoading
+
   if (isLoading) return <Loading />
 
+  // ✅ NOVO: Tela de erro/vazio mais amigável
+  if (hasError || isEmpty) {
+    return (
+      <div className="min-h-screen bg-[#1C1C24] p-6">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-6">
+          <Link 
+            href="/admin/superliga"
+            className="p-2 rounded-lg bg-[#272731] border border-gray-700 hover:border-gray-600 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5 text-white" />
+          </Link>
+          
+          <div>
+            <h1 className="text-2xl font-bold text-white">Temporada Regular</h1>
+            <p className="text-gray-400">Gerenciar jogos da temporada regular {temporada}</p>
+          </div>
+        </div>
+
+        {/* Conteúdo de Estado Vazio */}
+        <div className="text-center py-12">
+          {hasError ? (
+            <>
+              <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">Erro ao carregar dados</h3>
+              <p className="text-gray-400 mb-6">
+                Não foi possível carregar os dados da temporada regular.
+              </p>
+              <div className="space-y-3">
+                <p className="text-sm text-gray-500">
+                  Possíveis causas:
+                </p>
+                <ul className="text-sm text-gray-400 space-y-1">
+                  <li>• Superliga não foi criada ainda</li>
+                  <li>• Agenda de jogos não foi importada</li>
+                  <li>• Erro de conexão com o servidor</li>
+                </ul>
+              </div>
+            </>
+          ) : (
+            <>
+              <Calendar className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">Nenhum jogo encontrado</h3>
+              <p className="text-gray-400 mb-6">
+                A agenda de jogos ainda não foi importada para a temporada {temporada}.
+              </p>
+            </>
+          )}
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <button
+              onClick={() => refetch()}
+              className="flex items-center gap-2 bg-[#1C1C24] text-white px-4 py-2 rounded-md border border-gray-700 hover:border-gray-600 transition-colors"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Tentar Novamente
+            </button>
+
+            <Link
+              href="/admin/importar"
+              className="flex items-center gap-2 bg-[#63E300] text-black px-4 py-2 rounded-md font-semibold hover:bg-[#50B800] transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              Importar Agenda
+            </Link>
+
+            <Link
+              href="/admin/superliga"
+              className="flex items-center gap-2 bg-[#272731] text-white px-4 py-2 rounded-md border border-gray-700 hover:border-gray-600 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Voltar
+            </Link>
+          </div>
+
+          {/* Instruções */}
+          <div className="mt-8 bg-[#272731] rounded-lg border border-gray-700 p-6 max-w-2xl mx-auto">
+            <h4 className="text-white font-semibold mb-3">Para configurar a temporada regular:</h4>
+            <ol className="text-gray-300 text-sm space-y-2 text-left">
+              <li>1. Importe os times (se ainda não fez)</li>
+              <li>2. Importe os jogadores</li>
+              <li>3. Crie a Superliga</li>
+              <li>4. Importe a agenda de jogos</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ✅ Resto do código existente para quando há jogos...
   // Filtrar jogos
   const jogosFiltrados = jogos.filter(jogo => {
     const statusMatch = filterStatus === 'todos' || jogo.status === filterStatus
     const rodadaMatch = filterRodada === 'todas' || jogo.rodada === filterRodada
     const conferenciaMatch = filterConferencia === 'todas' || 
-      (jogo as any).conferencia === filterConferencia // Cast temporário até corrigir o tipo
+      (jogo as any).conferencia === filterConferencia
     return statusMatch && rodadaMatch && conferenciaMatch
   })
 
@@ -55,35 +162,11 @@ export default function AdminTemporadaRegularPage() {
     jogosFinalizados: jogos.filter(j => j.status === 'FINALIZADO').length,
     jogosAgendados: jogos.filter(j => j.status === 'AGENDADO').length,
     jogosAoVivo: jogos.filter(j => j.status === 'AO_VIVO').length,
-    rodadasTotal: Math.max(...jogos.map(j => j.rodada), 0),
-    rodadaAtual: jogos.find(j => j.status === 'AO_VIVO')?.rodada || 
-                 Math.min(...jogos.filter(j => j.status === 'AGENDADO').map(j => j.rodada)) || 1
+    proximoJogo: jogos.find(j => j.status === 'AGENDADO' && new Date(j.dataJogo) > new Date()),
   }
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'AGENDADO': return <Clock className="w-4 h-4 text-yellow-400" />
-      case 'AO_VIVO': return <Play className="w-4 h-4 text-red-400" />
-      case 'FINALIZADO': return <CheckCircle className="w-4 h-4 text-green-400" />
-      case 'ADIADO': return <AlertTriangle className="w-4 h-4 text-orange-400" />
-      default: return <Clock className="w-4 h-4 text-gray-400" />
-    }
-  }
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'AGENDADO': return 'Agendado'
-      case 'AO_VIVO': return 'Ao Vivo'
-      case 'FINALIZADO': return 'Finalizado'
-      case 'ADIADO': return 'Adiado'
-      default: return status
-    }
-  }
-
-  const conferencias = ['SUDESTE', 'SUL', 'NORDESTE', 'CENTRO_NORTE']
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-[#1C1C24] p-6">
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <Link 
@@ -95,178 +178,116 @@ export default function AdminTemporadaRegularPage() {
         
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-white">Temporada Regular</h1>
-          <p className="text-gray-400">
-            Gerencie os jogos da temporada regular {temporada}
-          </p>
+          <p className="text-gray-400">Gerenciar jogos da temporada regular {temporada}</p>
         </div>
 
         <div className="flex gap-3">
-          <Link
-            href="/admin/jogos"
+          <button
+            onClick={() => refetch()}
             className="flex items-center gap-2 bg-[#1C1C24] text-white px-4 py-2 rounded-md border border-gray-700 hover:border-gray-600 transition-colors"
           >
-            <Calendar className="w-4 h-4" />
-            Agenda Completa
-          </Link>
-          
+            <RefreshCw className="w-4 h-4" />
+            Atualizar
+          </button>
+
           <Link
-            href="/admin/superliga/playoffs"
+            href="/admin/importar"
             className="flex items-center gap-2 bg-[#63E300] text-black px-4 py-2 rounded-md font-semibold hover:bg-[#50B800] transition-colors"
           >
-            <Trophy className="w-4 h-4" />
-            Gerar Playoffs
+            <Plus className="w-4 h-4" />
+            Importar Dados
           </Link>
         </div>
       </div>
 
-      {/* Estatísticas da Temporada */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* Estatísticas Rápidas */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-[#272731] rounded-lg border border-gray-700 p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-500/20 rounded-lg">
-              <Calendar className="w-5 h-5 text-blue-400" />
-            </div>
+          <div className="flex items-center justify-between">
             <div>
-              <div className="text-lg font-bold text-white">{stats.totalJogos}</div>
-              <div className="text-sm text-gray-400">Total de Jogos</div>
+              <p className="text-gray-400 text-sm">Total de Jogos</p>
+              <p className="text-2xl font-bold text-white">{stats.totalJogos}</p>
             </div>
+            <Calendar className="w-8 h-8 text-blue-400" />
           </div>
         </div>
 
         <div className="bg-[#272731] rounded-lg border border-gray-700 p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-500/20 rounded-lg">
-              <CheckCircle className="w-5 h-5 text-green-400" />
-            </div>
+          <div className="flex items-center justify-between">
             <div>
-              <div className="text-lg font-bold text-white">{stats.jogosFinalizados}</div>
-              <div className="text-sm text-gray-400">Finalizados</div>
+              <p className="text-gray-400 text-sm">Finalizados</p>
+              <p className="text-2xl font-bold text-green-400">{stats.jogosFinalizados}</p>
             </div>
+            <CheckCircle className="w-8 h-8 text-green-400" />
           </div>
         </div>
 
         <div className="bg-[#272731] rounded-lg border border-gray-700 p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-yellow-500/20 rounded-lg">
-              <Clock className="w-5 h-5 text-yellow-400" />
-            </div>
+          <div className="flex items-center justify-between">
             <div>
-              <div className="text-lg font-bold text-white">{stats.jogosAgendados}</div>
-              <div className="text-sm text-gray-400">Agendados</div>
+              <p className="text-gray-400 text-sm">Agendados</p>
+              <p className="text-2xl font-bold text-yellow-400">{stats.jogosAgendados}</p>
             </div>
+            <Clock className="w-8 h-8 text-yellow-400" />
           </div>
         </div>
 
         <div className="bg-[#272731] rounded-lg border border-gray-700 p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-500/20 rounded-lg">
-              <Target className="w-5 h-5 text-purple-400" />
-            </div>
+          <div className="flex items-center justify-between">
             <div>
-              <div className="text-lg font-bold text-white">{stats.rodadaAtual}/{stats.rodadasTotal}</div>
-              <div className="text-sm text-gray-400">Rodada Atual</div>
+              <p className="text-gray-400 text-sm">Ao Vivo</p>
+              <p className="text-2xl font-bold text-red-400">{stats.jogosAoVivo}</p>
             </div>
+            <Play className="w-8 h-8 text-red-400" />
           </div>
         </div>
       </div>
 
       {/* Filtros */}
-      <div className="bg-[#272731] rounded-lg border border-gray-700 p-4">
-        <div className="flex flex-wrap gap-4">
-          <div>
-            <label className="block text-sm text-gray-400 mb-1">Status</label>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as FilterStatus)}
-              className="bg-[#1C1C24] border border-gray-600 rounded-md px-3 py-2 text-white text-sm"
-            >
-              <option value="todos">Todos os Status</option>
-              <option value="AGENDADO">Agendados</option>
-              <option value="AO_VIVO">Ao Vivo</option>
-              <option value="FINALIZADO">Finalizados</option>
-              <option value="ADIADO">Adiados</option>
-            </select>
+      <div className="bg-[#272731] rounded-lg border border-gray-700 p-4 mb-6">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Filter className="w-4 h-4 text-gray-400" />
+            <span className="text-white text-sm">Filtros:</span>
           </div>
 
-          <div>
-            <label className="block text-sm text-gray-400 mb-1">Rodada</label>
-            <select
-              value={filterRodada}
-              onChange={(e) => setFilterRodada(e.target.value === 'todas' ? 'todas' : parseInt(e.target.value))}
-              className="bg-[#1C1C24] border border-gray-600 rounded-md px-3 py-2 text-white text-sm"
-            >
-              <option value="todas">Todas as Rodadas</option>
-              {Array.from({ length: stats.rodadasTotal }, (_, i) => (
-                <option key={i + 1} value={i + 1}>Rodada {i + 1}</option>
-              ))}
-            </select>
-          </div>
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value as FilterStatus)}
+            className="bg-[#1C1C24] text-white border border-gray-600 rounded px-3 py-1 text-sm"
+          >
+            <option value="todos">Todos os status</option>
+            <option value="AGENDADO">Agendados</option>
+            <option value="AO_VIVO">Ao Vivo</option>
+            <option value="FINALIZADO">Finalizados</option>
+            <option value="ADIADO">Adiados</option>
+          </select>
 
-          <div>
-            <label className="block text-sm text-gray-400 mb-1">Conferência</label>
-            <select
-              value={filterConferencia}
-              onChange={(e) => setFilterConferencia(e.target.value)}
-              className="bg-[#1C1C24] border border-gray-600 rounded-md px-3 py-2 text-white text-sm"
-            >
-              <option value="todas">Todas as Conferências</option>
-              {conferencias.map(conf => (
-                <option key={conf} value={conf}>{conf}</option>
-              ))}
-            </select>
-          </div>
+          <select
+            value={filterRodada}
+            onChange={(e) => setFilterRodada(e.target.value === 'todas' ? 'todas' : parseInt(e.target.value))}
+            className="bg-[#1C1C24] text-white border border-gray-600 rounded px-3 py-1 text-sm"
+          >
+            <option value="todas">Todas as rodadas</option>
+            {[1, 2, 3, 4].map(rodada => (
+              <option key={rodada} value={rodada}>Rodada {rodada}</option>
+            ))}
+          </select>
 
-          <div className="flex items-end">
-            <button
-              onClick={() => {
-                setFilterStatus('todos')
-                setFilterRodada('todas')
-                setFilterConferencia('todas')
-              }}
-              className="flex items-center gap-2 bg-[#1C1C24] border border-gray-600 rounded-md px-3 py-2 text-white text-sm hover:bg-gray-700 transition-colors"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Limpar
-            </button>
-          </div>
-        </div>
-      </div>
+          <select
+            value={filterConferencia}
+            onChange={(e) => setFilterConferencia(e.target.value)}
+            className="bg-[#1C1C24] text-white border border-gray-600 rounded px-3 py-1 text-sm"
+          >
+            <option value="todas">Todas as conferências</option>
+            <option value="Sudeste">Sudeste</option>
+            <option value="Sul">Sul</option>
+            <option value="Nordeste">Nordeste</option>
+            <option value="Centro-Norte">Centro-Norte</option>
+          </select>
 
-      {/* Progresso da Temporada */}
-      <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
-        <h3 className="text-lg font-bold text-white mb-4">Progresso da Temporada</h3>
-        
-        <div className="mb-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-400">Jogos Finalizados</span>
-            <span className="text-sm text-white">
-              {stats.jogosFinalizados} de {stats.totalJogos} ({Math.round((stats.jogosFinalizados / stats.totalJogos) * 100)}%)
-            </span>
-          </div>
-          <div className="w-full bg-[#1C1C24] rounded-full h-2">
-            <div 
-              className="bg-[#63E300] h-2 rounded-full transition-all duration-300"
-              style={{ width: `${(stats.jogosFinalizados / stats.totalJogos) * 100}%` }}
-            ></div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-          <div>
-            <div className="text-2xl font-bold text-green-400">{stats.jogosFinalizados}</div>
-            <div className="text-xs text-gray-400">Finalizados</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-red-400">{stats.jogosAoVivo}</div>
-            <div className="text-xs text-gray-400">Ao Vivo</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-yellow-400">{stats.jogosAgendados}</div>
-            <div className="text-xs text-gray-400">Agendados</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-purple-400">{stats.rodadaAtual}</div>
-            <div className="text-xs text-gray-400">Rodada Atual</div>
+          <div className="ml-auto text-sm text-gray-400">
+            {jogosFiltrados.length} de {jogos.length} jogos
           </div>
         </div>
       </div>
@@ -277,145 +298,104 @@ export default function AdminTemporadaRegularPage() {
           .sort(([a], [b]) => parseInt(a) - parseInt(b))
           .map(([rodada, jogosRodada]) => (
             <div key={rodada} className="bg-[#272731] rounded-lg border border-gray-700">
-              {/* Header da Rodada */}
-              <div className="flex items-center justify-between p-4 border-b border-gray-700">
-                <div>
-                  <h3 className="text-lg font-bold text-white">Rodada {rodada}</h3>
-                  <p className="text-sm text-gray-400">
-                    {jogosRodada.length} jogos • {jogosRodada.filter(j => j.status === 'FINALIZADO').length} finalizados
-                  </p>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${
-                    jogosRodada.every(j => j.status === 'FINALIZADO') 
-                      ? 'bg-green-500/20 text-green-400' 
-                      : 'bg-yellow-500/20 text-yellow-400'
-                  }`}>
-                    {jogosRodada.every(j => j.status === 'FINALIZADO') ? 'Concluída' : 'Em Andamento'}
+              <div className="p-4 border-b border-gray-700">
+                <h3 className="text-lg font-semibold text-white">
+                  Rodada {rodada}
+                  <span className="ml-2 text-sm text-gray-400">
+                    ({jogosRodada.length} jogos)
                   </span>
-                </div>
+                </h3>
               </div>
 
-              {/* Jogos da Rodada */}
-              <div className="p-4">
-                <div className="space-y-3">
-                  {jogosRodada.map(jogo => (
-                    <div key={jogo.id} className="flex items-center gap-4 p-3 bg-[#1C1C24] rounded-lg">
-                      {/* Status */}
-                      <div className="flex items-center gap-2 min-w-[100px]">
-                        {getStatusIcon(jogo.status)}
-                        <span className="text-xs text-gray-400">
-                          {getStatusLabel(jogo.status)}
-                        </span>
-                      </div>
-
-                      {/* Times */}
-                      <div className="flex-1 flex items-center justify-center gap-4">
-                        <div className="text-right min-w-[200px]">
-                          <div className="text-white font-medium">{jogo.timeCasa.nome}</div>
-                          <div className="text-xs text-gray-400">{jogo.timeCasa.sigla}</div>
+              <div className="p-4 space-y-3">
+                {jogosRodada.map((jogo) => (
+                  <div key={jogo.id} className="bg-[#1C1C24] rounded border border-gray-600 p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="text-center">
+                          <p className="text-white font-medium">{jogo.timeCasa.sigla}</p>
+                          <p className="text-xs text-gray-400">Casa</p>
                         </div>
                         
-                        <div className="flex items-center gap-2 min-w-[80px] justify-center">
-                          {jogo.status === 'FINALIZADO' ? (
-                            <div className="text-lg font-bold text-white">
-                              {jogo.placarCasa} - {jogo.placarVisitante}
-                            </div>
-                          ) : (
-                            <div className="text-gray-400 text-sm">VS</div>
-                          )}
+                        <div className="text-center px-4">
+                          <p className="text-white font-bold">
+                            {jogo.status === 'FINALIZADO' 
+                              ? `${jogo.placarCasa} - ${jogo.placarVisitante}`
+                              : 'vs'
+                            }
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            {new Date(jogo.dataJogo).toLocaleDateString('pt-BR')}
+                          </p>
                         </div>
                         
-                        <div className="text-left min-w-[200px]">
-                          <div className="text-white font-medium">{jogo.timeVisitante.nome}</div>
-                          <div className="text-xs text-gray-400">{jogo.timeVisitante.sigla}</div>
+                        <div className="text-center">
+                          <p className="text-white font-medium">{jogo.timeVisitante.sigla}</p>
+                          <p className="text-xs text-gray-400">Visitante</p>
                         </div>
                       </div>
 
-                      {/* Data e Ações */}
-                      <div className="text-right min-w-[150px]">
-                        <div className="text-sm text-gray-300">
-                          {new Date(jogo.dataJogo).toLocaleDateString('pt-BR')}
+                      <div className="flex items-center gap-3">
+                        <div className={`px-2 py-1 rounded text-xs font-medium ${
+                          jogo.status === 'FINALIZADO' ? 'bg-green-500/20 text-green-400' :
+                          jogo.status === 'AO_VIVO' ? 'bg-red-500/20 text-red-400' :
+                          jogo.status === 'AGENDADO' ? 'bg-yellow-500/20 text-yellow-400' :
+                          'bg-gray-500/20 text-gray-400'
+                        }`}>
+                          {jogo.status}
                         </div>
-                        <div className="text-xs text-gray-400">
-                          {new Date(jogo.dataJogo).toLocaleTimeString('pt-BR', { 
-                            hour: '2-digit', 
-                            minute: '2-digit' 
-                          })}
-                        </div>
-                      </div>
 
-                      {/* Ações */}
-                      <div className="flex items-center gap-2">
                         <Link
                           href={`/admin/jogos/${jogo.id}`}
-                          className="p-2 text-blue-400 hover:text-blue-300 transition-colors"
-                          title="Ver detalhes"
+                          className="flex items-center gap-1 bg-[#63E300] text-black px-3 py-1 rounded text-xs font-medium hover:bg-[#50B800] transition-colors"
                         >
-                          <Eye className="w-4 h-4" />
+                          <Eye className="w-3 h-3" />
+                          Ver
                         </Link>
-                        
-                        {jogo.status === 'AGENDADO' && (
-                          <Link
-                            href={`/admin/jogos/${jogo.id}/resultado`}
-                            className="p-2 text-green-400 hover:text-green-300 transition-colors"
-                            title="Inserir resultado"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Link>
-                        )}
                       </div>
                     </div>
-                  ))}
-                </div>
+
+                    {jogo.observacoes && (
+                      <div className="mt-2 pt-2 border-t border-gray-600">
+                        <p className="text-sm text-gray-400">{jogo.observacoes}</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
-          ))
-        }
-
-        {jogosFiltrados.length === 0 && (
-          <div className="text-center py-12">
-            <Calendar className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-white mb-2">Nenhum jogo encontrado</h3>
-            <p className="text-gray-400 mb-6">
-              Ajuste os filtros ou verifique se a agenda foi importada
-            </p>
-            <Link
-              href="/admin/importar"
-              className="inline-flex items-center bg-[#63E300] text-black px-6 py-3 rounded-md font-semibold hover:bg-[#50B800] transition-colors"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Importar Agenda
-            </Link>
-          </div>
-        )}
+          ))}
       </div>
 
-      {/* Ações da Temporada Regular */}
-      {stats.jogosFinalizados === stats.totalJogos && stats.totalJogos > 0 && (
-        <div className="bg-gradient-to-r from-green-500/10 to-blue-500/10 border border-green-500/20 rounded-lg p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-bold text-green-400 mb-2">
-                Temporada Regular Concluída!
-              </h3>
-              <p className="text-gray-300">
-                Todos os jogos da temporada regular foram finalizados. 
-                Agora você pode gerar os playoffs.
-              </p>
-            </div>
-            
-            <Link
-              href="/admin/superliga/playoffs"
-              className="flex items-center gap-2 bg-[#63E300] text-black px-6 py-3 rounded-md font-semibold hover:bg-[#50B800] transition-colors"
-            >
-              <Trophy className="w-5 h-5" />
-              Gerar Playoffs
-            </Link>
-          </div>
+      {/* Ações Rápidas */}
+      <div className="mt-8 bg-[#272731] rounded-lg border border-gray-700 p-6">
+        <h3 className="text-white font-semibold mb-4">Ações Rápidas</h3>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/admin/importar"
+            className="flex items-center gap-2 bg-[#1C1C24] text-white px-4 py-2 rounded-md border border-gray-700 hover:border-gray-600 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Importar Resultados
+          </Link>
+
+          <Link
+            href="/admin/superliga/playoffs"
+            className="flex items-center gap-2 bg-[#1C1C24] text-white px-4 py-2 rounded-md border border-gray-700 hover:border-gray-600 transition-colors"
+          >
+            <Trophy className="w-4 h-4" />
+            Ver Playoffs
+          </Link>
+
+          <Link
+            href={`/superliga/${temporada}/temporada-regular`}
+            className="flex items-center gap-2 bg-[#1C1C24] text-white px-4 py-2 rounded-md border border-gray-700 hover:border-gray-600 transition-colors"
+          >
+            <Eye className="w-4 h-4" />
+            Visualização Pública
+          </Link>
         </div>
-      )}
+      </div>
     </div>
   )
 }
