@@ -257,13 +257,26 @@ export function useImportarAgendaJogos() {
 
   return useMutation({
     mutationFn: (arquivo: File) => ImportacaoService.importarAgendaJogos(arquivo),
-    onSuccess: (result: any) => {
-      notifications.success('Agenda importada!', `${result.sucesso} jogos cadastrados`)
+    onSuccess: (result: ImportResult) => {
+      // ✅ CORRIGIR NOTIFICAÇÃO
+      notifications.success(
+        'Agenda importada!',
+        `${result.sucesso || 0} jogos cadastrados com sucesso`
+      )
+
+      // Invalidar queries relacionadas
       queryClient.invalidateQueries({ queryKey: ['jogos'] })
       queryClient.invalidateQueries({ queryKey: ['superliga'] })
+      queryClient.invalidateQueries({ queryKey: ['campeonatos'] })
     },
     onError: (error: any) => {
-      notifications.error('Erro na importação', error.message || 'Erro ao importar agenda')
+      notifications.error(
+        'Erro na importação da agenda',
+        error.message || 'Verifique o formato da planilha e tente novamente'
+      )
+    },
+    meta: {
+      timeout: 30000, // 30 segundos de timeout
     }
   })
 }

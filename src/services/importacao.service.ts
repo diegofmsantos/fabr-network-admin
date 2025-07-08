@@ -93,8 +93,7 @@ export class ImportacaoService extends BaseService {
     const service = new ImportacaoService()
     return service.upload('/admin/importar-agenda-jogos', arquivo) as Promise<ImportResult>
   }
-
-   static async importarResultados(arquivo: File): Promise<ImportResult> {
+  static async importarResultados(arquivo: File): Promise<ImportResult> {
     const service = new ImportacaoService()
     return service.upload('/admin/importar-resultados-jogos', arquivo) as Promise<ImportResult>
   }
