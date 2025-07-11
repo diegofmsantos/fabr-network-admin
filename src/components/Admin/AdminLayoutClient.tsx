@@ -27,7 +27,6 @@ export const AdminLayoutClient: React.FC<AdminLayoutClientProps> = ({ children }
           </main>
         </div>
 
-        <NotificationContainer />
       </div>
     </AdminErrorBoundary>
   )

@@ -3,11 +3,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { 
-  Trophy, Users, Calendar, BarChart3, Upload, Settings, 
-  Play, CheckCircle, Clock, AlertTriangle, TrendingUp,
-  FileSpreadsheet, Target, Zap
-} from 'lucide-react'
+import { Trophy, Users, Calendar, Upload, Settings, Play, CheckCircle, Clock, AlertTriangle, TrendingUp, Target, Zap } from 'lucide-react'
 import { Loading } from '@/components/ui/Loading'
 import { useSuperliga, useStatusSuperliga } from '@/hooks/useSuperliga'
 import { useJogos } from '@/hooks/useJogos'
@@ -87,7 +83,8 @@ export default function AdminDashboard() {
           </Link>
           
           <Link
-            href={`/superliga/${selectedTemporada}`}
+            href="https://fabrnetwork.com.br/ "
+            target='_blank'
             className="flex items-center gap-2 bg-[#63E300] text-black px-4 py-2 rounded-md font-semibold hover:bg-[#50B800] transition-colors"
           >
             <Target className="w-4 h-4" />

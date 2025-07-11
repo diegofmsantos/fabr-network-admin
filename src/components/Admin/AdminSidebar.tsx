@@ -40,12 +40,6 @@ const sidebarItems: SidebarItem[] = [
         icon: Trophy
       }
     ]
-  },
-  {
-    id: 'dashboard-stats',
-    label: 'Estatísticas',
-    href: '/admin/dashboard',
-    icon: BarChart3
   }
 ]
 
