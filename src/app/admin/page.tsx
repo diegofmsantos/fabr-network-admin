@@ -1,107 +1,167 @@
-// src/app/admin/page.tsx
+// SUBSTITUIR COMPLETAMENTE o conteúdo de src/app/admin/superliga/page.tsx
+
 "use client"
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Trophy, Users, Calendar, Upload, Settings, Play, CheckCircle, Clock, AlertTriangle, TrendingUp, Target, Zap } from 'lucide-react'
+import {
+  Trophy, Plus, Settings, Eye, Play, Calendar, Users,
+  BarChart3, Target, CheckCircle, Clock, AlertTriangle,
+  Zap, ArrowRight, RefreshCw
+} from 'lucide-react'
 import { Loading } from '@/components/ui/Loading'
-import { useSuperliga, useStatusSuperliga } from '@/hooks/useSuperliga'
+import { useSuperliga, useStatusSuperliga, useDistribuirTimesAutomatico } from '@/hooks/useSuperliga'
 import { useJogos } from '@/hooks/useJogos'
 
-export default function AdminDashboard() {
+export default function AdminSuperligaPage() {
   const [selectedTemporada] = useState('2025')
-  
-  const { data: superliga, isLoading: loadingSuperliga } = useSuperliga(selectedTemporada)
+
+  const { data: superliga, isLoading: loadingSuperliga, refetch } = useSuperliga(selectedTemporada)
   const { data: status, isLoading: loadingStatus } = useStatusSuperliga(selectedTemporada)
   const { data: jogos = [], isLoading: loadingJogos } = useJogos({ temporada: selectedTemporada })
+  
+  // 🎯 HOOK PARA DISTRIBUIR TIMES
+  const distribuirTimes = useDistribuirTimesAutomatico()
 
   const isLoading = loadingSuperliga || loadingStatus || loadingJogos
 
   if (isLoading) return <Loading />
+
+  // Verificar se já existe uma Superliga
+  const superligaExists = !!superliga
+
+  // 🔍 VERIFICAR SE OS TIMES JÁ FORAM DISTRIBUÍDOS
+  const timesDistribuidos = (status as any)?.timesDistribuidos || 0
+  const jaDistribuido = timesDistribuidos >= 32
 
   // Calcular estatísticas
   const stats = {
     totalJogos: jogos.length,
     jogosFinalizados: jogos.filter(j => j.status === 'FINALIZADO').length,
     jogosAgendados: jogos.filter(j => j.status === 'AGENDADO').length,
-    jogosAoVivo: jogos.filter(j => j.status === 'AO_VIVO').length,
+    proximoJogo: jogos.find(j => j.status === 'AGENDADO' && new Date(j.dataJogo) > new Date()),
   }
 
-  const quickActions = [
+  const managementSections = [
     {
-      title: 'Gerenciar Superliga',
-      description: 'Configurar e acompanhar o campeonato',
-      href: '/admin/superliga',
-      icon: Trophy,
-      color: 'bg-yellow-500',
-      priority: superliga ? 'secondary' : 'primary'
-    },
-    {
-      title: 'Importar Dados',
-      description: 'Upload de planilhas (times, jogadores, agenda)',
-      href: '/admin/importar',
-      icon: Upload,
-      color: 'bg-blue-500',
-      priority: 'primary'
-    },
-    {
-      title: 'Gerenciar Jogos',
-      description: 'Inserir resultados e acompanhar agenda',
-      href: '/admin/jogos',
+      id: 'temporada-regular',
+      title: 'Temporada Regular',
+      description: 'Gerenciar jogos da temporada regular',
+      href: '/admin/superliga/temporada-regular',
       icon: Calendar,
-      color: 'bg-green-500',
-      priority: 'secondary'
+      color: 'blue',
+      stats: `${stats.jogosFinalizados}/${stats.totalJogos} jogos`,
+      enabled: superligaExists && stats.totalJogos > 0
     },
     {
-      title: 'Times & Jogadores',
-      description: 'Gerenciar cadastros de times e jogadores',
-      href: '/admin/times',
-      icon: Users,
-      color: 'bg-purple-500',
-      priority: 'secondary'
+      id: 'playoffs',
+      title: 'Playoffs',
+      description: 'Gerenciar playoffs e fase nacional',
+      href: '/admin/superliga/playoffs',
+      icon: Trophy,
+      color: 'yellow',
+      stats: (status as any)?.status === 'PLAYOFFS' ? 'Em andamento' : 'Aguardando',
+      enabled: superligaExists && (status as any)?.status === 'PLAYOFFS'
+    },
+    {
+      id: 'configuracoes',
+      title: 'Configurações',
+      description: 'Configurar estrutura e parâmetros',
+      href: '/admin/superliga/configuracoes',
+      icon: Settings,
+      color: 'gray',
+      stats: 'Configurar',
+      enabled: true
     }
   ]
 
+  const quickActions = [
+    {
+      title: 'Visualizar Site Público',
+      description: 'Ver como o público visualiza a Superliga',
+      href: `/superliga/${selectedTemporada}`,
+      icon: Eye,
+      color: 'green'
+    },
+    {
+      title: 'Gerenciar Jogos',
+      description: 'Inserir resultados e gerenciar agenda',
+      href: '/admin/jogos',
+      icon: Calendar,
+      color: 'blue'
+    },
+    {
+      title: 'Importar Dados',
+      description: 'Upload de planilhas e estatísticas',
+      href: '/admin/importar',
+      icon: Users,
+      color: 'purple'
+    }
+  ]
+
+  const createSuperliga = async () => {
+    try {
+      // Funcionalidade de criar Superliga será implementada
+      alert('Funcionalidade de criar Superliga será implementada')
+      refetch()
+    } catch (error) {
+      console.error('Erro ao criar Superliga:', error)
+    }
+  }
+
+  // 🎯 FUNÇÃO PARA DISTRIBUIR TIMES
+  const handleDistribuirTimes = async () => {
+    try {
+      await distribuirTimes.mutateAsync(selectedTemporada)
+      refetch() // Atualizar dados após distribuição
+    } catch (error) {
+      console.error('Erro ao distribuir times:', error)
+    }
+  }
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-[#63E300]">Dashboard Administrativo</h1>
-          <p className="mt-2 text-sm text-gray-300">
-            Gerencie a Superliga de Futebol Americano {selectedTemporada}
+          <h1 className="text-2xl font-bold text-white">Superliga de Futebol Americano</h1>
+          <p className="mt-1 text-sm text-gray-400">
+            Gerencie a estrutura e funcionamento da Superliga {selectedTemporada}
           </p>
         </div>
-        
+
         <div className="mt-4 sm:mt-0 flex gap-3">
-          <Link
-            href="/admin/superliga/configuracoes"
-            className="flex items-center gap-2 bg-[#1C1C24] text-white px-4 py-2 rounded-md border border-gray-700 hover:border-gray-600 transition-colors"
-          >
-            <Settings className="w-4 h-4" />
-            Configurações
-          </Link>
-          
-          <Link
-            href="https://fabrnetwork.com.br/ "
-            target='_blank'
-            className="flex items-center gap-2 bg-[#63E300] text-black px-4 py-2 rounded-md font-semibold hover:bg-[#50B800] transition-colors"
-          >
-            <Target className="w-4 h-4" />
-            Ver Site Público
-          </Link>
+          {superligaExists && (
+            <>
+              <Link
+                href="/admin/superliga/configuracoes"
+                className="flex items-center gap-2 bg-[#1C1C24] text-white px-4 py-2 rounded-md border border-gray-700 hover:border-gray-600 transition-colors"
+              >
+                <Settings className="w-4 h-4" />
+                Configurações
+              </Link>
+
+              <Link
+                href={`/superliga/${selectedTemporada}`}
+                className="flex items-center gap-2 bg-[#63E300] text-black px-4 py-2 rounded-md font-semibold hover:bg-[#50B800] transition-colors"
+              >
+                <Eye className="w-4 h-4" />
+                Ver Site Público
+              </Link>
+            </>
+          )}
         </div>
       </div>
 
       {/* Status da Superliga */}
-      {superliga && (
+      {superligaExists ? (
         <div className="bg-gradient-to-r from-[#272731] to-[#1C1C24] rounded-lg border border-gray-700 p-6">
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="flex-1">
               <h3 className="text-lg font-semibold text-white mb-2">
                 Status da Superliga {selectedTemporada}
               </h3>
-              <div className="flex items-center gap-4">
+              <div className="flex flex-wrap items-center gap-4">
                 <div className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-green-400" />
                   <span className="text-sm text-gray-300">Superliga Criada</span>
@@ -110,227 +170,192 @@ export default function AdminDashboard() {
                   <Calendar className="w-4 h-4 text-blue-400" />
                   <span className="text-sm text-gray-300">{stats.totalJogos} jogos cadastrados</span>
                 </div>
+                
+                {/* 🎯 STATUS DE DISTRIBUIÇÃO DE TIMES */}
                 <div className="flex items-center gap-2">
-                  <Trophy className="w-4 h-4 text-yellow-400" />
-                  <span className="text-sm text-gray-300">
-                    Status: {status ? 'Ativa' : 'Não Criada'}
-                  </span>
+                  {jaDistribuido ? (
+                    <>
+                      <CheckCircle className="w-4 h-4 text-green-400" />
+                      <span className="text-sm text-green-300">
+                        Times distribuídos ({timesDistribuidos}/32)
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <AlertTriangle className="w-4 h-4 text-yellow-400" />
+                      <span className="text-sm text-yellow-300">
+                        Times não distribuídos ({timesDistribuidos}/32)
+                      </span>
+                    </>
+                  )}
                 </div>
+              </div>
+
+              {stats.proximoJogo && (
+                <div className="mt-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded-md">
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-white font-medium">Próximo jogo: </span>
+                    <span className="text-gray-300">
+                      {stats.proximoJogo.timeCasa.nome} vs {stats.proximoJogo.timeVisitante.nome}
+                    </span>
+                    <span className="text-gray-400 ml-2">
+                      {new Date(stats.proximoJogo.dataJogo).toLocaleDateString('pt-BR')}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 🎯 BOTÃO DE DISTRIBUIR TIMES */}
+            {superligaExists && !jaDistribuido && (
+              <div className="lg:ml-4">
+                <button
+                  onClick={handleDistribuirTimes}
+                  disabled={distribuirTimes.isPending}
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors disabled:cursor-not-allowed"
+                >
+                  {distribuirTimes.isPending ? (
+                    <>
+                      <RefreshCw className="w-5 h-5 animate-spin" />
+                      Distribuindo...
+                    </>
+                  ) : (
+                    <>
+                      <Target className="w-5 h-5" />
+                      Distribuir Times nas Conferências
+                    </>
+                  )}
+                </button>
+                <p className="text-xs text-gray-400 mt-1 text-center">
+                  Organize os 32 times em 4 conferências
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 rounded-lg p-6">
+          <div className="flex items-start gap-4">
+            <AlertTriangle className="w-8 h-8 text-yellow-400 mt-1" />
+            <div className="flex-1">
+              <h3 className="text-xl font-bold text-yellow-400 mb-2">
+                Superliga não encontrada
+              </h3>
+              <p className="text-gray-300 mb-4">
+                A Superliga {selectedTemporada} ainda não foi criada.
+                Certifique-se de que times e jogadores foram importados antes de criar.
+              </p>
+
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={createSuperliga}
+                  className="flex items-center gap-2 bg-[#63E300] text-black px-6 py-3 rounded-md font-semibold hover:bg-[#50B800] transition-colors"
+                >
+                  <Plus className="w-5 h-5" />
+                  Criar Superliga {selectedTemporada}
+                </button>
+
+                <Link
+                  href="/admin/importar"
+                  className="flex items-center gap-2 text-yellow-400 hover:text-yellow-300 transition-colors"
+                >
+                  <ArrowRight className="w-4 h-4" />
+                  Importar dados primeiro
+                </Link>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Próximos Passos */}
-      {!superliga && (
-        <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 rounded-lg p-6">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="w-6 h-6 text-yellow-400 mt-1" />
+      {/* ⚠️ AVISO SE TIMES NÃO FORAM DISTRIBUÍDOS */}
+      {superligaExists && !jaDistribuido && (
+        <div className="bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20 rounded-lg p-4">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="w-6 h-6 text-orange-400" />
             <div>
-              <h3 className="text-lg font-bold text-yellow-400 mb-2">
-                Configure a Superliga
-              </h3>
-              <p className="text-gray-300 mb-4">
-                Para começar a usar o sistema, siga estes passos:
+              <h4 className="text-orange-400 font-semibold">Ação Necessária</h4>
+              <p className="text-gray-300 text-sm">
+                Os times precisam ser distribuídos nas conferências antes de gerar playoffs.
+                Use o botão "Distribuir Times" acima.
               </p>
-              <ol className="list-decimal list-inside text-gray-300 space-y-1 mb-4">
-                <li>Importe os times (planilha Excel)</li>
-                <li>Importe os jogadores (planilha Excel)</li>
-                <li>Crie a Superliga</li>
-                <li>Importe a agenda de jogos</li>
-              </ol>
-              <Link
-                href="/admin/importar"
-                className="inline-flex items-center gap-2 bg-[#63E300] text-black px-4 py-2 rounded-md font-semibold hover:bg-[#50B800] transition-colors"
-              >
-                <Upload className="w-4 h-4" />
-                Começar Importação
-              </Link>
             </div>
           </div>
         </div>
       )}
 
-      {/* Estatísticas Rápidas */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm mb-1">Total de Jogos</p>
-              <p className="text-2xl font-bold text-white">{stats.totalJogos}</p>
-            </div>
-            <Calendar className="w-8 h-8 text-blue-400" />
-          </div>
-        </div>
+      {/* Seções de Gerenciamento */}
+      {superligaExists && (
+        <div>
+          <h2 className="text-xl font-bold text-white mb-4">Gerenciamento</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {managementSections.map((section) => (
+              <Link
+                key={section.id}
+                href={section.enabled ? section.href : '#'}
+                className={`group bg-[#272731] rounded-lg border border-gray-700 p-6 transition-all ${
+                  section.enabled
+                    ? 'hover:border-gray-600 hover:transform hover:scale-105'
+                    : 'opacity-50 cursor-not-allowed'
+                }`}
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className={`p-2 bg-${section.color}-500/20 rounded-lg`}>
+                    <section.icon className={`w-6 h-6 text-${section.color}-400`} />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className={`font-semibold transition-colors ${
+                      section.enabled
+                        ? 'text-white group-hover:text-[#63E300]'
+                        : 'text-gray-400'
+                    }`}>
+                      {section.title}
+                    </h3>
+                    <p className="text-sm text-gray-400">
+                      {section.stats}
+                    </p>
+                  </div>
+                  {section.enabled && (
+                    <ArrowRight className="w-5 h-5 text-gray-600 group-hover:text-[#63E300] transition-colors" />
+                  )}
+                </div>
 
-        <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm mb-1">Jogos Finalizados</p>
-              <p className="text-2xl font-bold text-green-400">{stats.jogosFinalizados}</p>
-            </div>
-            <CheckCircle className="w-8 h-8 text-green-400" />
+                <p className="text-sm text-gray-400">
+                  {section.description}
+                </p>
+              </Link>
+            ))}
           </div>
         </div>
-
-        <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm mb-1">Jogos Agendados</p>
-              <p className="text-2xl font-bold text-yellow-400">{stats.jogosAgendados}</p>
-            </div>
-            <Clock className="w-8 h-8 text-yellow-400" />
-          </div>
-        </div>
-
-        <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm mb-1">Ao Vivo</p>
-              <p className="text-2xl font-bold text-red-400">{stats.jogosAoVivo}</p>
-            </div>
-            <Play className="w-8 h-8 text-red-400" />
-          </div>
-        </div>
-      </div>
+      )}
 
       {/* Ações Rápidas */}
       <div>
         <h2 className="text-xl font-bold text-white mb-4">Ações Rápidas</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {quickActions.map((action) => (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {quickActions.map((action, index) => (
             <Link
-              key={action.title}
+              key={index}
               href={action.href}
-              className={`group p-6 rounded-lg border border-gray-700 hover:border-gray-600 transition-all duration-200 ${
-                action.priority === 'primary' 
-                  ? 'bg-gradient-to-br from-[#63E300]/10 to-[#50B800]/5 hover:from-[#63E300]/20 hover:to-[#50B800]/10' 
-                  : 'bg-[#272731] hover:bg-[#2A2A35]'
-              }`}
+              className="group bg-[#272731] rounded-lg border border-gray-700 p-6 hover:border-gray-600 transition-all hover:transform hover:scale-105"
             >
               <div className="flex items-center gap-3 mb-3">
-                <div className={`p-2 rounded-lg ${action.color}`}>
-                  <action.icon className="w-5 h-5 text-white" />
+                <div className={`p-2 bg-${action.color}-500/20 rounded-lg`}>
+                  <action.icon className={`w-6 h-6 text-${action.color}-400`} />
                 </div>
-                <h3 className="font-semibold text-white group-hover:text-[#63E300] transition-colors">
-                  {action.title}
-                </h3>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-white group-hover:text-[#63E300] transition-colors">
+                    {action.title}
+                  </h3>
+                </div>
+                <ArrowRight className="w-5 h-5 text-gray-600 group-hover:text-[#63E300] transition-colors" />
               </div>
-              <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">
+
+              <p className="text-sm text-gray-400">
                 {action.description}
               </p>
-              {action.priority === 'primary' && (
-                <div className="mt-3">
-                  <span className="inline-flex items-center gap-1 text-xs font-medium text-[#63E300]">
-                    Recomendado
-                    <TrendingUp className="w-3 h-3" />
-                  </span>
-                </div>
-              )}
             </Link>
           ))}
-        </div>
-      </div>
-
-      {/* Progresso do Setup */}
-      <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
-        <h3 className="text-lg font-semibold text-white mb-4">Progresso da Configuração</h3>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between p-3 bg-[#1C1C24] rounded border border-gray-600">
-            <div className="flex items-center gap-3">
-              <CheckCircle className="w-5 h-5 text-green-400" />
-              <span className="text-white">Importar Times</span>
-            </div>
-            <span className="text-sm text-green-400">Concluído</span>
-          </div>
-
-          <div className="flex items-center justify-between p-3 bg-[#1C1C24] rounded border border-gray-600">
-            <div className="flex items-center gap-3">
-              <CheckCircle className="w-5 h-5 text-green-400" />
-              <span className="text-white">Importar Jogadores</span>
-            </div>
-            <span className="text-sm text-green-400">Concluído</span>
-          </div>
-
-          <div className="flex items-center justify-between p-3 bg-[#1C1C24] rounded border border-gray-600">
-            <div className="flex items-center gap-3">
-              {superliga ? (
-                <CheckCircle className="w-5 h-5 text-green-400" />
-              ) : (
-                <Clock className="w-5 h-5 text-yellow-400" />
-              )}
-              <span className="text-white">Criar Superliga</span>
-            </div>
-            <span className={`text-sm ${superliga ? 'text-green-400' : 'text-yellow-400'}`}>
-              {superliga ? 'Concluído' : 'Pendente'}
-            </span>
-          </div>
-
-          <div className="flex items-center justify-between p-3 bg-[#1C1C24] rounded border border-gray-600">
-            <div className="flex items-center gap-3">
-              {stats.totalJogos > 0 ? (
-                <CheckCircle className="w-5 h-5 text-green-400" />
-              ) : (
-                <Clock className="w-5 h-5 text-yellow-400" />
-              )}
-              <span className="text-white">Importar Agenda de Jogos</span>
-            </div>
-            <span className={`text-sm ${stats.totalJogos > 0 ? 'text-green-400' : 'text-yellow-400'}`}>
-              {stats.totalJogos > 0 ? `${stats.totalJogos} jogos` : 'Pendente'}
-            </span>
-          </div>
-
-          <div className="flex items-center justify-between p-3 bg-[#1C1C24] rounded border border-gray-600">
-            <div className="flex items-center gap-3">
-              {stats.jogosFinalizados > 0 ? (
-                <CheckCircle className="w-5 h-5 text-green-400" />
-              ) : (
-                <Clock className="w-5 h-5 text-gray-500" />
-              )}
-              <span className="text-white">Resultados dos Jogos</span>
-            </div>
-            <span className={`text-sm ${stats.jogosFinalizados > 0 ? 'text-green-400' : 'text-gray-500'}`}>
-              {stats.jogosFinalizados > 0 ? `${stats.jogosFinalizados} finalizados` : 'Aguardando'}
-            </span>
-          </div>
-        </div>
-
-        {/* Próximo Passo */}
-        <div className="mt-6 pt-4 border-t border-gray-600">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-white font-medium">Próximo Passo:</p>
-              <p className="text-sm text-gray-400">
-                {!superliga 
-                  ? 'Criar a Superliga 2025'
-                  : stats.totalJogos === 0 
-                  ? 'Importar agenda de jogos'
-                  : stats.jogosFinalizados === 0
-                  ? 'Começar a inserir resultados dos jogos'
-                  : 'Sistema configurado com sucesso!'
-                }
-              </p>
-            </div>
-            <Link
-              href={
-                !superliga 
-                  ? '/admin/superliga/criar'
-                  : stats.totalJogos === 0 
-                  ? '/admin/importar'
-                  : '/admin/importar'
-              }
-              className="flex items-center gap-2 bg-[#63E300] text-black px-4 py-2 rounded-md font-semibold hover:bg-[#50B800] transition-colors"
-            >
-              <Zap className="w-4 h-4" />
-              {!superliga 
-                ? 'Criar Superliga'
-                : stats.totalJogos === 0 
-                ? 'Importar Agenda'
-                : 'Gerenciar Jogos'
-              }
-            </Link>
-          </div>
         </div>
       </div>
     </div>
