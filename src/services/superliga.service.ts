@@ -62,11 +62,6 @@ export class SuperligaService extends BaseService {
   }
 
   // ==================== TIMES ====================
-  
-  static async distribuirTimes(temporada: string) {
-    const service = new SuperligaService()
-    return service.post(`/superliga/${temporada}/distribuir-times`)
-  }
 
   static async distribuirTimesAutomatico(temporada: string) {
     const service = new SuperligaService()

@@ -1,4 +1,4 @@
-// SUBSTITUIR COMPLETAMENTE o conteúdo de src/app/admin/superliga/page.tsx
+// SUBSTITUIR COMPLETAMENTE o conteúdo de src/app/admin/page.tsx
 
 "use client"
 
@@ -10,18 +10,15 @@ import {
   Zap, ArrowRight, RefreshCw
 } from 'lucide-react'
 import { Loading } from '@/components/ui/Loading'
-import { useSuperliga, useStatusSuperliga, useDistribuirTimesAutomatico } from '@/hooks/useSuperliga'
+import { useSuperliga, useStatusSuperliga } from '@/hooks/useSuperliga'
 import { useJogos } from '@/hooks/useJogos'
 
-export default function AdminSuperligaPage() {
+export default function AdminDashboardPage() {
   const [selectedTemporada] = useState('2025')
 
   const { data: superliga, isLoading: loadingSuperliga, refetch } = useSuperliga(selectedTemporada)
   const { data: status, isLoading: loadingStatus } = useStatusSuperliga(selectedTemporada)
   const { data: jogos = [], isLoading: loadingJogos } = useJogos({ temporada: selectedTemporada })
-  
-  // 🎯 HOOK PARA DISTRIBUIR TIMES
-  const distribuirTimes = useDistribuirTimesAutomatico()
 
   const isLoading = loadingSuperliga || loadingStatus || loadingJogos
 
@@ -30,9 +27,9 @@ export default function AdminSuperligaPage() {
   // Verificar se já existe uma Superliga
   const superligaExists = !!superliga
 
-  // 🔍 VERIFICAR SE OS TIMES JÁ FORAM DISTRIBUÍDOS
+  // ✅ STATUS DE DISTRIBUIÇÃO (SOMENTE PARA EXIBIÇÃO)
   const timesDistribuidos = (status as any)?.timesDistribuidos || 0
-  const jaDistribuido = timesDistribuidos >= 32
+  const distribuicaoCompleta = timesDistribuidos >= 32
 
   // Calcular estatísticas
   const stats = {
@@ -109,16 +106,6 @@ export default function AdminSuperligaPage() {
     }
   }
 
-  // 🎯 FUNÇÃO PARA DISTRIBUIR TIMES
-  const handleDistribuirTimes = async () => {
-    try {
-      await distribuirTimes.mutateAsync(selectedTemporada)
-      refetch() // Atualizar dados após distribuição
-    } catch (error) {
-      console.error('Erro ao distribuir times:', error)
-    }
-  }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -171,9 +158,9 @@ export default function AdminSuperligaPage() {
                   <span className="text-sm text-gray-300">{stats.totalJogos} jogos cadastrados</span>
                 </div>
                 
-                {/* 🎯 STATUS DE DISTRIBUIÇÃO DE TIMES */}
+                {/* ✅ STATUS DE DISTRIBUIÇÃO (SOMENTE INFORMATIVO) */}
                 <div className="flex items-center gap-2">
-                  {jaDistribuido ? (
+                  {distribuicaoCompleta ? (
                     <>
                       <CheckCircle className="w-4 h-4 text-green-400" />
                       <span className="text-sm text-green-300">
@@ -182,9 +169,9 @@ export default function AdminSuperligaPage() {
                     </>
                   ) : (
                     <>
-                      <AlertTriangle className="w-4 h-4 text-yellow-400" />
-                      <span className="text-sm text-yellow-300">
-                        Times não distribuídos ({timesDistribuidos}/32)
+                      <RefreshCw className="w-4 h-4 text-blue-400" />
+                      <span className="text-sm text-blue-300">
+                        Distribuição automática ({timesDistribuidos}/32)
                       </span>
                     </>
                   )}
@@ -205,32 +192,6 @@ export default function AdminSuperligaPage() {
                 </div>
               )}
             </div>
-
-            {/* 🎯 BOTÃO DE DISTRIBUIR TIMES */}
-            {superligaExists && !jaDistribuido && (
-              <div className="lg:ml-4">
-                <button
-                  onClick={handleDistribuirTimes}
-                  disabled={distribuirTimes.isPending}
-                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors disabled:cursor-not-allowed"
-                >
-                  {distribuirTimes.isPending ? (
-                    <>
-                      <RefreshCw className="w-5 h-5 animate-spin" />
-                      Distribuindo...
-                    </>
-                  ) : (
-                    <>
-                      <Target className="w-5 h-5" />
-                      Distribuir Times nas Conferências
-                    </>
-                  )}
-                </button>
-                <p className="text-xs text-gray-400 mt-1 text-center">
-                  Organize os 32 times em 4 conferências
-                </p>
-              </div>
-            )}
           </div>
         </div>
       ) : (
@@ -263,22 +224,6 @@ export default function AdminSuperligaPage() {
                   Importar dados primeiro
                 </Link>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ⚠️ AVISO SE TIMES NÃO FORAM DISTRIBUÍDOS */}
-      {superligaExists && !jaDistribuido && (
-        <div className="bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20 rounded-lg p-4">
-          <div className="flex items-center gap-3">
-            <AlertTriangle className="w-6 h-6 text-orange-400" />
-            <div>
-              <h4 className="text-orange-400 font-semibold">Ação Necessária</h4>
-              <p className="text-gray-300 text-sm">
-                Os times precisam ser distribuídos nas conferências antes de gerar playoffs.
-                Use o botão "Distribuir Times" acima.
-              </p>
             </div>
           </div>
         </div>

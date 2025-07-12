@@ -63,7 +63,7 @@ export interface Jogo {
   placarVisitante?: number
   observacoes?: string
   estatisticasProcessadas: boolean
-  
+
   // Relacionamentos
   timeCasa: Time
   timeVisitante: Time
@@ -72,21 +72,58 @@ export interface Jogo {
 }
 
 class JogosService extends BaseService {
-  static async getJogos(filters?: JogosFilters): Promise<Jogo[]> {
+  static async getJogos(filters?: {
+    temporada?: string
+    campeonatoId?: number
+    timeId?: number
+    status?: string
+    fase?: string
+    rodada?: number
+    limite?: number
+  }): Promise<Jogo[]> {
     const service = new JogosService()
-    
-    // Construir query params
+
+    // 🎯 SE TEM TEMPORADA, USAR ROTA DA SUPERLIGA
+    if (filters?.temporada) {
+      const params = new URLSearchParams()
+
+      if (filters.status) params.append('status', filters.status)
+      if (filters.fase) params.append('fase', filters.fase)
+      if (filters.rodada) params.append('rodada', filters.rodada.toString())
+      if (filters.limite) params.append('limite', filters.limite.toString())
+
+      const queryString = params.toString()
+      const url = `/superliga/${filters.temporada}/jogos${queryString ? `?${queryString}` : ''}`
+
+      return service.get<Jogo[]>(url)
+    }
+
+    // Se tem campeonatoId, usar rota de campeonatos
+    if (filters?.campeonatoId) {
+      const params = new URLSearchParams()
+      if (filters.status) params.append('status', filters.status)
+      if (filters.fase) params.append('fase', filters.fase)
+      if (filters.rodada) params.append('rodada', filters.rodada.toString())
+      if (filters.timeId) params.append('timeId', filters.timeId.toString())
+      if (filters.limite) params.append('limite', filters.limite.toString())
+
+      const queryString = params.toString()
+      const url = `/admin/campeonatos/${filters.campeonatoId}/jogos${queryString ? `?${queryString}` : ''}`
+
+      return service.get<Jogo[]>(url)
+    }
+
+    // Busca geral (fallback)
     const params = new URLSearchParams()
-    if (filters?.temporada) params.append('temporada', filters.temporada)
     if (filters?.status) params.append('status', filters.status)
     if (filters?.fase) params.append('fase', filters.fase)
     if (filters?.rodada) params.append('rodada', filters.rodada.toString())
-    if (filters?.conferencia) params.append('conferencia', filters.conferencia)
+    if (filters?.timeId) params.append('timeId', filters.timeId.toString())
     if (filters?.limite) params.append('limite', filters.limite.toString())
 
     const queryString = params.toString()
     const url = `/admin/jogos${queryString ? `?${queryString}` : ''}`
-    
+
     return service.get<Jogo[]>(url)
   }
 
@@ -134,8 +171,8 @@ export function useAtualizarResultadoJogo() {
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: ({ id, dados }: { 
-      id: number, 
+    mutationFn: ({ id, dados }: {
+      id: number,
       dados: {
         placarCasa: number
         placarVisitante: number

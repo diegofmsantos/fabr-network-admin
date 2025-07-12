@@ -210,21 +210,7 @@ export function useConfigurarConferencias() {
   })
 }
 
-export function useDistribuirTimes() {
-  const queryClient = useQueryClient()
-  const notifications = useNotifications()
 
-  return useMutation({
-    mutationFn: (temporada: string) => SuperligaService.distribuirTimes(temporada),
-    onSuccess: (_, temporada) => {
-      queryClient.invalidateQueries({ queryKey: superligaQueryKeys.temporada(temporada) })
-      notifications.success('Times distribuídos!', 'Times organizados nas conferências')
-    },
-    onError: (error: any) => {
-      notifications.error('Erro ao distribuir times', error.message)
-    },
-  })
-}
 
 export function useDistribuirTimesAutomatico() {
   const queryClient = useQueryClient()
