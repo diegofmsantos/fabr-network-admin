@@ -318,7 +318,7 @@ export default function AdminSuperligaPage() {
                 <Users className="w-5 h-5 text-green-400" />
               </div>
               <div>
-                <div className="text-lg font-bold text-white">1568</div>
+                <div className="text-lg font-bold text-red-600">?</div>
                 <div className="text-sm text-gray-400">Jogadores</div>
               </div>
             </div>
