@@ -1,15 +1,43 @@
+// src/components/Admin/Superliga/PlayoffsManager.tsx - CORREÇÃO DA TIPAGEM DO BRACKET
+
 "use client"
 
 import React, { useState } from 'react'
-import { Trophy, Crown, Target, Play, CheckCircle, Clock, AlertTriangle, Zap, Eye, Edit, RotateCcw, Download } from 'lucide-react'
+import { Trophy, Crown, Target, Play, CheckCircle, Clock, AlertTriangle, Zap, Eye, Edit, Download, RefreshCw } from 'lucide-react'
 import { Loading } from '@/components/ui/Loading'
 import Image from 'next/image'
 import { ImageService } from '@/utils/services/ImageService'
-import { useAtualizarResultadoPlayoff, useGerarFinalNacional, useGerarPlayoffs, useGerarSemifinaisNacionais, usePlayoffBracket, useResetarPlayoffs, useSimularPlayoffs } from '@/hooks/useSuperliga'
+import { usePlayoffBracket, useResetarPlayoffs } from '@/hooks/useSuperliga'
 
 interface PlayoffsManagerProps {
   superligaId: number
   temporada: string
+}
+
+interface JogoPlayoff {
+  id: number
+  fase: string
+  status: string
+  nome?: string
+  dataJogo?: string
+  placarTime1?: number
+  placarTime2?: number
+  timeClassificado1?: {
+    id: number
+    nome: string
+    sigla: string
+    logo?: string
+  }
+  timeClassificado2?: {
+    id: number
+    nome: string
+    sigla: string
+    logo?: string
+  }
+}
+
+interface BracketData {
+  [key: string]: JogoPlayoff[] | JogoPlayoff | any
 }
 
 export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
@@ -18,36 +46,34 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
 }) => {
   const [selectedConferencia, setSelectedConferencia] = useState<string>('SUDESTE')
   const [showModal, setShowModal] = useState(false)
-  const [selectedJogo, setSelectedJogo] = useState<any>(null)
+  const [selectedJogo, setSelectedJogo] = useState<JogoPlayoff | null>(null)
 
-  const { data: bracket, isLoading } = usePlayoffBracket(superligaId)
-  const { mutate: gerarPlayoffs, isPending: gerandoPlayoffs } = useGerarPlayoffs()
-  const { mutate: atualizarResultado } = useAtualizarResultadoPlayoff()
-  const { mutate: gerarSemifinais, isPending: gerandoSemifinais } = useGerarSemifinaisNacionais()
-  const { mutate: gerarFinal, isPending: gerandoFinal } = useGerarFinalNacional()
+  const { data: rawBracket, isLoading, error } = usePlayoffBracket(temporada)
   const { mutate: resetarPlayoffs, isPending: resetando } = useResetarPlayoffs()
-  const { mutate: simularPlayoffs, isPending: simulando } = useSimularPlayoffs()
+
+  // ✅ TYPE GUARD para verificar se bracket é válido
+  const bracket: BracketData | null = rawBracket && typeof rawBracket === 'object' ? rawBracket as BracketData : null
 
   const conferencias = [
     {
       tipo: 'SUDESTE',
       nome: 'Sudeste',
       icone: '🏭',
-      cor: 'bg-orange-500',
+      cor: 'bg-red-500',
       descricao: '12 times • 3 regionais'
     },
     {
       tipo: 'SUL',
       nome: 'Sul',
       icone: '🧊',
-      cor: 'bg-blue-500',
+      cor: 'bg-cyan-500',
       descricao: '8 times • 2 regionais'
     },
     {
       tipo: 'NORDESTE',
       nome: 'Nordeste',
       icone: '🌵',
-      cor: 'bg-yellow-500',
+      cor: 'bg-orange-500',
       descricao: '6 times • 1 regional'
     },
     {
@@ -81,26 +107,27 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
 
   const getFaseNome = (fase: string) => {
     switch (fase) {
-      case 'WILD_CARD': return 'Wild Card'
-      case 'SEMIFINAL_CONF': return 'Semifinal'
-      case 'FINAL_CONF': return 'Final'
-      case 'SEMIFINAL_NACIONAL': return 'Semifinal Nacional'
-      case 'FINAL_NACIONAL': return 'Final Nacional'
+      case 'WILD CARD': return 'Wild Card'
+      case 'SEMIFINAL CONFERENCIA': return 'Semifinal'
+      case 'FINAL CONFERENCIA': return 'Final'
+      case 'SEMIFINAL NACIONAL': return 'Semifinal Nacional'
+      case 'FINAL NACIONAL': return 'Final Nacional'
       default: return fase
     }
   }
 
-  const JogoPlayoffCard = ({ jogo, size = 'normal' }: { jogo: any, size?: 'small' | 'normal' | 'large' }) => {
+  const JogoPlayoffCard = ({ jogo, size = 'normal' }: { jogo: JogoPlayoff, size?: 'small' | 'normal' | 'large' }) => {
     const isSmall = size === 'small'
-    const isLarge = size === 'large'
+    const cardPadding = isSmall ? 'p-3' : 'p-4'
 
     return (
-      <div className={`bg-[#272731] rounded-lg border border-gray-700 p-${isSmall ? '3' : '4'} hover:border-[#63E300] transition-colors cursor-pointer`}
-        onClick={() => { setSelectedJogo(jogo); setShowModal(true) }}>
-
+      <div 
+        className={`bg-[#272731] rounded-lg border border-gray-700 ${cardPadding} hover:border-[#63E300] transition-colors cursor-pointer`}
+        onClick={() => { setSelectedJogo(jogo); setShowModal(true) }}
+      >
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <span className={`text-${isSmall ? 'xs' : 'sm'} text-gray-400`}>
+            <span className={`${isSmall ? 'text-xs' : 'text-sm'} text-gray-400`}>
               {getFaseNome(jogo.fase)}
             </span>
             <span className={`px-2 py-1 rounded-full text-xs text-white flex items-center gap-1 ${getStatusColor(jogo.status)}`}>
@@ -113,28 +140,29 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
 
           <div className="flex items-center gap-1">
             <button className="p-1 text-gray-400 hover:text-white transition-colors">
-              <Eye className={`w-${isSmall ? '3' : '4'} h-${isSmall ? '3' : '4'}`} />
+              <Eye className={`w-4 h-4`} />
             </button>
             {jogo.status !== 'FINALIZADO' && (
               <button className="p-1 text-gray-400 hover:text-white transition-colors">
-                <Edit className={`w-${isSmall ? '3' : '4'} h-${isSmall ? '3' : '4'}`} />
+                <Edit className={`w-4 h-4`} />
               </button>
             )}
           </div>
         </div>
 
         <div className="space-y-2">
+          {/* Time 1 */}
           <div className="flex items-center justify-between p-2 bg-[#1C1C24] rounded">
             <div className="flex items-center gap-2 flex-1 min-w-0">
               {jogo.timeClassificado1 ? (
                 <>
                   <Image
-                    src={ImageService.getTeamLogo(jogo.timeClassificado1.nome)}
-                    alt={`Logo ${jogo.timeClassificado1.nome}`}
+                    src={jogo.timeClassificado1.logo || '/placeholder-team.png'}
+                    alt={jogo.timeClassificado1.nome}
                     width={isSmall ? 20 : 24}
                     height={isSmall ? 20 : 24}
                     className="rounded"
-                    onError={(e) => ImageService.handleTeamLogoError(e, jogo.timeClassificado1.nome)}
+                    onError={(e) => ImageService.handleTeamLogoError(e, jogo.timeClassificado1?.nome || '')}
                   />
                   <span className={`text-white font-medium ${isSmall ? 'text-sm' : ''} truncate`}>
                     {jogo.timeClassificado1.sigla || jogo.timeClassificado1.nome}
@@ -147,29 +175,27 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
               )}
             </div>
 
-            {jogo.status === 'FINALIZADO' && jogo.placarTime1 !== null && (
-              <span className={`font-bold ${isSmall ? 'text-sm' : 'text-lg'} ${jogo.placarTime1 > jogo.placarTime2 ? 'text-green-400' : 'text-gray-400'
-                }`}>
+            {jogo.status === 'FINALIZADO' && jogo.placarTime1 !== undefined && (
+              <span className={`font-bold ${isSmall ? 'text-sm' : 'text-lg'} ${
+                (jogo.placarTime1 || 0) > (jogo.placarTime2 || 0) ? 'text-green-400' : 'text-gray-400'
+              }`}>
                 {jogo.placarTime1}
               </span>
             )}
           </div>
 
-          <div className="text-center">
-            <span className="text-gray-500 font-bold text-xs">VS</span>
-          </div>
-
+          {/* Time 2 */}
           <div className="flex items-center justify-between p-2 bg-[#1C1C24] rounded">
             <div className="flex items-center gap-2 flex-1 min-w-0">
               {jogo.timeClassificado2 ? (
                 <>
                   <Image
-                    src={ImageService.getTeamLogo(jogo.timeClassificado2.nome)}
-                    alt={`Logo ${jogo.timeClassificado2.nome}`}
+                    src={jogo.timeClassificado2.logo || '/placeholder-team.png'}
+                    alt={jogo.timeClassificado2.nome}
                     width={isSmall ? 20 : 24}
                     height={isSmall ? 20 : 24}
                     className="rounded"
-                    onError={(e) => ImageService.handleTeamLogoError(e, jogo.timeClassificado2.nome)}
+                    onError={(e) => ImageService.handleTeamLogoError(e, jogo.timeClassificado2?.nome || '')}
                   />
                   <span className={`text-white font-medium ${isSmall ? 'text-sm' : ''} truncate`}>
                     {jogo.timeClassificado2.sigla || jogo.timeClassificado2.nome}
@@ -182,9 +208,10 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
               )}
             </div>
 
-            {jogo.status === 'FINALIZADO' && jogo.placarTime2 !== null && (
-              <span className={`font-bold ${isSmall ? 'text-sm' : 'text-lg'} ${jogo.placarTime2 > jogo.placarTime1 ? 'text-green-400' : 'text-gray-400'
-                }`}>
+            {jogo.status === 'FINALIZADO' && jogo.placarTime2 !== undefined && (
+              <span className={`font-bold ${isSmall ? 'text-sm' : 'text-lg'} ${
+                (jogo.placarTime2 || 0) > (jogo.placarTime1 || 0) ? 'text-green-400' : 'text-gray-400'
+              }`}>
                 {jogo.placarTime2}
               </span>
             )}
@@ -202,10 +229,10 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
     )
   }
 
-  const ConferenciaBracket = ({ conferencia, jogos }: { conferencia: any, jogos: any[] }) => {
-    const wildCards = jogos.filter(j => j.fase === 'WILD_CARD')
-    const semifinais = jogos.filter(j => j.fase === 'SEMIFINAL_CONF')
-    const final = jogos.find(j => j.fase === 'FINAL_CONF')
+  const ConferenciaBracket = ({ conferencia, jogos }: { conferencia: any, jogos: JogoPlayoff[] }) => {
+    const wildCards = jogos.filter(j => j.fase === 'WILD CARD')
+    const semifinais = jogos.filter(j => j.fase === 'SEMIFINAL CONFERENCIA')
+    const final = jogos.find(j => j.fase === 'FINAL CONFERENCIA')
 
     return (
       <div className="space-y-6">
@@ -259,30 +286,30 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
     )
   }
 
-  const getJogosConferencia = (bracket: any, conferencia: string): any[] => {
-    if (!bracket) return []
+  const FaseNacionalView = () => {
+    const semifinais: JogoPlayoff[] = []
+    let final: JogoPlayoff | undefined
 
-    const key = `playoffs${conferencia.charAt(0) + conferencia.slice(1).toLowerCase()}`
-    const jogosData = bracket[key]
-
-    // TYPE-SAFE CHECK
-    if (Array.isArray(jogosData)) {
-      return jogosData
+    // Extrair jogos da fase nacional do bracket
+    if (bracket && typeof bracket === 'object') {
+      Object.values(bracket).forEach((item: any) => {
+        if (Array.isArray(item)) {
+          item.forEach((jogo: any) => {
+            if (jogo.fase === 'SEMIFINAL NACIONAL') {
+              semifinais.push(jogo)
+            } else if (jogo.fase === 'FINAL NACIONAL') {
+              final = jogo
+            }
+          })
+        } else if (item && typeof item === 'object' && item.fase) {
+          if (item.fase === 'SEMIFINAL NACIONAL') {
+            semifinais.push(item)
+          } else if (item.fase === 'FINAL NACIONAL') {
+            final = item
+          }
+        }
+      })
     }
-
-    // Se é um objeto com jogos
-    if (jogosData && typeof jogosData === 'object' && 'jogos' in jogosData) {
-      return Array.isArray(jogosData.jogos) ? jogosData.jogos : []
-    }
-
-    return []
-  }
-
-  const FaseNacional = () => {
-    const semifinais = bracket?.semifinalNacional1 ? [bracket.semifinalNacional1] : []
-    if (bracket?.semifinalNacional2) semifinais.push(bracket.semifinalNacional2)
-
-    const final = bracket?.finalNacional
 
     return (
       <div className="space-y-8">
@@ -321,89 +348,104 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
             <Crown className="w-16 h-16 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-white mb-2">Fase Nacional</h3>
             <p className="mb-4">Aguardando conclusão das finais de conferência</p>
-            <button
-              onClick={() => gerarSemifinais(superligaId)}
-              disabled={gerandoSemifinais}
-              className="bg-[#63E300] text-black px-6 py-2 rounded-md font-medium hover:bg-[#50B800] transition-colors disabled:opacity-50"
-            >
-              {gerandoSemifinais ? 'Gerando...' : 'Gerar Semifinais Nacionais'}
-            </button>
           </div>
         )}
       </div>
     )
   }
 
+  const getJogosConferencia = (bracket: BracketData | null, conferencia: string): JogoPlayoff[] => {
+    if (!bracket || typeof bracket !== 'object') return []
+
+    // Procurar pelos jogos da conferência no bracket
+    const jogos: JogoPlayoff[] = []
+    
+    Object.entries(bracket).forEach(([key, value]) => {
+      if (key.toLowerCase().includes(conferencia.toLowerCase()) || 
+          (typeof value === 'object' && value !== null && 'conferencia' in value && value.conferencia === conferencia)) {
+        
+        if (Array.isArray(value)) {
+          jogos.push(...value)
+        } else if (value && typeof value === 'object' && 'jogos' in value && Array.isArray(value.jogos)) {
+          jogos.push(...value.jogos)
+        }
+      }
+    })
+
+    return jogos
+  }
+
   if (isLoading) {
     return <Loading />
   }
 
+  if (error) {
+    return (
+      <div className="bg-[#272731] rounded-lg border border-red-700 p-12 text-center">
+        <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+        <h3 className="text-xl font-bold text-white mb-2">Erro ao carregar playoffs</h3>
+        <p className="text-red-400">{error.message}</p>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
-      <div className="bg-[#272731] rounded-lg border border-gray-700 p-4">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      {/* Header */}
+      <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
+        <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-white font-semibold">Playoffs da Superliga</h3>
-            <p className="text-gray-400 text-sm">
-              Gerencie o chaveamento dos playoffs das 4 conferências
+            <h2 className="text-2xl font-bold text-white mb-2">
+              Playoffs da Superliga {temporada}
+            </h2>
+            <p className="text-gray-400">
+              {!bracket 
+                ? 'Os playoffs são gerados automaticamente quando a temporada regular é finalizada'
+                : 'Playoffs gerados automaticamente após finalização da temporada regular'
+              }
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            {!bracket && (
-              <button
-                onClick={() => gerarPlayoffs(superligaId)}
-                disabled={gerandoPlayoffs}
-                className="bg-[#63E300] text-black px-4 py-2 rounded-md font-medium hover:bg-[#50B800] transition-colors disabled:opacity-50"
+          {/* ✅ CONDICIONAL CORRIGIDA */}
+          {bracket && (
+            <div className="flex gap-3">
+              <button 
+                onClick={() => resetarPlayoffs(temporada)}
+                disabled={resetando}
+                className="flex items-center gap-2 px-3 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors disabled:opacity-50"
               >
-                {gerandoPlayoffs ? 'Gerando...' : 'Gerar Playoffs'}
+                <RefreshCw className="w-4 h-4" />
+                {resetando ? 'Resetando...' : 'Resetar (Dev)'}
               </button>
-            )}
 
-            {bracket && (
-              <>
-                <button
-                  onClick={() => simularPlayoffs(superligaId)}
-                  disabled={simulando}
-                  className="flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors disabled:opacity-50"
-                >
-                  <Zap className="w-4 h-4" />
-                  {simulando ? 'Simulando...' : 'Simular'}
-                </button>
-
-                <button
-                  onClick={() => resetarPlayoffs(superligaId)}
-                  disabled={resetando}
-                  className="flex items-center gap-2 px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  {resetando ? 'Resetando...' : 'Resetar'}
-                </button>
-
-                <button className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
-                  <Download className="w-4 h-4" />
-                  Exportar
-                </button>
-              </>
-            )}
-          </div>
+              <button className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+                <Download className="w-4 h-4" />
+                Exportar
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
       {!bracket ? (
         <div className="bg-[#272731] rounded-lg border border-gray-700 p-12 text-center">
           <Trophy className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-white mb-2">Playoffs não gerados</h3>
-          <p className="text-gray-400 mb-6">
-            Gere os playoffs para começar o chaveamento das 4 conferências
-          </p>
-          <button
-            onClick={() => gerarPlayoffs(superligaId)}
-            disabled={gerandoPlayoffs}
-            className="bg-[#63E300] text-black px-6 py-2 rounded-md font-medium hover:bg-[#50B800] transition-colors disabled:opacity-50"
-          >
-            {gerandoPlayoffs ? 'Gerando Playoffs...' : 'Gerar Playoffs da Superliga'}
-          </button>
+          <h3 className="text-xl font-bold text-white mb-2">Playoffs serão gerados automaticamente</h3>
+          <div className="text-gray-400 space-y-2">
+            <p>Os playoffs são criados automaticamente quando:</p>
+            <ul className="list-disc list-inside space-y-1 mt-4">
+              <li>Todos os jogos da temporada regular forem finalizados</li>
+              <li>Você importar a última planilha de resultados</li>
+              <li>O sistema detectar que a temporada regular está completa</li>
+            </ul>
+            <div className="mt-6 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+              <p className="text-blue-300 text-sm">
+                💡 <strong>Dica:</strong> Continue importando as planilhas de resultados na ordem. 
+                Quando o último jogo da temporada regular for importado, os playoffs de todas as 
+                4 conferências serão gerados automaticamente.
+              </p>
+            </div>
+          </div>
         </div>
       ) : (
         <>
@@ -413,10 +455,11 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
                 <button
                   key={conf.tipo}
                   onClick={() => setSelectedConferencia(conf.tipo)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${selectedConferencia === conf.tipo
+                  className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
+                    selectedConferencia === conf.tipo
                       ? 'bg-[#63E300] text-black'
                       : 'bg-[#1C1C24] text-gray-300 hover:bg-[#2A2A35]'
-                    }`}
+                  }`}
                 >
                   <span className="text-lg">{conf.icone}</span>
                   <span className="font-medium">{conf.nome}</span>
@@ -425,10 +468,11 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
 
               <button
                 onClick={() => setSelectedConferencia('NACIONAL')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${selectedConferencia === 'NACIONAL'
+                className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
+                  selectedConferencia === 'NACIONAL'
                     ? 'bg-[#63E300] text-black'
                     : 'bg-[#1C1C24] text-gray-300 hover:bg-[#2A2A35]'
-                  }`}
+                }`}
               >
                 <Crown className="w-5 h-5" />
                 <span className="font-medium">Nacional</span>
@@ -437,7 +481,7 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
           </div>
 
           {selectedConferencia === 'NACIONAL' ? (
-            <FaseNacional />
+            <FaseNacionalView />
           ) : (
             <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
               <div className="flex items-center gap-3 mb-6">
@@ -463,6 +507,7 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
         </>
       )}
 
+      {/* Modal */}
       {showModal && selectedJogo && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-[#272731] rounded-lg border border-gray-700 p-6 max-w-md w-full">
