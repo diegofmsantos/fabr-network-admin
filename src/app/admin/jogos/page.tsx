@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { Calendar, Filter, Eye, Edit, Trash2, Clock, CheckCircle, AlertTriangle } from 'lucide-react'
+import { Calendar, Eye, Edit, Clock, CheckCircle, AlertTriangle } from 'lucide-react'
 import { Loading } from '@/components/ui/Loading'
 import { useJogos } from '@/hooks/useJogos'
 
@@ -18,7 +18,7 @@ export default function AdminJogosPage() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'AGENDADO': return <Clock className="w-4 h-4 text-yellow-400" />
-      case 'AO_VIVO': return <AlertTriangle className="w-4 h-4 text-red-400" />
+      case 'AO VIVO': return <AlertTriangle className="w-4 h-4 text-red-400" />
       case 'FINALIZADO': return <CheckCircle className="w-4 h-4 text-green-400" />
       default: return <Clock className="w-4 h-4 text-gray-400" />
     }
@@ -27,7 +27,7 @@ export default function AdminJogosPage() {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'AGENDADO': return 'Agendado'
-      case 'AO_VIVO': return 'Ao Vivo'
+      case 'AO VIVO': return 'Ao Vivo'
       case 'FINALIZADO': return 'Finalizado'
       default: return status
     }
@@ -37,7 +37,6 @@ export default function AdminJogosPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Jogos da Superliga</h1>
@@ -57,7 +56,6 @@ export default function AdminJogosPage() {
         </div>
       </div>
 
-      {/* Filtros */}
       <div className="bg-[#272731] shadow rounded-lg p-4">
         <div className="flex flex-wrap gap-4">
           <div>
@@ -69,7 +67,7 @@ export default function AdminJogosPage() {
             >
               <option value="todos">Todos</option>
               <option value="AGENDADO">Agendado</option>
-              <option value="AO_VIVO">Ao Vivo</option>
+              <option value="AO VIVO">Ao Vivo</option>
               <option value="FINALIZADO">Finalizado</option>
             </select>
           </div>
@@ -88,7 +86,6 @@ export default function AdminJogosPage() {
         </div>
       </div>
 
-      {/* Lista de Jogos */}
       <div className="bg-[#272731] shadow rounded-lg overflow-hidden">
         <table className="min-w-full divide-y divide-gray-700">
           <thead className="bg-[#1C1C24]">
@@ -117,13 +114,13 @@ export default function AdminJogosPage() {
                   {new Date(jogo.dataJogo).toLocaleDateString('pt-BR')}
                   <br />
                   <span className="text-gray-400">
-                    {new Date(jogo.dataJogo).toLocaleTimeString('pt-BR', { 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
+                    {new Date(jogo.dataJogo).toLocaleTimeString('pt-BR', {
+                      hour: '2-digit',
+                      minute: '2-digit'
                     })}
                   </span>
                 </td>
-                
+
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-white">
                     <div className="flex items-center space-x-2">
@@ -138,13 +135,13 @@ export default function AdminJogosPage() {
                     )}
                   </div>
                 </td>
-                
+
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
                   {jogo.rodada}ª Rodada
                   <br />
                   <span className="text-gray-400 text-xs">{jogo.fase}</span>
                 </td>
-                
+
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center space-x-2">
                     {getStatusIcon(jogo.status)}
@@ -153,7 +150,7 @@ export default function AdminJogosPage() {
                     </span>
                   </div>
                 </td>
-                
+
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div className="flex space-x-2">
                     <Link
@@ -162,7 +159,7 @@ export default function AdminJogosPage() {
                     >
                       <Eye className="w-4 h-4" />
                     </Link>
-                    
+
                     {jogo.status === 'AGENDADO' && (
                       <Link
                         href={`/admin/jogos/${jogo.id}/resultado`}
@@ -177,7 +174,7 @@ export default function AdminJogosPage() {
             ))}
           </tbody>
         </table>
-        
+
         {jogos.length === 0 && (
           <div className="text-center py-12">
             <Calendar className="w-16 h-16 text-gray-500 mx-auto mb-4" />

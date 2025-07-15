@@ -28,12 +28,6 @@ export default function HomePage() {
       route: '/materia'
     },
     {
-      title: 'Temporada',
-      description: 'Gerencie a transição entre temporadas',
-      icon: '/window.svg',
-      route: '/temporada'
-    },
-    {
       title: 'Dashboard',
       description: 'Filtros e insights sobre times e jogadores',
       icon: '/globe.svg',

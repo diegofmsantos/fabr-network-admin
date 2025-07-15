@@ -224,7 +224,7 @@ export const JogoManager: React.FC<JogoManagerProps> = ({ jogos, campeonato, vie
           >
             <option value="todos">Todos os Status</option>
             <option value="AGENDADO">Agendados</option>
-            <option value="AO_VIVO">Ao Vivo</option>
+            <option value="AO VIVO">Ao Vivo</option>
             <option value="FINALIZADO">Finalizados</option>
             <option value="ADIADO">Adiados</option>
           </select>

@@ -24,14 +24,13 @@ export default function AdminSuperligaConfiguracoesPage() {
     dataInicio: '2025-07-01',
     dataFim: '2025-12-15',
     descricao: 'Campeonato nacional de futebol americano',
-    status: 'EM_ANDAMENTO'
+    status: 'EM ANDAMENTO'
   })
 
   if (isLoading) return <Loading />
 
   const handleSave = async () => {
     try {
-      // Salvar configurações
       alert('Configurações salvas com sucesso!')
       setIsEditing(false)
       refetch()
@@ -44,7 +43,6 @@ export default function AdminSuperligaConfiguracoesPage() {
   const resetarSuperliga = async () => {
     if (confirm('Tem certeza que deseja resetar toda a Superliga? Esta ação não pode ser desfeita.')) {
       try {
-        // Reset da superliga
         alert('Superliga resetada com sucesso!')
         refetch()
       } catch (error) {
@@ -91,7 +89,6 @@ export default function AdminSuperligaConfiguracoesPage() {
 
   return (
     <div className="space-y-6">
-      {/* ✅ CORRIGIDO - Header com tipagem explícita para React.JSX.Element */}
       <div className="flex items-center gap-4 mb-6">
         <Link
           href="/admin/superliga"
@@ -129,7 +126,6 @@ export default function AdminSuperligaConfiguracoesPage() {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="bg-[#272731] rounded-lg border border-gray-700">
         <div className="border-b border-gray-700">
           <nav className="flex">
@@ -155,7 +151,6 @@ export default function AdminSuperligaConfiguracoesPage() {
         </div>
 
         <div className="p-6">
-          {/* Tab: Configurações Gerais */}
           {activeTab === 'geral' && (
             <div className="space-y-6">
               <div>
@@ -238,15 +233,14 @@ export default function AdminSuperligaConfiguracoesPage() {
                     }}
                     className="w-full px-4 py-3 bg-[#1C1C24] text-white rounded-md border border-gray-700 focus:border-[#63E300] focus:outline-none"
                   >
-                    <option value="NAO_INICIADO">Não Iniciado</option>
-                    <option value="EM_ANDAMENTO">Em Andamento</option>
+                    <option value="NAO INICIADO">Não Iniciado</option>
+                    <option value="EM ANDAMENTO">Em Andamento</option>
                     <option value="PLAYOFFS">Playoffs</option>
                     <option value="FINALIZADO">Finalizado</option>
                   </select>
                 </div>
               </div>
 
-              {/* Status Atual */}
               <div className="bg-[#1C1C24] rounded-lg p-4">
                 <h4 className="text-white font-semibold mb-3">Status Atual</h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -275,7 +269,6 @@ export default function AdminSuperligaConfiguracoesPage() {
             </div>
           )}
 
-          {/* Tab: Estrutura */}
           {activeTab === 'estrutura' && (
             <div className="space-y-6">
               <div>
@@ -308,7 +301,6 @@ export default function AdminSuperligaConfiguracoesPage() {
                 </div>
               </div>
 
-              {/* Ações da Estrutura */}
               <div className="bg-[#1C1C24] rounded-lg p-6">
                 <h4 className="text-white font-semibold mb-4">Ações da Estrutura</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -331,7 +323,6 @@ export default function AdminSuperligaConfiguracoesPage() {
             </div>
           )}
 
-          {/* Tab: Avançado */}
           {activeTab === 'avancado' && (
             <div className="space-y-6">
               <div>
@@ -340,7 +331,6 @@ export default function AdminSuperligaConfiguracoesPage() {
                   Ações administrativas e configurações avançadas do sistema
                 </p>
 
-                {/* Seção: Backup e Restore */}
                 <div className="bg-[#1C1C24] rounded-lg p-6 mb-6">
                   <h4 className="text-white font-semibold mb-4">Backup e Restauração</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -359,7 +349,6 @@ export default function AdminSuperligaConfiguracoesPage() {
                   </div>
                 </div>
 
-                {/* Seção: Manutenção */}
                 <div className="bg-[#1C1C24] rounded-lg p-6 mb-6">
                   <h4 className="text-white font-semibold mb-4">Manutenção do Sistema</h4>
                   <div className="space-y-4">
@@ -375,7 +364,6 @@ export default function AdminSuperligaConfiguracoesPage() {
                   </div>
                 </div>
 
-                {/* Zona de Perigo */}
                 <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-6">
                   <div className="flex items-center gap-2 mb-4">
                     <AlertTriangle className="w-5 h-5 text-red-400" />
@@ -408,7 +396,6 @@ export default function AdminSuperligaConfiguracoesPage() {
         </div>
       </div>
 
-      {/* Footer Actions */}
       <div className="flex items-center justify-between p-4 bg-[#272731] rounded-lg border border-gray-700">
         <div className="flex items-center gap-2 text-gray-400">
           <CheckCircle className="w-5 h-5 text-green-400" />

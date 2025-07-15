@@ -1,7 +1,6 @@
 "use client"
 
 import { AdminSidebar } from '@/components/Admin/AdminSidebar'
-import { AdminHeader } from '@/components/Admin/AdminHeader'
 import { AdminErrorBoundary } from '@/components/Admin/ErrorBoundary'
 import { NotificationContainer } from '@/components/Admin/NotificationContainer'
 import { HeaderGeneral } from '../HeaderGeneral'
@@ -14,7 +13,6 @@ export const AdminLayoutClient: React.FC<AdminLayoutClientProps> = ({ children }
   return (
     <AdminErrorBoundary>
       <HeaderGeneral label='CAMPEONATOS' />
-      <AdminHeader />
       <div className="min-h-screen bg-[#272731]">
         <AdminSidebar />
 

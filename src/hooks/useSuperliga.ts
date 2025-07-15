@@ -2,8 +2,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNotifications } from './useNotifications'
 import { SuperligaService } from '@/services/superliga.service'
 
-// ==================== QUERY KEYS ====================
-
 export const superligaQueryKeys = {
   all: ['superliga'] as const,
   
@@ -17,21 +15,18 @@ export const superligaQueryKeys = {
   bracket: (temporada: string) => [...superligaQueryKeys.temporada(temporada), 'bracket'] as const,
   validacao: (temporada: string) => [...superligaQueryKeys.temporada(temporada), 'validacao'] as const,
   
-  // Query keys específicas
   jogosRodada: (temporada: string, rodada: number) => 
     [...superligaQueryKeys.jogos(temporada), 'rodada', rodada] as const,
   classificacaoConferencia: (temporada: string, conferencia: string) => 
     [...superligaQueryKeys.classificacao(temporada), 'conferencia', conferencia] as const,
 }
 
-// ==================== QUERIES BÁSICAS ====================
-
 export function useSuperliga(temporada: string) {
   return useQuery({
     queryKey: superligaQueryKeys.temporada(temporada),
     queryFn: () => SuperligaService.getSuperliga(temporada),
     enabled: !!temporada,
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    staleTime: 1000 * 60 * 5, 
     retry: 2,
   })
 }
@@ -41,8 +36,8 @@ export function useStatusSuperliga(temporada: string) {
     queryKey: superligaQueryKeys.status(temporada),
     queryFn: () => SuperligaService.getStatus(temporada),
     enabled: !!temporada,
-    staleTime: 1000 * 30, // 30 segundos (atualiza mais frequentemente)
-    refetchInterval: 1000 * 60, // Refetch a cada minuto
+    staleTime: 1000 * 30, 
+    refetchInterval: 1000 * 60, 
   })
 }
 
@@ -51,7 +46,7 @@ export function useConferencias(temporada: string) {
     queryKey: superligaQueryKeys.conferencias(temporada),
     queryFn: () => SuperligaService.getConferencias(temporada),
     enabled: !!temporada,
-    staleTime: 1000 * 60 * 10, // 10 minutos (estrutura não muda muito)
+    staleTime: 1000 * 60 * 10, 
   })
 }
 
@@ -73,8 +68,6 @@ export function useTimesPorConferencia(temporada: string) {
   })
 }
 
-// ==================== QUERIES DE JOGOS ====================
-
 export function useJogosSuperliga(temporada: string, filters?: {
   conferencia?: string
   fase?: string
@@ -85,7 +78,7 @@ export function useJogosSuperliga(temporada: string, filters?: {
     queryKey: [...superligaQueryKeys.jogos(temporada), filters],
     queryFn: () => SuperligaService.getJogos(temporada, filters),
     enabled: !!temporada,
-    staleTime: 1000 * 60 * 2, // 2 minutos
+    staleTime: 1000 * 60 * 2,
   })
 }
 
@@ -103,11 +96,9 @@ export function useProximosJogos(temporada: string, limite?: number) {
     queryKey: [...superligaQueryKeys.jogos(temporada), 'proximos', limite],
     queryFn: () => SuperligaService.getProximosJogos(temporada, limite),
     enabled: !!temporada,
-    staleTime: 1000 * 60 * 1, // 1 minuto (próximos jogos mudam)
+    staleTime: 1000 * 60 * 1, 
   })
 }
-
-// ==================== QUERIES DE CLASSIFICAÇÃO ====================
 
 export function useClassificacaoGeral(temporada: string) {
   return useQuery({
@@ -136,8 +127,6 @@ export function useWildCardRanking(temporada: string, conferencia: string) {
   })
 }
 
-// ==================== QUERIES DE PLAYOFFS ====================
-
 export function usePlayoffBracket(temporada: string) {
   return useQuery({
     queryKey: superligaQueryKeys.bracket(temporada),
@@ -156,8 +145,6 @@ export function useFaseNacional(temporada: string) {
   })
 }
 
-// ==================== QUERIES DE VALIDAÇÃO ====================
-
 export function useValidarEstrutura(temporada: string) {
   return useQuery({
     queryKey: [...superligaQueryKeys.validacao(temporada), 'estrutura'],
@@ -175,8 +162,6 @@ export function useValidarIntegridade(temporada: string) {
     staleTime: 1000 * 60 * 2,
   })
 }
-
-// ==================== MUTATIONS - CRIAÇÃO E CONFIGURAÇÃO ====================
 
 export function useCriarSuperliga() {
   const queryClient = useQueryClient()
@@ -210,8 +195,6 @@ export function useConfigurarConferencias() {
   })
 }
 
-
-
 export function useDistribuirTimesAutomatico() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -227,8 +210,6 @@ export function useDistribuirTimesAutomatico() {
     },
   })
 }
-
-// ==================== MUTATIONS - TEMPORADA REGULAR ====================
 
 export function useGerarJogosTemporada() {
   const queryClient = useQueryClient()
@@ -246,8 +227,6 @@ export function useGerarJogosTemporada() {
     },
   })
 }
-
-// ==================== MUTATIONS - PLAYOFFS ====================
 
 export function useGerarPlayoffs() {
   const queryClient = useQueryClient()
@@ -297,8 +276,6 @@ export function useGerarFaseNacional() {
   })
 }
 
-// ==================== MUTATIONS - VALIDAÇÃO ====================
-
 export function useRepararIntegridade() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -315,8 +292,6 @@ export function useRepararIntegridade() {
   })
 }
 
-// ==================== MUTATIONS - SIMULAÇÃO (DESENVOLVIMENTO) ====================
-
 export function useSimularTemporadaCompleta() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -332,8 +307,6 @@ export function useSimularTemporadaCompleta() {
     },
   })
 }
-
-// ==================== HOOKS COMPOSTOS - PÁGINAS ESPECÍFICAS ====================
 
 export function useAdminSuperliga(temporada: string) {
   const superliga = useSuperliga(temporada)
@@ -379,13 +352,11 @@ export function usePlayoffAdmin(temporada: string) {
   }
 }
 
-// ==================== UTILITIES ====================
-
 export function useTemporadas() {
   return useQuery({
     queryKey: [...superligaQueryKeys.all, 'temporadas'],
     queryFn: () => SuperligaService.listarTemporadas(),
-    staleTime: 1000 * 60 * 10, // 10 minutos
+    staleTime: 1000 * 60 * 10, 
   })
 }
 
@@ -393,18 +364,16 @@ export function useTemporadaAtual() {
   return useQuery({
     queryKey: [...superligaQueryKeys.all, 'atual'],
     queryFn: () => SuperligaService.getTemporadaAtual(),
-    staleTime: 1000 * 60 * 30, // 30 minutos
+    staleTime: 1000 * 60 * 30, 
   })
 }
-
-// ADICIONAR este hook ao arquivo src/hooks/useSuperliga.ts
 
 export function useClassificacaoSuperliga(temporada: string) {
   return useQuery({
     queryKey: [...superligaQueryKeys.classificacao(temporada)],
     queryFn: () => SuperligaService.getClassificacaoGeral(temporada),
     enabled: !!temporada,
-    staleTime: 1000 * 60 * 5, // 5 minutos (dados mudam com jogos)
+    staleTime: 1000 * 60 * 5, 
     retry: 2,
     refetchOnWindowFocus: false,
   })

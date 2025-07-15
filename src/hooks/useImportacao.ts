@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ImportacaoService, } from '@/services/importacao.service'
 import { queryKeys } from './queryKeys'
 import { useNotifications } from './useNotifications'
-import { BaseService } from '@/services/base.service'
 
 export interface ImportResult {
   sucesso?: number
@@ -219,7 +218,6 @@ export function useEstatisticasImportacao(temporada: string) {
   })
 }
 
-// ==================== HOOKS DE VALIDAÇÃO (OPCIONAL) ==========
 export function useValidarPlanilhaTimes() {
   const notifications = useNotifications()
 
@@ -248,9 +246,6 @@ export function useValidarPlanilhaJogadores() {
   })
 }
 
-
-// Adicionar este hook em src/hooks/useImportacao.ts
-
 export function useImportarAgendaJogos() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -258,13 +253,11 @@ export function useImportarAgendaJogos() {
   return useMutation({
     mutationFn: (arquivo: File) => ImportacaoService.importarAgendaJogos(arquivo),
     onSuccess: (result: ImportResult) => {
-      // ✅ CORRIGIR NOTIFICAÇÃO
       notifications.success(
         'Agenda importada!',
         `${result.sucesso || 0} jogos cadastrados com sucesso`
       )
 
-      // Invalidar queries relacionadas
       queryClient.invalidateQueries({ queryKey: ['jogos'] })
       queryClient.invalidateQueries({ queryKey: ['superliga'] })
       queryClient.invalidateQueries({ queryKey: ['campeonatos'] })
@@ -276,7 +269,7 @@ export function useImportarAgendaJogos() {
       )
     },
     meta: {
-      timeout: 30000, // 30 segundos de timeout
+      timeout: 30000, 
     }
   })
 }

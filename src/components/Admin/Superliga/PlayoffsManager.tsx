@@ -1,5 +1,3 @@
-// src/components/Admin/Superliga/PlayoffsManager.tsx - CORREÇÃO DA TIPAGEM DO BRACKET
-
 "use client"
 
 import React, { useState } from 'react'
@@ -51,7 +49,6 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
   const { data: rawBracket, isLoading, error } = usePlayoffBracket(temporada)
   const { mutate: resetarPlayoffs, isPending: resetando } = useResetarPlayoffs()
 
-  // ✅ TYPE GUARD para verificar se bracket é válido
   const bracket: BracketData | null = rawBracket && typeof rawBracket === 'object' ? rawBracket as BracketData : null
 
   const conferencias = [
@@ -77,7 +74,7 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
       descricao: '6 times • 1 regional'
     },
     {
-      tipo: 'CENTRO_NORTE',
+      tipo: 'CENTRO NORTE',
       nome: 'Centro-Norte',
       icone: '🌲',
       cor: 'bg-green-500',
@@ -89,7 +86,7 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
     switch (status) {
       case 'AGUARDANDO': return <Clock className="w-4 h-4" />
       case 'AGENDADO': return <Target className="w-4 h-4" />
-      case 'AO_VIVO': return <Play className="w-4 h-4" />
+      case 'AO VIVO': return <Play className="w-4 h-4" />
       case 'FINALIZADO': return <CheckCircle className="w-4 h-4" />
       default: return <AlertTriangle className="w-4 h-4" />
     }
@@ -99,7 +96,7 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
     switch (status) {
       case 'AGUARDANDO': return 'bg-gray-500'
       case 'AGENDADO': return 'bg-blue-500'
-      case 'AO_VIVO': return 'bg-red-500'
+      case 'AO VIVO': return 'bg-red-500'
       case 'FINALIZADO': return 'bg-green-500'
       default: return 'bg-gray-500'
     }
@@ -151,7 +148,6 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
         </div>
 
         <div className="space-y-2">
-          {/* Time 1 */}
           <div className="flex items-center justify-between p-2 bg-[#1C1C24] rounded">
             <div className="flex items-center gap-2 flex-1 min-w-0">
               {jogo.timeClassificado1 ? (
@@ -184,7 +180,6 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
             )}
           </div>
 
-          {/* Time 2 */}
           <div className="flex items-center justify-between p-2 bg-[#1C1C24] rounded">
             <div className="flex items-center gap-2 flex-1 min-w-0">
               {jogo.timeClassificado2 ? (
@@ -290,7 +285,6 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
     const semifinais: JogoPlayoff[] = []
     let final: JogoPlayoff | undefined
 
-    // Extrair jogos da fase nacional do bracket
     if (bracket && typeof bracket === 'object') {
       Object.values(bracket).forEach((item: any) => {
         if (Array.isArray(item)) {
@@ -357,7 +351,6 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
   const getJogosConferencia = (bracket: BracketData | null, conferencia: string): JogoPlayoff[] => {
     if (!bracket || typeof bracket !== 'object') return []
 
-    // Procurar pelos jogos da conferência no bracket
     const jogos: JogoPlayoff[] = []
     
     Object.entries(bracket).forEach(([key, value]) => {
@@ -391,7 +384,6 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
         <div className="flex items-center justify-between">
           <div>
@@ -406,7 +398,6 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
             </p>
           </div>
 
-          {/* ✅ CONDICIONAL CORRIGIDA */}
           {bracket && (
             <div className="flex gap-3">
               <button 
@@ -507,7 +498,6 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
         </>
       )}
 
-      {/* Modal */}
       {showModal && selectedJogo && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-[#272731] rounded-lg border border-gray-700 p-6 max-w-md w-full">

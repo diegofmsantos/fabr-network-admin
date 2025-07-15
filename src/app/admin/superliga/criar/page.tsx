@@ -3,11 +3,10 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Trophy, Users, Target, Calendar, CheckCircle, Zap, Settings, Award, Crown } from 'lucide-react'
+import { ArrowLeft, Trophy, Users, Target, CheckCircle, Settings, Crown } from 'lucide-react'
 import { Loading } from '@/components/ui/Loading'
 import { useCriarSuperliga, useConfigurarConferencias, useDistribuirTimesAutomatico } from '@/hooks/useSuperliga'
 
-// Informações da estrutura da Superliga
 const SUPERLIGA_INFO = {
   conferencias: [
     {
@@ -78,12 +77,10 @@ export default function CriarSuperligaPage() {
         setSuperligaId(data.id || data.campeonatoId)
         setEtapaAtual('estruturando')
         
-        // Configurar conferências automaticamente
         configurarConferencias(temporada, {
           onSuccess: () => {
             setEtapaAtual('distribuindo')
             
-            // Distribuir times automaticamente
             distribuirTimes(temporada, {
               onSuccess: () => {
                 setEtapaAtual('concluido')
@@ -128,7 +125,6 @@ export default function CriarSuperligaPage() {
         </p>
       </div>
 
-      {/* Formulário */}
       <div className="bg-[#272731] rounded-lg border border-gray-700 p-6 mb-6">
         <h3 className="text-white font-semibold mb-4">Configuração Básica</h3>
         
@@ -149,7 +145,6 @@ export default function CriarSuperligaPage() {
         </div>
       </div>
 
-      {/* Estrutura da Superliga */}
       <div className="bg-[#272731] rounded-lg border border-gray-700 p-6 mb-6">
         <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
           <Target className="w-5 h-5 text-[#63E300]" />
@@ -179,7 +174,6 @@ export default function CriarSuperligaPage() {
           ))}
         </div>
 
-        {/* Resumo */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-[#1C1C24] rounded-lg">
           <div className="text-center">
             <p className="text-2xl font-bold text-[#63E300]">{SUPERLIGA_INFO.totalTimes}</p>
@@ -388,7 +382,6 @@ export default function CriarSuperligaPage() {
 
   return (
     <div className="min-h-screen bg-[#1C1C24] p-6">
-      {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <Link 
           href="/admin/superliga"
@@ -403,7 +396,6 @@ export default function CriarSuperligaPage() {
         </div>
       </div>
 
-      {/* Progresso */}
       {etapaAtual !== 'configuracao' && (
         <div className="mb-6">
           <div className="flex items-center justify-center gap-2 mb-2">
@@ -430,7 +422,6 @@ export default function CriarSuperligaPage() {
         </div>
       )}
 
-      {/* Conteúdo */}
       <div className="container mx-auto">
         {renderConteudo()}
       </div>

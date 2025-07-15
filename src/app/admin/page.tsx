@@ -1,14 +1,8 @@
-// SUBSTITUIR COMPLETAMENTE o conteúdo de src/app/admin/page.tsx
-
 "use client"
 
 import { useState } from 'react'
 import Link from 'next/link'
-import {
-  Trophy, Plus, Settings, Eye, Play, Calendar, Users,
-  BarChart3, Target, CheckCircle, Clock, AlertTriangle,
-  Zap, ArrowRight, RefreshCw
-} from 'lucide-react'
+import { Trophy, Plus, Settings, Eye, Calendar, Users, CheckCircle, AlertTriangle, ArrowRight, RefreshCw } from 'lucide-react'
 import { Loading } from '@/components/ui/Loading'
 import { useSuperliga, useStatusSuperliga } from '@/hooks/useSuperliga'
 import { useJogos } from '@/hooks/useJogos'
@@ -24,14 +18,11 @@ export default function AdminDashboardPage() {
 
   if (isLoading) return <Loading />
 
-  // Verificar se já existe uma Superliga
   const superligaExists = !!superliga
 
-  // ✅ STATUS DE DISTRIBUIÇÃO (SOMENTE PARA EXIBIÇÃO)
   const timesDistribuidos = (status as any)?.timesDistribuidos || 0
   const distribuicaoCompleta = timesDistribuidos >= 32
 
-  // Calcular estatísticas
   const stats = {
     totalJogos: jogos.length,
     jogosFinalizados: jogos.filter(j => j.status === 'FINALIZADO').length,
@@ -98,7 +89,6 @@ export default function AdminDashboardPage() {
 
   const createSuperliga = async () => {
     try {
-      // Funcionalidade de criar Superliga será implementada
       alert('Funcionalidade de criar Superliga será implementada')
       refetch()
     } catch (error) {
@@ -108,7 +98,6 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Superliga de Futebol Americano</h1>
@@ -140,7 +129,6 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Status da Superliga */}
       {superligaExists ? (
         <div className="bg-gradient-to-r from-[#272731] to-[#1C1C24] rounded-lg border border-gray-700 p-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -158,7 +146,6 @@ export default function AdminDashboardPage() {
                   <span className="text-sm text-gray-300">{stats.totalJogos} jogos cadastrados</span>
                 </div>
                 
-                {/* ✅ STATUS DE DISTRIBUIÇÃO (SOMENTE INFORMATIVO) */}
                 <div className="flex items-center gap-2">
                   {distribuicaoCompleta ? (
                     <>
@@ -229,7 +216,6 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* Seções de Gerenciamento */}
       {superligaExists && (
         <div>
           <h2 className="text-xl font-bold text-white mb-4">Gerenciamento</h2>
@@ -274,7 +260,6 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* Ações Rápidas */}
       <div>
         <h2 className="text-xl font-bold text-white mb-4">Ações Rápidas</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

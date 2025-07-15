@@ -4,7 +4,6 @@ import { queryKeys } from './queryKeys'
 import { useNotifications } from './useNotifications'
 import { Time } from '@/types'
 
-// Hook para buscar times
 export function useTimes(temporada: string = '2025') {
   return useQuery({
     queryKey: queryKeys.times.list(temporada),
@@ -16,7 +15,6 @@ export function useTimes(temporada: string = '2025') {
   })
 }
 
-// Hook para buscar um time específico
 export function useTime(id: number) {
   return useQuery({
     queryKey: queryKeys.times.detail(id),
@@ -27,7 +25,6 @@ export function useTime(id: number) {
   })
 }
 
-// Hook para buscar jogadores de um time
 export function useTimeJogadores(timeId: number, temporada?: string) {
   return useQuery({
     queryKey: queryKeys.times.jogadores(timeId, temporada),
@@ -37,7 +34,6 @@ export function useTimeJogadores(timeId: number, temporada?: string) {
   })
 }
 
-// Hook para criar time
 export function useCreateTime() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -45,12 +41,10 @@ export function useCreateTime() {
   return useMutation({
     mutationFn: (data: Omit<Time, 'id'>) => TimesService.createTime(data),
     onSuccess: (newTime) => {
-      // Invalidar lista de times da temporada
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.times.list(newTime.temporada || '2025') 
       })
       
-      // Adicionar ao cache
       queryClient.setQueryData(queryKeys.times.detail(newTime.id), newTime)
       
       notifications.success('Time criado!', `${newTime.nome} foi criado com sucesso`)
@@ -61,7 +55,6 @@ export function useCreateTime() {
   })
 }
 
-// Hook para atualizar time
 export function useUpdateTime() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -70,10 +63,8 @@ export function useUpdateTime() {
     mutationFn: ({ id, data }: { id: number; data: Partial<Time> }) =>
       TimesService.updateTime(id, data),
     onSuccess: (updatedTime, { id }) => {
-      // Atualizar cache específico
       queryClient.setQueryData(queryKeys.times.detail(id), updatedTime)
       
-      // Invalidar lista de times
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.times.list(updatedTime.temporada || '2025') 
       })
@@ -86,7 +77,6 @@ export function useUpdateTime() {
   })
 }
 
-// Hook para deletar time
 export function useDeleteTime() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -94,12 +84,10 @@ export function useDeleteTime() {
   return useMutation({
     mutationFn: TimesService.deleteTime,
     onSuccess: (_, id) => {
-      // Remover do cache
       queryClient.removeQueries({ 
         queryKey: queryKeys.times.detail(id) 
       })
       
-      // Invalidar listas de todas as temporadas
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.times.lists() 
       })
@@ -112,7 +100,6 @@ export function useDeleteTime() {
   })
 }
 
-// Hook para importar times
 export function useImportarTimes() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
@@ -120,7 +107,6 @@ export function useImportarTimes() {
   return useMutation({
     mutationFn: TimesService.importarTimes,
     onSuccess: (result) => {
-      // Invalidar todas as listas de times
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.times.lists() 
       })

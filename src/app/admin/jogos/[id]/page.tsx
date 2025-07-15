@@ -16,7 +16,7 @@ export default function DetalheJogoPage() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'AGENDADO': return <Clock className="w-5 h-5 text-yellow-400" />
-      case 'AO_VIVO': return <PlayCircle className="w-5 h-5 text-red-400" />
+      case 'AO VIVO': return <PlayCircle className="w-5 h-5 text-red-400" />
       case 'FINALIZADO': return <CheckCircle className="w-5 h-5 text-green-400" />
       case 'ADIADO': return <AlertTriangle className="w-5 h-5 text-orange-400" />
       default: return <Clock className="w-5 h-5 text-gray-400" />
@@ -26,7 +26,7 @@ export default function DetalheJogoPage() {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'AGENDADO': return 'Agendado'
-      case 'AO_VIVO': return 'Ao Vivo'
+      case 'AO VIVO': return 'Ao Vivo'
       case 'FINALIZADO': return 'Finalizado'
       case 'ADIADO': return 'Adiado'
       default: return status
@@ -35,12 +35,12 @@ export default function DetalheJogoPage() {
 
   const getFaseLabel = (fase: string) => {
     switch (fase) {
-      case 'TEMPORADA_REGULAR': return 'Temporada Regular'
-      case 'WILD_CARD': return 'Wild Card'
-      case 'SEMIFINAL_CONFERENCIA': return 'Semifinal de Conferência'
-      case 'FINAL_CONFERENCIA': return 'Final de Conferência'
-      case 'SEMIFINAL_NACIONAL': return 'Semifinal Nacional'
-      case 'FINAL_NACIONAL': return 'Final Nacional'
+      case 'TEMPORADA REGULAR': return 'Temporada Regular'
+      case 'WILD CARD': return 'Wild Card'
+      case 'SEMIFINAL CONFERENCIA': return 'Semifinal de Conferência'
+      case 'FINAL CONFERENCIA': return 'Final de Conferência'
+      case 'SEMIFINAL NACIONAL': return 'Semifinal Nacional'
+      case 'FINAL NACIONAL': return 'Final Nacional'
       default: return fase
     }
   }
@@ -92,7 +92,6 @@ export default function DetalheJogoPage() {
   return (
     <div className="min-h-screen bg-[#1C1C24] p-6">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
         <div className="flex items-center gap-4 mb-6">
           <Link 
             href="/admin/jogos"
@@ -108,9 +107,8 @@ export default function DetalheJogoPage() {
             </p>
           </div>
 
-          {/* Actions */}
           <div className="flex gap-3">
-            {(jogoTyped.status === 'AGENDADO' || jogoTyped.status === 'AO_VIVO') && (
+            {(jogoTyped.status === 'AGENDADO' || jogoTyped.status === 'AO VIVO') && (
               <Link
                 href={`/admin/jogos/${jogoTyped.id}/resultado`}
                 className="inline-flex items-center bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700 transition-colors"
@@ -130,11 +128,9 @@ export default function DetalheJogoPage() {
           </div>
         </div>
 
-        {/* Status e Info Principal */}
         <div className="bg-[#272731] rounded-lg border border-gray-700 p-6 mb-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            {/* Confronto */}
             <div className="lg:col-span-2">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -150,7 +146,6 @@ export default function DetalheJogoPage() {
               </div>
 
               <div className="flex items-center justify-between">
-                {/* Time Casa */}
                 <div className="text-center flex-1">
                   <div className="text-2xl font-bold text-white mb-2">
                     {jogoTyped.timeCasa.nome}
@@ -165,7 +160,6 @@ export default function DetalheJogoPage() {
                   )}
                 </div>
 
-                {/* VS */}
                 <div className="text-center px-6">
                   <div className="text-2xl font-bold text-gray-400">VS</div>
                   {jogoTyped.status === 'FINALIZADO' && (
@@ -173,7 +167,6 @@ export default function DetalheJogoPage() {
                   )}
                 </div>
 
-                {/* Time Visitante */}
                 <div className="text-center flex-1">
                   <div className="text-2xl font-bold text-white mb-2">
                     {jogoTyped.timeVisitante.nome}
@@ -190,7 +183,6 @@ export default function DetalheJogoPage() {
               </div>
             </div>
 
-            {/* Informações do Jogo */}
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <Calendar className="w-5 h-5 text-[#63E300]" />
@@ -220,9 +212,7 @@ export default function DetalheJogoPage() {
           </div>
         </div>
 
-        {/* Informações dos Times */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Time Casa */}
           <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
             <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
               <div 
@@ -257,7 +247,6 @@ export default function DetalheJogoPage() {
             </div>
           </div>
 
-          {/* Time Visitante */}
           <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
             <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
               <div 
@@ -293,7 +282,6 @@ export default function DetalheJogoPage() {
           </div>
         </div>
 
-        {/* Estatísticas do Jogo */}
         {jogo.status === 'FINALIZADO' && jogo.estatisticas && jogo.estatisticas.length > 0 && (
           <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
             <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
@@ -309,7 +297,6 @@ export default function DetalheJogoPage() {
           </div>
         )}
 
-        {/* Actions */}
         {jogo.status !== 'FINALIZADO' && (
           <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
             <h3 className="text-lg font-semibold text-white mb-4">Próximos Passos</h3>

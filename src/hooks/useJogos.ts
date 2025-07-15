@@ -1,5 +1,3 @@
-// Arquivo: src/hooks/useJogos.ts
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { BaseService } from '@/services/base.service'
 import { queryKeys } from './queryKeys'
@@ -58,13 +56,12 @@ export interface Jogo {
   local?: string
   rodada: number
   fase: string
-  status: 'AGENDADO' | 'AO_VIVO' | 'FINALIZADO' | 'ADIADO'
+  status: 'AGENDADO' | 'AO VIVO' | 'FINALIZADO' | 'ADIADO'
   placarCasa?: number
   placarVisitante?: number
   observacoes?: string
   estatisticasProcessadas: boolean
 
-  // Relacionamentos
   timeCasa: Time
   timeVisitante: Time
   campeonato: Campeonato
@@ -83,7 +80,6 @@ class JogosService extends BaseService {
   }): Promise<Jogo[]> {
     const service = new JogosService()
 
-    // 🎯 SE TEM TEMPORADA, USAR ROTA DA SUPERLIGA
     if (filters?.temporada) {
       const params = new URLSearchParams()
 
@@ -98,7 +94,6 @@ class JogosService extends BaseService {
       return service.get<Jogo[]>(url)
     }
 
-    // Se tem campeonatoId, usar rota de campeonatos
     if (filters?.campeonatoId) {
       const params = new URLSearchParams()
       if (filters.status) params.append('status', filters.status)
@@ -113,7 +108,6 @@ class JogosService extends BaseService {
       return service.get<Jogo[]>(url)
     }
 
-    // Busca geral (fallback)
     const params = new URLSearchParams()
     if (filters?.status) params.append('status', filters.status)
     if (filters?.fase) params.append('fase', filters.fase)
@@ -147,7 +141,7 @@ export function useJogos(filters?: JogosFilters) {
   return useQuery({
     queryKey: queryKeys.jogos.list(filters || {}),
     queryFn: () => JogosService.getJogos(filters),
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    staleTime: 1000 * 60 * 5, 
     retry: 2,
     refetchOnWindowFocus: false,
     throwOnError: false

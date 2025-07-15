@@ -2,11 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import {
-  ArrowLeft, Trophy, Play, Calendar, Eye, Edit, Users,
-  CheckCircle, Clock, AlertTriangle, Settings, Zap,
-  Target, BarChart3, RefreshCw, Plus, Award
-} from 'lucide-react'
+import { ArrowLeft, Trophy, Play, Eye, Edit, Users, Zap, Target, BarChart3, RefreshCw, Plus, Award } from 'lucide-react'
 import { Loading } from '@/components/ui/Loading'
 import { usePlayoffBracket, useFaseNacional, useStatusSuperliga } from '@/hooks/useSuperliga'
 
@@ -65,8 +61,6 @@ export default function AdminPlayoffsPage() {
 
   const gerarPlayoffs = async () => {
     try {
-      // Chamada para gerar playoffs
-      // await SuperligaService.gerarPlayoffs(temporada)
       alert('Playoffs gerados com sucesso!')
       refetchBracket()
     } catch (error) {
@@ -77,8 +71,6 @@ export default function AdminPlayoffsPage() {
 
   const gerarFaseNacional = async () => {
     try {
-      // Chamada para gerar fase nacional
-      // await SuperligaService.gerarFaseNacional(temporada)
       alert('Fase nacional gerada com sucesso!')
       refetchNacional()
     } catch (error) {
@@ -89,8 +81,6 @@ export default function AdminPlayoffsPage() {
 
   const simularResultados = async () => {
     try {
-      // Chamada para simular resultados
-      // await SuperligaService.simularPlayoffs(temporada)
       alert('Resultados simulados com sucesso!')
       refetchBracket()
       refetchNacional()
@@ -103,8 +93,6 @@ export default function AdminPlayoffsPage() {
   const resetarPlayoffs = async () => {
     if (confirm('Tem certeza que deseja resetar todos os playoffs? Esta ação não pode ser desfeita.')) {
       try {
-        // Chamada para resetar playoffs
-        // await SuperligaService.resetarPlayoffs(temporada)
         alert('Playoffs resetados com sucesso!')
         refetchBracket()
         refetchNacional()
@@ -117,7 +105,6 @@ export default function AdminPlayoffsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <Link
           href="/admin/superliga"
@@ -152,7 +139,6 @@ export default function AdminPlayoffsPage() {
         </div>
       </div>
 
-      {/* Status da Superliga */}
       <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -180,7 +166,6 @@ export default function AdminPlayoffsPage() {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="bg-[#272731] rounded-lg border border-gray-700">
         <div className="border-b border-gray-700">
           <nav className="flex">
@@ -204,11 +189,9 @@ export default function AdminPlayoffsPage() {
         </div>
 
         <div className="p-6">
-          {/* Tab: Playoffs das Conferências */}
           {activeTab === 'conferencias' && (
             <div className="space-y-6">
               {!hasPlayoffs ? (
-                /* Estado: Playoffs não gerados */
                 <div className="text-center py-12">
                   <Trophy className="w-16 h-16 text-gray-500 mx-auto mb-4" />
                   <h3 className="text-xl font-bold text-white mb-2">Playoffs não gerados</h3>
@@ -238,7 +221,6 @@ export default function AdminPlayoffsPage() {
                     </button>
                   </div>
 
-                  {/* Pré-visualização da estrutura */}
                   <div className="mt-8">
                     <h4 className="text-lg font-bold text-white mb-4">Estrutura dos Playoffs</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -272,9 +254,7 @@ export default function AdminPlayoffsPage() {
                   </div>
                 </div>
               ) : (
-                /* Estado: Playoffs gerados */
                 <div className="space-y-6">
-                  {/* Filtro de Conferências */}
                   <div className="flex items-center gap-4">
                     <label className="text-sm text-gray-400">Filtrar por conferência:</label>
                     <select
@@ -291,13 +271,11 @@ export default function AdminPlayoffsPage() {
                     </select>
                   </div>
 
-                  {/* Grid de Conferências */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {conferencias
                       .filter(conf => selectedConferencia === 'all' || conf.id === selectedConferencia)
                       .map((conf) => (
                         <div key={conf.id} className="bg-[#1C1C24] rounded-lg border border-gray-700">
-                          {/* Header da Conferência */}
                           <div className="p-4 border-b border-gray-700">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3">
@@ -318,9 +296,7 @@ export default function AdminPlayoffsPage() {
                             </div>
                           </div>
 
-                          {/* Chaveamento da Conferência */}
                           <div className="p-4 space-y-4">
-                            {/* Wild Card */}
                             <div>
                               <h5 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
                                 <Target className="w-4 h-4" />
@@ -348,7 +324,6 @@ export default function AdminPlayoffsPage() {
                               </div>
                             </div>
 
-                            {/* Semifinal */}
                             <div>
                               <h5 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
                                 <Trophy className="w-4 h-4" />
@@ -376,7 +351,6 @@ export default function AdminPlayoffsPage() {
                               </div>
                             </div>
 
-                            {/* Final da Conferência */}
                             <div>
                               <h5 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
                                 <Award className="w-4 h-4" />
@@ -394,7 +368,6 @@ export default function AdminPlayoffsPage() {
                             </div>
                           </div>
 
-                          {/* Ações da Conferência */}
                           <div className="p-4 border-t border-gray-700">
                             <div className="flex gap-2">
                               <Link
@@ -414,7 +387,6 @@ export default function AdminPlayoffsPage() {
                       ))}
                   </div>
 
-                  {/* Ações Gerais dos Playoffs */}
                   <div className="bg-[#1C1C24] rounded-lg p-6">
                     <h4 className="text-white font-semibold mb-4">Ações dos Playoffs</h4>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -453,11 +425,9 @@ export default function AdminPlayoffsPage() {
             </div>
           )}
 
-          {/* Tab: Fase Nacional */}
           {activeTab === 'nacional' && (
             <div className="space-y-6">
               {!hasFaseNacional ? (
-                /* Estado: Fase Nacional não gerada */
                 <div className="text-center py-12">
                   <Award className="w-16 h-16 text-gray-500 mx-auto mb-4" />
                   <h3 className="text-xl font-bold text-white mb-2">Fase Nacional não gerada</h3>
@@ -487,11 +457,9 @@ export default function AdminPlayoffsPage() {
                     </button>
                   </div>
 
-                  {/* Pré-visualização da Fase Nacional */}
                   <div className="mt-8 max-w-4xl mx-auto">
                     <h4 className="text-lg font-bold text-white mb-6">Estrutura da Fase Nacional</h4>
 
-                    {/* Semifinais Nacionais */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                       <div className="bg-[#1C1C24] rounded-lg p-6 border border-gray-700">
                         <h5 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
@@ -536,7 +504,6 @@ export default function AdminPlayoffsPage() {
                       </div>
                     </div>
 
-                    {/* Grande Final Nacional */}
                     <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 rounded-lg p-6">
                       <div className="text-center">
                         <Trophy className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
@@ -561,11 +528,8 @@ export default function AdminPlayoffsPage() {
                   </div>
                 </div>
               ) : (
-                /* Estado: Fase Nacional gerada */
                 <div className="space-y-6">
-                  {/* Semifinais Nacionais */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Semifinal 1 */}
                     <div className="bg-[#1C1C24] rounded-lg border border-gray-700">
                       <div className="p-4 border-b border-gray-700">
                         <h4 className="text-lg font-bold text-white flex items-center gap-2">
@@ -621,7 +585,6 @@ export default function AdminPlayoffsPage() {
                       </div>
                     </div>
 
-                    {/* Semifinal 2 */}
                     <div className="bg-[#1C1C24] rounded-lg border border-gray-700">
                       <div className="p-4 border-b border-gray-700">
                         <h4 className="text-lg font-bold text-white flex items-center gap-2">
@@ -678,7 +641,6 @@ export default function AdminPlayoffsPage() {
                     </div>
                   </div>
 
-                  {/* Grande Final Nacional */}
                   <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 rounded-lg p-6">
                     <div className="text-center">
                       <Trophy className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
@@ -738,7 +700,6 @@ export default function AdminPlayoffsPage() {
                     </div>
                   </div>
 
-                  {/* Ações da Fase Nacional */}
                   <div className="bg-[#1C1C24] rounded-lg p-6">
                     <h4 className="text-white font-semibold mb-4">Ações da Fase Nacional</h4>
 

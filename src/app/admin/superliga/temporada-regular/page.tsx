@@ -1,18 +1,13 @@
-// src/app/admin/superliga/temporada-regular/page.tsx
 "use client"
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { 
-  ArrowLeft, Calendar, Filter, Eye, Edit, Plus, Play, 
-  CheckCircle, Clock, AlertTriangle, BarChart3, Users,
-  Trophy, Target, RefreshCw
-} from 'lucide-react'
+import { ArrowLeft, Calendar, Filter, Eye, Plus, Play, CheckCircle, Clock, AlertTriangle, Trophy, RefreshCw } from 'lucide-react'
 import { Loading } from '@/components/ui/Loading'
 import { useJogos } from '@/hooks/useJogos'
 import { useClassificacaoSuperliga, useSuperliga } from '@/hooks/useSuperliga'
 
-type FilterStatus = 'todos' | 'AGENDADO' | 'AO_VIVO' | 'FINALIZADO' | 'ADIADO'
+type FilterStatus = 'todos' | 'AGENDADO' | 'AO VIVO' | 'FINALIZADO' | 'ADIADO'
 type FilterRodada = 'todas' | number
 
 export default function AdminTemporadaRegularPage() {
@@ -22,7 +17,6 @@ export default function AdminTemporadaRegularPage() {
   
   const temporada = '2025'
   
-  // ✅ CORREÇÃO: Usar hook correto e adicionar tratamento de erro
   const { data: superliga } = useSuperliga(temporada)
   const { 
     data: jogos = [], 
@@ -42,17 +36,14 @@ export default function AdminTemporadaRegularPage() {
 
   const isLoading = loadingJogos || loadingClassificacao
 
-  // ✅ NOVO: Tratamento de erro específico
   const hasError = jogosError || classificacaoError
   const isEmpty = jogos.length === 0 && !isLoading
 
   if (isLoading) return <Loading />
 
-  // ✅ NOVO: Tela de erro/vazio mais amigável
   if (hasError || isEmpty) {
     return (
       <div className="min-h-screen bg-[#1C1C24] p-6">
-        {/* Header */}
         <div className="flex items-center gap-4 mb-6">
           <Link 
             href="/admin/superliga"
@@ -67,7 +58,6 @@ export default function AdminTemporadaRegularPage() {
           </div>
         </div>
 
-        {/* Conteúdo de Estado Vazio */}
         <div className="text-center py-12">
           {hasError ? (
             <>
@@ -123,7 +113,6 @@ export default function AdminTemporadaRegularPage() {
             </Link>
           </div>
 
-          {/* Instruções */}
           <div className="mt-8 bg-[#272731] rounded-lg border border-gray-700 p-6 max-w-2xl mx-auto">
             <h4 className="text-white font-semibold mb-3">Para configurar a temporada regular:</h4>
             <ol className="text-gray-300 text-sm space-y-2 text-left">
@@ -138,8 +127,6 @@ export default function AdminTemporadaRegularPage() {
     )
   }
 
-  // ✅ Resto do código existente para quando há jogos...
-  // Filtrar jogos
   const jogosFiltrados = jogos.filter(jogo => {
     const statusMatch = filterStatus === 'todos' || jogo.status === filterStatus
     const rodadaMatch = filterRodada === 'todas' || jogo.rodada === filterRodada
@@ -148,7 +135,6 @@ export default function AdminTemporadaRegularPage() {
     return statusMatch && rodadaMatch && conferenciaMatch
   })
 
-  // Agrupar jogos por rodada
   const jogosPorRodada = jogosFiltrados.reduce((acc, jogo) => {
     const rodada = jogo.rodada
     if (!acc[rodada]) acc[rodada] = []
@@ -156,18 +142,16 @@ export default function AdminTemporadaRegularPage() {
     return acc
   }, {} as Record<number, typeof jogos>)
 
-  // Calcular estatísticas
   const stats = {
     totalJogos: jogos.length,
     jogosFinalizados: jogos.filter(j => j.status === 'FINALIZADO').length,
     jogosAgendados: jogos.filter(j => j.status === 'AGENDADO').length,
-    jogosAoVivo: jogos.filter(j => j.status === 'AO_VIVO').length,
+    jogosAoVivo: jogos.filter(j => j.status === 'AO VIVO').length,
     proximoJogo: jogos.find(j => j.status === 'AGENDADO' && new Date(j.dataJogo) > new Date()),
   }
 
   return (
     <div className="min-h-screen bg-[#1C1C24] p-6">
-      {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <Link 
           href="/admin/superliga"
@@ -200,7 +184,6 @@ export default function AdminTemporadaRegularPage() {
         </div>
       </div>
 
-      {/* Estatísticas Rápidas */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-[#272731] rounded-lg border border-gray-700 p-4">
           <div className="flex items-center justify-between">
@@ -243,7 +226,6 @@ export default function AdminTemporadaRegularPage() {
         </div>
       </div>
 
-      {/* Filtros */}
       <div className="bg-[#272731] rounded-lg border border-gray-700 p-4 mb-6">
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2">
@@ -292,7 +274,6 @@ export default function AdminTemporadaRegularPage() {
         </div>
       </div>
 
-      {/* Lista de Jogos por Rodada */}
       <div className="space-y-6">
         {Object.entries(jogosPorRodada)
           .sort(([a], [b]) => parseInt(a) - parseInt(b))
@@ -338,7 +319,7 @@ export default function AdminTemporadaRegularPage() {
                       <div className="flex items-center gap-3">
                         <div className={`px-2 py-1 rounded text-xs font-medium ${
                           jogo.status === 'FINALIZADO' ? 'bg-green-500/20 text-green-400' :
-                          jogo.status === 'AO_VIVO' ? 'bg-red-500/20 text-red-400' :
+                          jogo.status === 'AO VIVO' ? 'bg-red-500/20 text-red-400' :
                           jogo.status === 'AGENDADO' ? 'bg-yellow-500/20 text-yellow-400' :
                           'bg-gray-500/20 text-gray-400'
                         }`}>
@@ -367,7 +348,6 @@ export default function AdminTemporadaRegularPage() {
           ))}
       </div>
 
-      {/* Ações Rápidas */}
       <div className="mt-8 bg-[#272731] rounded-lg border border-gray-700 p-6">
         <h3 className="text-white font-semibold mb-4">Ações Rápidas</h3>
         <div className="flex flex-wrap gap-3">

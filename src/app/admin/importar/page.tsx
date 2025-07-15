@@ -1,18 +1,8 @@
 "use client"
 
 import { useState } from 'react'
-import {
-  Upload, FileSpreadsheet, Users, Calendar, BarChart3,
-  CheckCircle, AlertTriangle, Clock, Download, RefreshCw,
-  ArrowRight, FileText, Target, Trophy
-} from 'lucide-react'
-import {
-  useImportarTimes,
-  useImportarJogadores,
-  useImportarAgendaJogos,
-  useAtualizarEstatisticas,
-  useImportarResultados // ✅ ADICIONADO - estava faltando
-} from '@/hooks/useImportacao'
+import { Upload, FileSpreadsheet, Users, Calendar, BarChart3, CheckCircle, AlertTriangle, Download, RefreshCw, ArrowRight, Trophy } from 'lucide-react'
+import { useImportarTimes, useImportarJogadores, useImportarAgendaJogos, useAtualizarEstatisticas, useImportarResultados } from '@/hooks/useImportacao'
 
 type ImportStep = 'times' | 'jogadores' | 'agenda' | 'resultados' | 'estatisticas'
 
@@ -35,11 +25,10 @@ export default function AdminImportarPage() {
     data_jogo: ''
   })
 
-  // Hooks de importação
   const importTimesMutation = useImportarTimes()
   const importJogadoresMutation = useImportarJogadores()
   const importAgendaMutation = useImportarAgendaJogos()
-  const importResultadosMutation = useImportarResultados() // ✅ CORRIGIDO - agora está definido
+  const importResultadosMutation = useImportarResultados() 
   const atualizarEstatisticasMutation = useAtualizarEstatisticas()
 
   const steps: ImportStepConfig[] = [
@@ -100,7 +89,7 @@ export default function AdminImportarPage() {
   const isUploading = importTimesMutation.isPending ||
     importJogadoresMutation.isPending ||
     importAgendaMutation.isPending ||
-    importResultadosMutation?.isPending || // ✅ CORRIGIDO - agora funciona
+    importResultadosMutation?.isPending || 
     atualizarEstatisticasMutation.isPending
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,10 +125,9 @@ export default function AdminImportarPage() {
             alert('Preencha o ID do jogo e a data')
             return
           }
-          // ✅ CORRIGIDO - tratamento correto do File | null
           if (selectedFile) {
             await atualizarEstatisticasMutation.mutateAsync({
-              arquivo: selectedFile, // Agora TypeScript sabe que não é null
+              arquivo: selectedFile, 
               idJogo: formData.id_jogo,
               dataJogo: formData.data_jogo
             })
@@ -147,7 +135,6 @@ export default function AdminImportarPage() {
           break
       }
 
-      // Reset form after success
       setSelectedFile(null)
       setFormData({ id_jogo: '', data_jogo: '' })
 
@@ -165,7 +152,7 @@ export default function AdminImportarPage() {
       case 'agenda':
         return importAgendaMutation.isSuccess ? 'success' : 'pending'
       case 'resultados':
-        return importResultadosMutation?.isSuccess ? 'success' : 'pending' // ✅ CORRIGIDO
+        return importResultadosMutation?.isSuccess ? 'success' : 'pending' 
       case 'estatisticas':
         return atualizarEstatisticasMutation.isSuccess ? 'success' : 'pending'
       default:
@@ -175,7 +162,6 @@ export default function AdminImportarPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Importar Dados</h1>
@@ -192,7 +178,6 @@ export default function AdminImportarPage() {
         </div>
       </div>
 
-      {/* Step Navigation */}
       <div className="bg-[#272731] rounded-lg border border-gray-700 p-4">
         <div className="flex flex-wrap gap-2">
           {steps.map((step) => (
@@ -214,9 +199,7 @@ export default function AdminImportarPage() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="grid grid-cols-1 gap-6">
-        {/* Upload Form */}
         <div className="lg:col-span-2">
           <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
             <div className="flex items-center gap-3 mb-6">
@@ -228,7 +211,6 @@ export default function AdminImportarPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* File Upload */}
               <div>
                 <label className="block text-sm text-gray-400 mb-2">
                   Arquivo ({currentStep.fileFormat})
@@ -264,7 +246,6 @@ export default function AdminImportarPage() {
                 </div>
               </div>
 
-              {/* Campos extras para estatísticas */}
               {activeStep === 'estatisticas' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -289,7 +270,6 @@ export default function AdminImportarPage() {
                 </div>
               )}
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={!selectedFile || isUploading}
@@ -312,7 +292,6 @@ export default function AdminImportarPage() {
               </button>
             </form>
 
-            {/* Success Messages */}
             {importTimesMutation.isSuccess && activeStep === 'times' && (
               <div className="mt-4 p-4 bg-green-900/20 border border-green-500 rounded-lg">
                 <div className="flex items-center gap-2 text-green-400">
@@ -358,7 +337,6 @@ export default function AdminImportarPage() {
               </div>
             )}
 
-            {/* Error Messages */}
             {(importTimesMutation.error || importJogadoresMutation.error || importAgendaMutation.error || importResultadosMutation?.error || atualizarEstatisticasMutation.error) && (
               <div className="mt-4 p-4 bg-red-900/20 border border-red-500 rounded-lg">
                 <div className="flex items-center gap-2 text-red-400">
@@ -374,7 +352,6 @@ export default function AdminImportarPage() {
         </div>
       </div>
 
-      {/* Progress Steps */}
       <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
         <h3 className="text-lg font-bold text-white mb-4">Sequência Recomendada</h3>
 
