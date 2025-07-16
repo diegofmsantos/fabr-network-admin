@@ -1,8 +1,9 @@
 "use client"
 
 import { useState } from 'react'
-import { Upload, FileSpreadsheet, Users, Calendar, BarChart3, CheckCircle, AlertTriangle, Download, RefreshCw, ArrowRight, Trophy } from 'lucide-react'
+import { Upload, FileSpreadsheet, Users, Calendar, BarChart3, CheckCircle, AlertTriangle, Download, RefreshCw, ArrowRight, Trophy, Trash2 } from 'lucide-react'
 import { useImportarTimes, useImportarJogadores, useImportarAgendaJogos, useAtualizarEstatisticas, useImportarResultados } from '@/hooks/useImportacao'
+
 
 type ImportStep = 'times' | 'jogadores' | 'agenda' | 'resultados' | 'estatisticas'
 
@@ -20,6 +21,8 @@ interface ImportStepConfig {
 export default function AdminImportarPage() {
   const [activeStep, setActiveStep] = useState<ImportStep>('times')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [isResettingDatabase, setIsResettingDatabase] = useState(false)
+  const [showResetConfirm, setShowResetConfirm] = useState(false)
   const [formData, setFormData] = useState({
     id_jogo: '',
     data_jogo: ''
@@ -28,7 +31,7 @@ export default function AdminImportarPage() {
   const importTimesMutation = useImportarTimes()
   const importJogadoresMutation = useImportarJogadores()
   const importAgendaMutation = useImportarAgendaJogos()
-  const importResultadosMutation = useImportarResultados() 
+  const importResultadosMutation = useImportarResultados()
   const atualizarEstatisticasMutation = useAtualizarEstatisticas()
 
   const steps: ImportStepConfig[] = [
@@ -89,7 +92,7 @@ export default function AdminImportarPage() {
   const isUploading = importTimesMutation.isPending ||
     importJogadoresMutation.isPending ||
     importAgendaMutation.isPending ||
-    importResultadosMutation?.isPending || 
+    importResultadosMutation?.isPending ||
     atualizarEstatisticasMutation.isPending
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -127,7 +130,7 @@ export default function AdminImportarPage() {
           }
           if (selectedFile) {
             await atualizarEstatisticasMutation.mutateAsync({
-              arquivo: selectedFile, 
+              arquivo: selectedFile,
               idJogo: formData.id_jogo,
               dataJogo: formData.data_jogo
             })
@@ -152,11 +155,44 @@ export default function AdminImportarPage() {
       case 'agenda':
         return importAgendaMutation.isSuccess ? 'success' : 'pending'
       case 'resultados':
-        return importResultadosMutation?.isSuccess ? 'success' : 'pending' 
+        return importResultadosMutation?.isSuccess ? 'success' : 'pending'
       case 'estatisticas':
         return atualizarEstatisticasMutation.isSuccess ? 'success' : 'pending'
       default:
         return 'pending'
+    }
+  }
+
+  const handleResetDatabase = async () => {
+    if (!showResetConfirm) {
+      setShowResetConfirm(true)
+      return
+    }
+
+    try {
+      setIsResettingDatabase(true)
+
+      const response = await fetch('/api/admin/reset-database', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (response.ok) {
+        alert('✅ Banco de dados resetado com sucesso!')
+        // Opcional: recarregar a página
+        window.location.reload()
+      } else {
+        const error = await response.text()
+        alert(`❌ Erro ao resetar banco: ${error}`)
+      }
+    } catch (error) {
+      console.error('Erro ao resetar banco:', error)
+      alert('❌ Erro ao resetar banco de dados')
+    } finally {
+      setIsResettingDatabase(false)
+      setShowResetConfirm(false)
     }
   }
 
@@ -185,10 +221,10 @@ export default function AdminImportarPage() {
               key={step.id}
               onClick={() => setActiveStep(step.id)}
               className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeStep === step.id
-                  ? 'bg-[#63E300] text-black'
-                  : getStepStatus(step) === 'success'
-                    ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                    : 'bg-[#1C1C24] text-gray-300 hover:bg-gray-700'
+                ? 'bg-[#63E300] text-black'
+                : getStepStatus(step) === 'success'
+                  ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                  : 'bg-[#1C1C24] text-gray-300 hover:bg-gray-700'
                 }`}
             >
               <step.icon className="w-4 h-4" />
@@ -274,8 +310,8 @@ export default function AdminImportarPage() {
                 type="submit"
                 disabled={!selectedFile || isUploading}
                 className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-md font-semibold transition-colors ${!selectedFile || isUploading
-                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                    : 'bg-[#63E300] text-black hover:bg-[#50B800]'
+                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                  : 'bg-[#63E300] text-black hover:bg-[#50B800]'
                   }`}
               >
                 {isUploading ? (
@@ -359,8 +395,8 @@ export default function AdminImportarPage() {
           {steps.map((step, index) => (
             <div key={step.id} className="flex items-center gap-2 flex-shrink-0">
               <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${getStepStatus(step) === 'success'
-                  ? 'bg-green-500/20 text-green-400'
-                  : 'bg-gray-500/20 text-gray-400'
+                ? 'bg-green-500/20 text-green-400'
+                : 'bg-gray-500/20 text-gray-400'
                 }`}>
                 <span className="text-sm font-medium">{index + 1}</span>
                 <span className="text-sm">{step.title}</span>
@@ -380,6 +416,67 @@ export default function AdminImportarPage() {
           Siga esta sequência para configurar corretamente a Superliga.
           Após importar times, jogadores e agenda, você poderá criar a Superliga.
         </p>
+      </div>
+      <div className="mt-12 border-t border-gray-700 pt-8">
+        <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-6">
+          <div className="flex items-start gap-4">
+            <AlertTriangle className="w-6 h-6 text-red-400 flex-shrink-0 mt-1" />
+
+            <div className="flex-1">
+              <h3 className="text-lg font-bold text-red-400 mb-2">
+                ⚠️ Zona de Perigo
+              </h3>
+
+              <p className="text-gray-300 text-sm mb-4">
+                Esta ação irá <strong>deletar TODOS os dados</strong> do banco de dados
+                e resetar os IDs para 1. Use apenas para desenvolvimento/teste.
+              </p>
+
+              <div className="bg-red-950/50 border border-red-600/30 rounded p-3 mb-4">
+                <p className="text-red-300 text-xs">
+                  <strong>⚠️ ATENÇÃO:</strong> Esta operação não pode ser desfeita!
+                  Todos os times, jogadores, jogos, estatísticas e campeonatos serão permanentemente removidos.
+                </p>
+              </div>
+
+              {!showResetConfirm ? (
+                <button
+                  onClick={handleResetDatabase}
+                  className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md font-medium transition-colors"
+                  disabled={isResettingDatabase}
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Resetar Banco de Dados
+                </button>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-yellow-300 text-sm font-medium">
+                    🔄 Tem certeza que deseja resetar o banco?
+                  </p>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleResetDatabase}
+                      disabled={isResettingDatabase}
+                      className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md font-medium transition-colors disabled:opacity-50"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      {isResettingDatabase ? 'Resetando...' : 'Sim, Resetar Tudo'}
+                    </button>
+
+                    <button
+                      onClick={() => setShowResetConfirm(false)}
+                      disabled={isResettingDatabase}
+                      className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md font-medium transition-colors disabled:opacity-50"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )
