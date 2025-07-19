@@ -162,7 +162,7 @@ export default function AdminJogosPage() {
 
                     {jogo.status === 'AGENDADO' && (
                       <Link
-                        href={`/admin/jogos/${jogo.id}/resultado`}
+                        href={`/admin/jogos/${jogo.id}/gerenciar-jogo`}
                         className="text-blue-400 hover:text-blue-300"
                       >
                         <Edit className="w-4 h-4" />

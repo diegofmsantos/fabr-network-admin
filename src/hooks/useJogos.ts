@@ -141,7 +141,7 @@ export function useJogos(filters?: JogosFilters) {
   return useQuery({
     queryKey: queryKeys.jogos.list(filters || {}),
     queryFn: () => JogosService.getJogos(filters),
-    staleTime: 1000 * 60 * 5, 
+    staleTime: 1000 * 60 * 5,
     retry: 2,
     refetchOnWindowFocus: false,
     throwOnError: false
@@ -185,6 +185,55 @@ export function useAtualizarResultadoJogo() {
     },
     onError: (error: any) => {
       notifications.error('Erro ao atualizar resultado', error.message)
+    }
+  })
+}
+
+class GerenciarJogoService extends BaseService {
+  async atualizarJogoCompleto(id: number, dados: {
+    placarCasa?: number
+    placarVisitante?: number
+    dataJogo?: string
+    local?: string
+    observacoes?: string
+    status?: string
+  }): Promise<{ message: string; jogo: Jogo }> {
+    return this.put(`/admin/jogos/${id}/gerenciar`, dados)
+  }
+}
+
+// Hook para atualizar jogo completo
+export function useGerenciarJogo() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, dados }: {
+      id: number,
+      dados: {
+        placarCasa?: number
+        placarVisitante?: number
+        dataJogo?: string
+        local?: string
+        observacoes?: string
+        status?: string
+      }
+    }) => {
+      const service = new GerenciarJogoService()
+      return service.atualizarJogoCompleto(id, dados)
+    },
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.jogos.detail(id)
+      })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.jogos.lists()
+      })
+      // Adicione notificação aqui se tiver sistema de notificações
+      console.log('✅ Jogo atualizado com sucesso!')
+    },
+    onError: (error: any) => {
+      // Adicione notificação de erro aqui se tiver sistema de notificações
+      console.error('❌ Erro ao atualizar jogo:', error.message)
     }
   })
 }

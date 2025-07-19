@@ -1,4 +1,4 @@
-import { Jogador } from '@/types'
+import { Jogador, Jogo } from '@/types'
 import { BaseService } from './base.service'
 
 export class JogadoresService extends BaseService {

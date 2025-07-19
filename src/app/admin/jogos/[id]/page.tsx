@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { ArrowLeft, Calendar, MapPin, Users, Edit, Upload, Clock, CheckCircle, PlayCircle, AlertTriangle } from 'lucide-react'
 import { Loading } from '@/components/ui/Loading'
 import { useJogo, type Jogo } from '@/hooks/useJogos'
+import Image from 'next/image'
+import { ImageService } from '@/utils/services/ImageService'
 
 export default function DetalheJogoPage() {
   const params = useParams()
@@ -48,15 +50,15 @@ export default function DetalheJogoPage() {
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString)
     return {
-      date: date.toLocaleDateString('pt-BR', { 
+      date: date.toLocaleDateString('pt-BR', {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
         day: 'numeric'
       }),
-      time: date.toLocaleTimeString('pt-BR', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
+      time: date.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit'
       })
     }
   }
@@ -93,13 +95,13 @@ export default function DetalheJogoPage() {
     <div className="min-h-screen bg-[#1C1C24] p-6">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center gap-4 mb-6">
-          <Link 
+          <Link
             href="/admin/jogos"
             className="p-2 rounded-lg bg-[#272731] border border-gray-700 hover:border-gray-600 transition-colors"
           >
             <ArrowLeft className="w-5 h-5 text-white" />
           </Link>
-          
+
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-white">Detalhes do Jogo</h1>
             <p className="text-gray-400">
@@ -110,11 +112,11 @@ export default function DetalheJogoPage() {
           <div className="flex gap-3">
             {(jogoTyped.status === 'AGENDADO' || jogoTyped.status === 'AO VIVO') && (
               <Link
-                href={`/admin/jogos/${jogoTyped.id}/resultado`}
+                href={`/admin/jogos/${jogoTyped.id}/gerenciar-jogo`}
                 className="inline-flex items-center bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700 transition-colors"
               >
                 <Edit className="w-4 h-4 mr-2" />
-                Inserir Resultado
+                Gerenciar Jogo
               </Link>
             )}
 
@@ -130,7 +132,7 @@ export default function DetalheJogoPage() {
 
         <div className="bg-[#272731] rounded-lg border border-gray-700 p-6 mb-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
+
             <div className="lg:col-span-2">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -215,9 +217,13 @@ export default function DetalheJogoPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
             <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <div 
-                className="w-4 h-4 rounded" 
-                style={{ backgroundColor: jogo.timeCasa.cor || '#63E300' }}
+              <Image
+                src={ImageService.getTeamLogo(jogo.timeCasa?.nome || '')}
+                alt={jogo.timeCasa?.nome || ''}
+                width={48}
+                height={48}
+                className="w-12 h-12 object-contain"
+                onError={(e) => ImageService.handleTeamLogoError(e, jogo.timeCasa?.nome || '')}
               />
               {jogo.timeCasa.nome} (Casa)
             </h3>
@@ -249,9 +255,13 @@ export default function DetalheJogoPage() {
 
           <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
             <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <div 
-                className="w-4 h-4 rounded" 
-                style={{ backgroundColor: jogo.timeVisitante.cor || '#63E300' }}
+              <Image
+                src={ImageService.getTeamLogo(jogo.timeVisitante?.nome || '')}
+                alt={jogo.timeVisitante?.nome || ''}
+                width={48}
+                height={48}
+                className="w-12 h-12 object-contain"
+                onError={(e) => ImageService.handleTeamLogoError(e, jogo.timeVisitante?.nome || '')}
               />
               {jogo.timeVisitante.nome} (Visitante)
             </h3>
@@ -293,28 +303,6 @@ export default function DetalheJogoPage() {
               <p className="text-sm mt-2">
                 {jogo.estatisticas.length} registros de estatísticas encontrados
               </p>
-            </div>
-          </div>
-        )}
-
-        {jogo.status !== 'FINALIZADO' && (
-          <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Próximos Passos</h3>
-            <div className="flex flex-wrap gap-3">
-              <Link
-                href={`/admin/jogos/${jogo.id}/resultado`}
-                className="inline-flex items-center bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700 transition-colors"
-              >
-                <Edit className="w-4 h-4 mr-2" />
-                Inserir Resultado
-              </Link>
-              <Link
-                href="/importar"
-                className="inline-flex items-center bg-[#63E300] text-black px-4 py-2 rounded-md font-semibold hover:bg-[#50B800] transition-colors"
-              >
-                <Upload className="w-4 h-4 mr-2" />
-                Importar Estatísticas
-              </Link>
             </div>
           </div>
         )}

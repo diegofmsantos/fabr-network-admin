@@ -85,6 +85,7 @@ export class SuperligaService extends BaseService {
     const service = new SuperligaService()
     return service.get(`/superliga/${temporada}/jogos`, filters)
   }
+  
 
   static async getProximosJogos(temporada: string, limite?: number) {
     const service = new SuperligaService()
