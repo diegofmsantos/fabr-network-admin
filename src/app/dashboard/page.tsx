@@ -14,7 +14,7 @@ interface Relatorio {
 }
 
 export default function DashboardPage() {
-    const [temporada, setTemporada] = useState("2024")
+    const [temporada, setTemporada] = useState("2025")
     const [filtroAtivo, setFiltroAtivo] = useState<string | null>(null)
     const [resultados, setResultados] = useState<any>(null)
 

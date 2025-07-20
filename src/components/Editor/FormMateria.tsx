@@ -12,6 +12,8 @@ import { Materia } from '@/types'
 import { useMaterias, useCreateMateria } from '@/hooks/useMaterias'
 
 export const FormMateria = () => {
+  console.log('🔍 API Base URL:', process.env.NEXT_PUBLIC_API_BASE_URL)
+  console.log('🔍 Tentando carregar matérias...')
   const { data: materias = [], isLoading: loadingMaterias } = useMaterias()
   const createMateriaMutation = useCreateMateria()
 
@@ -444,10 +446,14 @@ export const FormMateria = () => {
                   >
                     <div className={`relative ${activeView === 'list' ? 'h-28 w-40' : 'h-48 w-full'}`}>
                       <Image
-                        src={materia.imagem}
+                        src={materia.imagem || '/placeholder-image.png'}
                         alt={materia.titulo}
                         fill
                         className="object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = '/placeholder-image.png';
+                        }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-70"></div>
                     </div>
@@ -464,10 +470,14 @@ export const FormMateria = () => {
                         <div className="flex items-center gap-2">
                           <div className="relative w-8 h-8 rounded-full overflow-hidden bg-[#272731]">
                             <Image
-                              src={materia.autorImage}
+                              src={materia.autorImage || '/placeholder-avatar.png'} 
                               alt={materia.autor}
                               fill
                               className="object-cover"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = '/placeholder-avatar.png';
+                              }}
                             />
                           </div>
                           <span className="text-gray-400 text-sm">

@@ -24,6 +24,6 @@ export class MateriasService extends BaseService {
 
   static async deleteMateria(id: number): Promise<void> {
     const service = new MateriasService()
-    return service.delete(`/materia/${id}`)
+    return service.delete(`/materias/${id}`)
   }
 }
