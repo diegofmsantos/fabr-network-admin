@@ -269,7 +269,7 @@ export function useImportarAgendaJogos() {
       )
     },
     meta: {
-      timeout: 30000, 
+      timeout: 30000,
     }
   })
 }
@@ -309,6 +309,60 @@ export function useImportarResultados() {
     },
     meta: {
       timeout: 60000,
+    }
+  })
+}
+
+export function useResetDatabase() {
+  const queryClient = useQueryClient()
+  const notifications = useNotifications()
+
+  return useMutation({
+    mutationFn: () => ImportacaoService.resetDatabase(),
+    onSuccess: (result) => {
+      // Limpar todos os caches
+      queryClient.clear()
+
+      // Invalidar queries específicas
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.times.all
+      })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.jogadores.all
+      })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.campeonatos.all
+      })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.jogos.all
+      })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.materias.all
+      })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.admin.all
+      })
+
+      if (result.success) {
+        notifications.success(
+          'Banco resetado com sucesso!',
+          result.message
+        )
+      } else {
+        notifications.warning(
+          'Reset concluído com avisos',
+          result.warnings || 'Alguns dados podem não ter sido removidos'
+        )
+      }
+    },
+    onError: (error: any) => {
+      notifications.error(
+        'Erro ao resetar banco',
+        error.message || 'Tente novamente ou verifique os logs'
+      )
+    },
+    meta: {
+      timeout: 60000, // 1 minuto
     }
   })
 }

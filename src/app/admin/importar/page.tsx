@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Upload, FileSpreadsheet, Users, Calendar, BarChart3, CheckCircle, AlertTriangle, Download, RefreshCw, ArrowRight, Trophy, Trash2 } from 'lucide-react'
-import { useImportarTimes, useImportarJogadores, useImportarAgendaJogos, useAtualizarEstatisticas, useImportarResultados } from '@/hooks/useImportacao'
+import { useImportarTimes, useImportarJogadores, useImportarAgendaJogos, useAtualizarEstatisticas, useImportarResultados, useResetDatabase } from '@/hooks/useImportacao'
 
 
 type ImportStep = 'times' | 'jogadores' | 'agenda' | 'resultados' | 'estatisticas'
@@ -21,7 +21,6 @@ interface ImportStepConfig {
 export default function AdminImportarPage() {
   const [activeStep, setActiveStep] = useState<ImportStep>('times')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [isResettingDatabase, setIsResettingDatabase] = useState(false)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   const [formData, setFormData] = useState({
     id_jogo: '',
@@ -33,6 +32,8 @@ export default function AdminImportarPage() {
   const importAgendaMutation = useImportarAgendaJogos()
   const importResultadosMutation = useImportarResultados()
   const atualizarEstatisticasMutation = useAtualizarEstatisticas()
+  const resetDatabaseMutation = useResetDatabase()
+  const isResettingDatabase = resetDatabaseMutation.isPending
 
   const steps: ImportStepConfig[] = [
     {
@@ -170,28 +171,11 @@ export default function AdminImportarPage() {
     }
 
     try {
-      setIsResettingDatabase(true)
-
-      const response = await fetch('/api/admin/reset-database', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-
-      if (response.ok) {
-        alert('✅ Banco de dados resetado com sucesso!')
-        // Opcional: recarregar a página
-        window.location.reload()
-      } else {
-        const error = await response.text()
-        alert(`❌ Erro ao resetar banco: ${error}`)
-      }
+      await resetDatabaseMutation.mutateAsync()
+      setTimeout(() => window.location.reload(), 2000)
     } catch (error) {
-      console.error('Erro ao resetar banco:', error)
-      alert('❌ Erro ao resetar banco de dados')
+      console.error('Erro no reset:', error)
     } finally {
-      setIsResettingDatabase(false)
       setShowResetConfirm(false)
     }
   }

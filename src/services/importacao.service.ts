@@ -105,4 +105,19 @@ export class ImportacaoService extends BaseService {
       data_jogo: dataJogo
     }) as Promise<ImportResult>
   }
+
+  static async resetDatabase(): Promise<{
+    success: boolean
+    message: string
+    counts?: {
+      times: number
+      jogadores: number
+      campeonatos: number
+      jogos: number
+    }
+    warnings?: string
+  }> {
+    const service = new ImportacaoService()
+    return service.post('/admin/reset-database')
+  }
 }
