@@ -16,6 +16,8 @@ import { HeaderGeneral } from "./HeaderGeneral"
 import { Time, Estatisticas, Jogador } from "@/types"
 import { useTimes, useCreateTime } from '@/hooks/useTimes'
 import { useCreateJogador } from '@/hooks/useJogadores'
+import Image from "next/image"
+import { ImageService } from "@/utils/services/ImageService"
 
 type TimeFormData = z.infer<typeof TimeSchema>
 type JogadorFormData = z.infer<typeof JogadorSchema>
@@ -444,33 +446,51 @@ export const Times = () => {
                                 {times.map((time) => (
                                     <div
                                         key={time.id}
-                                        className="bg-[#272731] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105"
+                                        className="bg-[#272731] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 hover:border hover:border-[#63E300] group"
+                                        style={{
+                                            borderLeft: `4px solid ${time.cor || '#63E300'}`
+                                        }}
                                         onClick={() => {
                                             setSelectedTime(time);
                                             setIsTimeModalOpen(true);
                                         }}
                                     >
+                                        {/* Header com cor do time */}
+                                        <div 
+                                            className="h-2 w-full"
+                                            style={{ backgroundColor: time.cor || '#63E300' }}
+                                        ></div>
+                                        
                                         <div className="p-6">
+                                            {/* Logo e informações principais */}
                                             <div className="flex items-center justify-between mb-4">
-                                                <div
-                                                    className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-lg"
-                                                    style={{ backgroundColor: time.cor || '#63E300' }}
-                                                >
-                                                    {time.sigla?.substring(0, 2) || 'T'}
+                                                <div className="flex items-center gap-3">
+                                                    <div className="relative">
+                                                        <div className="w-24 h-24 bg-[#1C1C24] rounded-lg flex items-center justify-center p-1 border border-gray-600 group-hover:border-[#63E300] transition-colors">
+                                                            <Image
+                                                                src={ImageService.getTeamLogo(time.nome || '')}
+                                                                alt={`Logo ${time.nome}`}
+                                                                width={62}
+                                                                height={62}
+                                                                className="object-contain"
+                                                                onError={(e) => ImageService.handleTeamLogoError(e, time.nome || '')}
+                                                            />
+                                                        </div>
+                                                    </div>
                                                 </div>
                                                 <span className="text-xs text-gray-400 bg-[#1C1C24] px-2 py-1 rounded">
                                                     {time.temporada}
                                                 </span>
                                             </div>
 
-                                            <h3 className="text-white font-bold text-lg mb-2 line-clamp-2">
+                                            <h3 className="text-white font-bold text-lg mb-2 line-clamp-2 group-hover:text-[#63E300] transition-colors">
                                                 {time.nome}
                                             </h3>
 
                                             <div className="space-y-2 text-sm text-gray-400">
                                                 <div className="flex justify-between">
                                                     <span>Sigla:</span>
-                                                    <span className="text-white">{time.sigla}</span>
+                                                    <span className="text-white font-semibold">{time.sigla}</span>
                                                 </div>
                                                 <div className="flex justify-between">
                                                     <span>Cidade:</span>
@@ -478,7 +498,7 @@ export const Times = () => {
                                                 </div>
                                                 <div className="flex justify-between">
                                                     <span>Jogadores:</span>
-                                                    <span className="text-white">{time._count?.jogadores || 0}</span>
+                                                    <span className="text-[#63E300] font-bold">{time._count?.jogadores || 0}</span>
                                                 </div>
                                             </div>
                                         </div>
