@@ -358,13 +358,13 @@ export const Times = () => {
                                     <div className="space-y-6">
                                         <h3 className="text-lg font-semibold text-white">Estatísticas</h3>
                                         {estatisticas.map((grupo) => (
-                                            <div key={grupo.group} className="border border-gray-600 rounded-lg overflow-hidden">
+                                            <div key={grupo.group} className="border border-gray-600 p-2 rounded-lg overflow-hidden">
                                                 <button
                                                     type="button"
                                                     onClick={() => toggleGroup(grupo.group)}
                                                     className="w-full flex items-center justify-between p-4 bg-[#2C2C34] hover:bg-[#3C3C44] transition-colors"
                                                 >
-                                                    <span className="text-white font-medium">
+                                                    <span className="text-[#63E300] font-medium">
                                                         {(grupo as any).title || grupo.group}
                                                     </span>
                                                     <svg
@@ -378,7 +378,7 @@ export const Times = () => {
                                                     </svg>
                                                 </button>
                                                 <div
-                                                    className={`transition-all duration-300 ease-in-out overflow-hidden ${expandedGroups[grupo.group]
+                                                    className={`transition-all duration-300 ease-in-out overflow-hidden p-2 ${expandedGroups[grupo.group]
                                                         ? 'max-h-[1000px] opacity-100'
                                                         : 'max-h-0 opacity-0'
                                                         }`}
@@ -489,8 +489,8 @@ export const Times = () => {
 
                                             <div className="space-y-2 text-sm text-gray-400">
                                                 <div className="flex justify-between">
-                                                    <span>Sigla:</span>
-                                                    <span className="text-white font-semibold">{time.sigla}</span>
+                                                    <span>Head Coach:</span>
+                                                    <span className="text-white">{time.head_coach}</span>
                                                 </div>
                                                 <div className="flex justify-between">
                                                     <span>Cidade:</span>

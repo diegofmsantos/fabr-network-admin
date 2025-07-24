@@ -55,7 +55,7 @@ export const camposNumericosJogador: Array<{ id: keyof JogadorFormData; label: s
 
 export const estatisticas = [
     {
-        group: "passe",
+        group: "PASSE",
         fields: [
             { id: "passes_completos", label: "Passes Completos", type: "number" },
             { id: "passes_tentados", label: "Passes Tentados", type: "number" },
@@ -67,7 +67,7 @@ export const estatisticas = [
         ],
     },
     {
-        group: "corrida",
+        group: "CORRIDA",
         fields: [
             { id: "corridas", label: "Corridas", type: "number" },
             { id: "jardas_corridas", label: "Jardas Corridas", type: "number" },
@@ -76,7 +76,7 @@ export const estatisticas = [
         ],
     },
     {
-        group: "recepcao",
+        group: "RECEPÇÃO",
         fields: [
             { id: "recepcoes", label: "Recepções", type: "number" },
             { id: "alvo", label: "Alvo", type: "number" },
@@ -85,7 +85,7 @@ export const estatisticas = [
         ],
     },
     {
-        group: "retorno",
+        group: "RETORNO",
         fields: [
             { id: "retornos", label: "Retornos", type: "number" },
             { id: "jardas_retornadas", label: "Jardas Retornadas", type: "number" },
@@ -93,7 +93,7 @@ export const estatisticas = [
         ],
     },
     {
-        group: "defesa",
+        group: "DEFESA",
         fields: [
             { id: "tackles_totais", label: "Tackles Totais", type: "number" },
             { id: "tackles_for_loss", label: "Tackles for Loss", type: "number" },
@@ -106,7 +106,7 @@ export const estatisticas = [
         ],
     },
     {
-        group: "kicker",
+        group: "KICKER",
         fields: [
             { id: "xp_bons", label: "Extra Points Bons", type: "number" },
             { id: "tentativas_de_xp", label: "Tentativas de Extra Points", type: "number" },
@@ -116,7 +116,7 @@ export const estatisticas = [
         ],
     },
     {
-        group: "punter",
+        group: "PUNTER",
         fields: [
             { id: "punts", label: "Punts", type: "number" },
             { id: "jardas_de_punt", label: "Jardas de Punt", type: "number" },

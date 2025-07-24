@@ -312,6 +312,19 @@ export interface JogadorTime extends BaseEntity {
   // Relacionamentos (quando incluídos)
   jogador?: Jogador
   time?: Time
+
+  nome?: string        // Do jogador
+  posicao?: string     // Do jogador  
+  setor?: 'Ataque' | 'Defesa' | 'Special'  // Do jogador
+  experiencia?: number // Do jogador
+  idade?: number       // Do jogador
+  altura?: number      // Do jogador
+  peso?: number        // Do jogador
+  instagram?: string   // Do jogador
+  instagram2?: string  // Do jogador
+  cidade?: string      // Do jogador
+  nacionalidade?: string // Do jogador
+  timeFormador?: string  // Do jogador
 }
 
 // ==================== MATÉRIAS/NOTÍCIAS ====================

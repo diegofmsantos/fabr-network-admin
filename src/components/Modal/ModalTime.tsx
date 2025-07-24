@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { fieldGroups } from "@/utils/campos";
 import { Time } from "@/types";
 import { useUpdateTime, useDeleteTime } from '@/hooks/useTimes'
+import Image from "next/image";
+import { ImageService } from "@/utils/services/ImageService";
 
 export default function ModalTime({
     time,
@@ -210,24 +212,64 @@ export default function ModalTime({
                             </div>
 
                             {filteredJogadores.length > 0 ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
                                     {filteredJogadores.map((jogadorTime, index) => (
-                                        <div key={jogadorTime.id || index} className="bg-[#1C1C24] rounded-lg p-3 flex items-center hover:bg-[#2C2C34] transition-colors cursor-pointer"
-                                            onClick={() => openJogadorModal(jogadorTime.jogador)}>
-                                            <div className="p-3 flex-grow">
-                                                <h4 className="text-white font-medium">{jogadorTime.jogador?.nome}</h4>
-                                                <div className="flex items-center mt-1">
-                                                    <span className="text-xs text-gray-400 bg-[#272731] px-2 py-0.5 rounded">
-                                                        {jogadorTime.jogador?.posicao}
-                                                    </span>
-                                                    <span className="mx-2 text-gray-600">•</span>
-                                                    <span className="text-xs text-gray-400">
-                                                        {jogadorTime.jogador?.setor}
-                                                    </span>
+                                        <div className="flex-1">
+                                            <div
+                                                key={jogadorTime.id || index}
+                                                className="bg-[#1C1C24]  flex justify-between px-4 items-center rounded-lg p-2 border border-gray-800 hover:border-[#63E300] transition-all duration-200 cursor-pointer hover:-translate-y-1"
+                                                style={{
+                                                    boxShadow: `0 4px 12px ${time.cor}20, 0 0 0 1px ${time.cor}10`
+                                                }}
+                                                onClick={() => openJogadorModal(jogadorTime)}
+                                            >
+                                                {/* Imagem da Camisa */}
+                                                <div className="relative w-12 h-12 rounded-md overflow-hidden bg-[#272731]">
+                                                    {jogadorTime.camisa ? (
+                                                        <Image
+                                                            src={ImageService.getPlayerShirt(time.nome, jogadorTime.camisa)}
+                                                            alt={`Camisa ${jogadorTime.camisa}`}
+                                                            width={48}
+                                                            height={48}
+                                                            className="w-full h-full object-contain"
+                                                            onError={(e) => {
+                                                                // Fallback para avatar com inicial do nome
+                                                                const target = e.currentTarget;
+                                                                const parent = target.parentElement;
+                                                                if (parent) {
+                                                                    parent.innerHTML = `
+                                                <div class="w-full h-full bg-gradient-to-br from-[#63E300] to-[#50B800] rounded-md flex items-center justify-center">
+                                                    <span class="text-black font-bold text-sm">${jogadorTime.nome?.charAt(0)?.toUpperCase() || '?'}</span>
                                                 </div>
-                                                <div className="flex items-center mt-1">
-                                                    <span className="text-xs text-[#63E300]">
-                                                        #{jogadorTime.numero} • {jogadorTime.camisa}
+                                            `;
+                                                                }
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-gradient-to-br from-[#63E300] to-[#50B800] rounded-md flex items-center justify-center">
+                                                            <span className="text-black font-bold text-sm">
+                                                                {jogadorTime.nome?.charAt(0)?.toUpperCase() || '?'}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                {/* Nome do Jogador */}
+                                                <div className="text-center mt-3">
+                                                    <h4 className="text-white font-medium text-xs leading-tight line-clamp-2 h-8 flex items-center justify-center px-1">
+                                                        {jogadorTime.nome || 'Nome não disponível'}
+                                                    </h4>
+                                                </div>
+                                                <div className="text-center flex justify-center items-center gap-2">
+                                                    <div className="text-gray-300 text-xs font-bold">
+                                                        #{jogadorTime.numero}
+                                                    </div>
+                                                    <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${jogadorTime.setor === 'Ataque'
+                                                        ? 'bg-blue-500/20 text-blue-400'
+                                                        : jogadorTime.setor === 'Defesa'
+                                                            ? 'bg-red-500/20 text-red-400'
+                                                            : 'bg-purple-500/20 text-purple-400'
+                                                        }`}>
+                                                        {jogadorTime.posicao || 'N/A'}
                                                     </span>
                                                 </div>
                                             </div>
@@ -235,15 +277,21 @@ export default function ModalTime({
                                     ))}
                                 </div>
                             ) : (
-                                <div className="bg-[#1C1C24] p-8 rounded-lg text-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                    </svg>
-                                    {filter ? (
-                                        <p className="text-gray-400">Nenhum jogador encontrado com o termo "{filter}"</p>
-                                    ) : (
-                                        <p className="text-gray-400">Este time ainda não possui jogadores cadastrados</p>
-                                    )}
+                                <div className="bg-[#1C1C24] p-6 rounded-lg text-center border-2 border-dashed border-gray-700">
+                                    <div className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-white font-medium text-sm mb-2">
+                                        {filter ? 'Nenhum jogador encontrado' : 'Nenhum jogador cadastrado'}
+                                    </h3>
+                                    <p className="text-gray-400 text-xs">
+                                        {filter
+                                            ? `Nenhum jogador encontrado com o termo "${filter}"`
+                                            : 'Este time ainda não possui jogadores cadastrados'
+                                        }
+                                    </p>
                                 </div>
                             )}
                         </div>
