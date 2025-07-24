@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { ArrowLeft, Save, Calendar, MapPin, Users, Trophy, Clock, FileText } from 'lucide-react'
+import { ArrowLeft, Save, Calendar, MapPin, Users, Trophy, FileText } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useJogo, useGerenciarJogo } from '@/hooks/useJogos'

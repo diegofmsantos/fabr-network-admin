@@ -1,147 +1,31 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { BaseService } from '@/services/base.service'
 import { queryKeys } from './queryKeys'
 import { useNotifications } from './useNotifications'
+// ✅ IMPORTAR DO SERVICE CORRETO
+import { JogosService, Jogo } from '@/services/jogos.service'
 
 interface JogosFilters {
   temporada?: string
+  campeonatoId?: number
   status?: string
   fase?: string
   rodada?: number
   conferencia?: string
+  regional?: string
+  timeId?: number
   limite?: number
 }
 
-interface Time {
-  id: number
-  nome: string
-  sigla: string
-  logo?: string
-  cor?: string
-  presidente?: string
-  head_coach?: string
-  estadio?: string
-}
-
-interface Campeonato {
-  id: number
-  nome: string
-  temporada: string
-  isSuperliga?: boolean
-}
-
-interface EstatisticaJogo {
-  id: number
-  jogadorId: number
-  timeId: number
-  estatisticas: any
-  jogador: {
-    id: number
-    nome: string
-    posicao: string
-  }
-  time: {
-    id: number
-    nome: string
-    sigla: string
-  }
-}
-
-export interface Jogo {
-  id: number
-  campeonatoId: number
-  timeCasaId: number
-  timeVisitanteId: number
-  dataJogo: string
-  local?: string
-  rodada: number
-  fase: string
-  status: 'AGENDADO' | 'AO VIVO' | 'FINALIZADO' | 'ADIADO'
-  placarCasa?: number
-  placarVisitante?: number
-  observacoes?: string
-  estatisticasProcessadas: boolean
-
-  timeCasa: Time
-  timeVisitante: Time
-  campeonato: Campeonato
-  estatisticas?: EstatisticaJogo[]
-}
-
-class JogosService extends BaseService {
-  static async getJogos(filters?: {
-    temporada?: string
-    campeonatoId?: number
-    timeId?: number
-    status?: string
-    fase?: string
-    rodada?: number
-    limite?: number
-  }): Promise<Jogo[]> {
-    const service = new JogosService()
-
-    if (filters?.temporada) {
-      const params = new URLSearchParams()
-
-      if (filters.status) params.append('status', filters.status)
-      if (filters.fase) params.append('fase', filters.fase)
-      if (filters.rodada) params.append('rodada', filters.rodada.toString())
-      if (filters.limite) params.append('limite', filters.limite.toString())
-
-      const queryString = params.toString()
-      const url = `/superliga/${filters.temporada}/jogos${queryString ? `?${queryString}` : ''}`
-
-      return service.get<Jogo[]>(url)
-    }
-
-    if (filters?.campeonatoId) {
-      const params = new URLSearchParams()
-      if (filters.status) params.append('status', filters.status)
-      if (filters.fase) params.append('fase', filters.fase)
-      if (filters.rodada) params.append('rodada', filters.rodada.toString())
-      if (filters.timeId) params.append('timeId', filters.timeId.toString())
-      if (filters.limite) params.append('limite', filters.limite.toString())
-
-      const queryString = params.toString()
-      const url = `/admin/campeonatos/${filters.campeonatoId}/jogos${queryString ? `?${queryString}` : ''}`
-
-      return service.get<Jogo[]>(url)
-    }
-
-    const params = new URLSearchParams()
-    if (filters?.status) params.append('status', filters.status)
-    if (filters?.fase) params.append('fase', filters.fase)
-    if (filters?.rodada) params.append('rodada', filters.rodada.toString())
-    if (filters?.timeId) params.append('timeId', filters.timeId.toString())
-    if (filters?.limite) params.append('limite', filters.limite.toString())
-
-    const queryString = params.toString()
-    const url = `/admin/jogos${queryString ? `?${queryString}` : ''}`
-
-    return service.get<Jogo[]>(url)
-  }
-
-  static async getJogo(id: number): Promise<Jogo> {
-    const service = new JogosService()
-    return service.get<Jogo>(`/admin/jogos/${id}`)
-  }
-
-  static async atualizarResultado(id: number, dados: {
-    placarCasa: number
-    placarVisitante: number
-    status?: string
-    observacoes?: string
-  }): Promise<{ message: string; jogo: Jogo }> {
-    const service = new JogosService()
-    return service.put(`/admin/jogos/${id}/resultado`, dados)
-  }
-}
+// ✅ REMOVER A CLASSE JogosService DAQUI (ela deve ficar só no service)
+// ✅ MANTER APENAS OS HOOKS
 
 export function useJogos(filters?: JogosFilters) {
   return useQuery({
     queryKey: queryKeys.jogos.list(filters || {}),
     queryFn: () => JogosService.getJogos(filters),
-    staleTime: 1000 * 60 * 5,
+    enabled: true,
+    staleTime: 1000 * 60 * 5, // 5 minutos
     retry: 2,
     refetchOnWindowFocus: false,
     throwOnError: false
@@ -152,11 +36,33 @@ export function useJogo(id: number) {
   return useQuery({
     queryKey: queryKeys.jogos.detail(id),
     queryFn: () => JogosService.getJogo(id),
-    enabled: !!id,
+    enabled: !!id && id > 0,
     staleTime: 1000 * 60 * 5,
     retry: 2,
     refetchOnWindowFocus: false,
     throwOnError: false
+  })
+}
+
+export function useJogosTime(timeId: number, filters?: Omit<JogosFilters, 'timeId'>) {
+  return useQuery({
+    queryKey: [...queryKeys.jogos.all, 'jogos-time', timeId, filters],
+    queryFn: () => JogosService.getJogos({ ...filters, timeId }),
+    enabled: !!timeId && timeId > 0,
+    staleTime: 1000 * 60 * 3,
+    retry: 2,
+    refetchOnWindowFocus: false
+  })
+}
+
+export function useJogosSuperliga(temporada: string, filters?: Omit<JogosFilters, 'temporada'>) {
+  return useQuery({
+    queryKey: [...queryKeys.jogos.all, 'superliga', temporada, filters],
+    queryFn: () => JogosService.getJogos({ ...filters, temporada }),
+    enabled: !!temporada,
+    staleTime: 1000 * 60 * 3,
+    retry: 2,
+    refetchOnWindowFocus: false
   })
 }
 
@@ -189,51 +95,43 @@ export function useAtualizarResultadoJogo() {
   })
 }
 
-class GerenciarJogoService extends BaseService {
-  async atualizarJogoCompleto(id: number, dados: {
-    placarCasa?: number
-    placarVisitante?: number
-    dataJogo?: string
-    local?: string
-    observacoes?: string
-    status?: string
-  }): Promise<{ message: string; jogo: Jogo }> {
-    return this.put(`/admin/jogos/${id}/gerenciar`, dados)
-  }
-}
-
-// Hook para atualizar jogo completo
-export function useGerenciarJogo() {
+export function useFinalizarJogo() {
   const queryClient = useQueryClient()
+  const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: ({ id, dados }: {
-      id: number,
-      dados: {
-        placarCasa?: number
-        placarVisitante?: number
-        dataJogo?: string
-        local?: string
-        observacoes?: string
-        status?: string
-      }
-    }) => {
-      const service = new GerenciarJogoService()
-      return service.atualizarJogoCompleto(id, dados)
-    },
-    onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.jogos.detail(id)
-      })
+    mutationFn: (jogoId: number) => JogosService.finalizarJogo(jogoId),
+    onSuccess: (updatedJogo) => {
+      queryClient.setQueryData(queryKeys.jogos.detail(updatedJogo.id), updatedJogo)
       queryClient.invalidateQueries({
         queryKey: queryKeys.jogos.lists()
       })
-      // Adicione notificação aqui se tiver sistema de notificações
-      console.log('✅ Jogo atualizado com sucesso!')
+      notifications.success('Jogo finalizado!', 'Jogo foi marcado como finalizado')
     },
     onError: (error: any) => {
-      // Adicione notificação de erro aqui se tiver sistema de notificações
-      console.error('❌ Erro ao atualizar jogo:', error.message)
-    }
+      notifications.error('Erro ao finalizar jogo', error.message)
+    },
   })
 }
+
+export function useAdiarJogo() {
+  const queryClient = useQueryClient()
+  const notifications = useNotifications()
+
+  return useMutation({
+    mutationFn: ({ jogoId, novaData }: { jogoId: number; novaData?: string }) =>
+      JogosService.adiarJogo(jogoId, novaData),
+    onSuccess: (updatedJogo) => {
+      queryClient.setQueryData(queryKeys.jogos.detail(updatedJogo.id), updatedJogo)
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.jogos.lists()
+      })
+      notifications.success('Jogo adiado!', 'Jogo foi marcado como adiado')
+    },
+    onError: (error: any) => {
+      notifications.error('Erro ao adiar jogo', error.message)
+    },
+  })
+}
+
+export type { Jogo, JogosFilters }

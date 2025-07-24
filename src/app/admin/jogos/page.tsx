@@ -129,8 +129,8 @@ export default function AdminJogosPage() {
                       <span>{jogo.timeVisitante?.nome || 'Time Visitante'}</span>
                     </div>
                     {jogo.status === 'FINALIZADO' && (
-                      <div className="text-[#63E300] text-xs mt-1">
-                        {jogo.placarCasa} x {jogo.placarVisitante}
+                      <div className="text-[#63E300] text-md mt-1 flex justify-start gap-16 ml-7 items-center">
+                        <div>{jogo.placarCasa}</div> x <div>{jogo.placarVisitante}</div>
                       </div>
                     )}
                   </div>
