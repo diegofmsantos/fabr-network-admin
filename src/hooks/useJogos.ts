@@ -2,7 +2,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from './queryKeys'
 import { useNotifications } from './useNotifications'
-// ✅ IMPORTAR DO SERVICE CORRETO
 import { JogosService, Jogo } from '@/services/jogos.service'
 
 interface JogosFilters {
@@ -152,7 +151,6 @@ export function useGerenciarJogo() {
       id: number; 
       dados: GerenciarJogoData
     }): Promise<Jogo> => {
-      // Se há placar nos dados, usar endpoint de resultado
       if (dados.placarCasa !== undefined && dados.placarVisitante !== undefined) {
         const resultado = await JogosService.atualizarResultado(id, {
           placarCasa: dados.placarCasa,
@@ -160,11 +158,9 @@ export function useGerenciarJogo() {
           status: dados.status,
           observacoes: dados.observacoes
         })
-        // Retornar apenas o jogo do resultado
         return resultado.jogo
       }
       
-      // Senão, usar endpoint de atualização geral
       const dadosAtualizacao: Partial<Jogo> = {}
       
       if (dados.dataJogo) {
@@ -183,21 +179,16 @@ export function useGerenciarJogo() {
       return JogosService.atualizarJogo(id, dadosAtualizacao)
     },
     onSuccess: (jogoAtualizado, { id }) => {
-      // Atualizar cache do jogo específico
       queryClient.setQueryData(queryKeys.jogos.detail(id), jogoAtualizado)
 
-      // Invalidar listas de jogos
       queryClient.invalidateQueries({
         queryKey: queryKeys.jogos.lists()
       })
 
-      // ✅ SOLUÇÃO: Invalidar superliga sempre, não importa se tem temporada ou não
-      // Isso garante que os dados sejam atualizados para qualquer jogo da superliga
       queryClient.invalidateQueries({
         queryKey: ['superliga']
       })
 
-      // ✅ ADICIONAL: Se for especificamente superliga 2025, invalidar também
       queryClient.invalidateQueries({
         queryKey: ['superliga', '2025']
       })

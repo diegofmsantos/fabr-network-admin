@@ -57,30 +57,22 @@ export default function AdminSuperligaPage() {
       color: 'gray',
       stats: 'Configurar',
       enabled: true
-    }
-  ]
-
-  const quickActions = [
-    {
-      title: 'Visualizar Site Público',
-      description: 'Ver como o público visualiza a Superliga',
-      href: `/superliga/${selectedTemporada}`,
-      icon: Eye,
-      color: 'green'
     },
-    {
+        {
       title: 'Gerenciar Jogos',
       description: 'Inserir resultados e gerenciar agenda',
       href: '/admin/jogos',
       icon: Calendar,
-      color: 'blue'
+      color: 'blue',
+      enabled: true
     },
     {
       title: 'Importar Dados',
       description: 'Upload de planilhas e estatísticas',
       href: '/admin/importar',
       icon: Users,
-      color: 'purple'
+      color: 'purple',
+      enabled: true
     }
   ]
 
@@ -253,85 +245,6 @@ export default function AdminSuperligaPage() {
                 </p>
               </Link>
             ))}
-          </div>
-        </div>
-      )}
-
-      <div>
-        <h2 className="text-xl font-bold text-white mb-4">Ações Rápidas</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {quickActions.map((action, index) => (
-            <Link
-              key={index}
-              href={action.href}
-              className="group bg-[#272731] rounded-lg border border-gray-700 p-6 hover:border-gray-600 transition-all hover:transform hover:scale-105"
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <div className={`p-2 bg-${action.color}-500/20 rounded-lg`}>
-                  <action.icon className={`w-5 h-5 text-${action.color}-400`} />
-                </div>
-                <h3 className="font-semibold text-white group-hover:text-[#63E300] transition-colors">
-                  {action.title}
-                </h3>
-                <ArrowRight className="w-4 h-4 text-gray-600 group-hover:text-[#63E300] transition-colors ml-auto" />
-              </div>
-
-              <p className="text-sm text-gray-400">
-                {action.description}
-              </p>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {superligaExists && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-[#272731] rounded-lg border border-gray-700 p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-500/20 rounded-lg">
-                <Users className="w-5 h-5 text-blue-400" />
-              </div>
-              <div>
-                <div className="text-lg font-bold text-white">32</div>
-                <div className="text-sm text-gray-400">Times</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-[#272731] rounded-lg border border-gray-700 p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-500/20 rounded-lg">
-                <Users className="w-5 h-5 text-green-400" />
-              </div>
-              <div>
-                <div className="text-lg font-bold text-red-600">?</div>
-                <div className="text-sm text-gray-400">Jogadores</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-[#272731] rounded-lg border border-gray-700 p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-500/20 rounded-lg">
-                <Trophy className="w-5 h-5 text-purple-400" />
-              </div>
-              <div>
-                <div className="text-lg font-bold text-white">4</div>
-                <div className="text-sm text-gray-400">Conferências</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-[#272731] rounded-lg border border-gray-700 p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-orange-500/20 rounded-lg">
-                <Target className="w-5 h-5 text-orange-400" />
-              </div>
-              <div>
-                <div className="text-lg font-bold text-white">8</div>
-                <div className="text-sm text-gray-400">Regionais</div>
-              </div>
-            </div>
           </div>
         </div>
       )}

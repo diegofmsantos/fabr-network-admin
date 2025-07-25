@@ -51,8 +51,8 @@ export function TemporadaRegularContent({ jogosPorRodada, jogosFiltrados, onRefr
             <div className="p-4 space-y-3">
               {jogosRodada.map((jogo: any) => (
                 <div key={jogo.id} className="bg-[#1C1C24] rounded-lg p-4 border border-gray-700">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
+                  <div className="flex items-center">
+                    <div className="flex-1 justify-between flex items-center gap-5">
                       <div className="text-center">
                         <p className="text-white font-medium">{jogo.timeCasa?.sigla || 'TBD'}</p>
                         <p className="text-gray-400 text-xs">{jogo.timeCasa?.nome || 'A definir'}</p>
@@ -73,7 +73,7 @@ export function TemporadaRegularContent({ jogosPorRodada, jogosFiltrados, onRefr
                       </div>
                     </div>
 
-                    <div className="text-right">
+                    <div className="text-center flex-1">
                       <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${jogo.status === 'FINALIZADO' ? 'bg-green-500/20 text-green-400' :
                         jogo.status === 'AO VIVO' ? 'bg-red-500/20 text-red-400' :
                           jogo.status === 'ADIADO' ? 'bg-yellow-500/20 text-yellow-400' :
@@ -101,13 +101,7 @@ export function TemporadaRegularContent({ jogosPorRodada, jogosFiltrados, onRefr
                       )}
                     </div>
 
-                    <div className="flex gap-2 ml-4">
-                      <button className="p-2 bg-[#272731] text-gray-400 rounded-lg border border-gray-700 hover:border-gray-600 hover:text-white transition-colors"
-                        onClick={() => router.push(`/admin/jogos/${jogo.id}`)}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-
+                    <div className="flex-1 flex justify-end gap-2 ml-4">
                       {jogo.status !== 'FINALIZADO' && (
                         <button className="p-2 bg-[#63E300] text-black rounded-lg hover:bg-[#50B800] transition-colors"
                           onClick={() => router.push(`/admin/jogos/${jogo.id}/gerenciar-jogo`)}
@@ -115,6 +109,11 @@ export function TemporadaRegularContent({ jogosPorRodada, jogosFiltrados, onRefr
                           <Play className="w-4 h-4" />
                         </button>
                       )}
+                      <button className="p-2 bg-[#272731] text-gray-400 rounded-lg border border-gray-700 hover:border-gray-600 hover:text-white transition-colors"
+                        onClick={() => router.push(`/admin/jogos/${jogo.id}`)}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
                 </div>

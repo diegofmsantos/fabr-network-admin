@@ -214,9 +214,8 @@ export default function ModalTime({
                             {filteredJogadores.length > 0 ? (
                                 <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
                                     {filteredJogadores.map((jogadorTime, index) => (
-                                        <div className="flex-1">
+                                        <div className="flex-1" key={jogadorTime.id || index}>
                                             <div
-                                                key={jogadorTime.id || index}
                                                 className="bg-[#1C1C24]  flex justify-between px-4 items-center rounded-lg p-2 border border-gray-800 hover:border-[#63E300] transition-all duration-200 cursor-pointer hover:-translate-y-1"
                                                 style={{
                                                     boxShadow: `0 4px 12px ${time.cor}20, 0 0 0 1px ${time.cor}10`

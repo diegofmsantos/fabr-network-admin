@@ -15,12 +15,7 @@ interface SidebarItem {
 }
 
 const sidebarItems: SidebarItem[] = [
-  {
-    id: 'dashboard',
-    label: 'Dashboard',
-    href: '/admin',
-    icon: Home
-  },
+ 
   {
     id: 'superliga',
     label: 'Superliga',
