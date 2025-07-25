@@ -9,6 +9,15 @@ import { useJogo, useGerenciarJogo } from '@/hooks/useJogos'
 import { Loading } from '@/components/ui/Loading'
 import { ImageService } from '@/utils/services/ImageService'
 
+interface GerenciarJogoData {
+  placarCasa?: number
+  placarVisitante?: number
+  dataJogo?: string
+  local?: string
+  observacoes?: string
+  status?: 'AGENDADO' | 'AO VIVO' | 'FINALIZADO' | 'ADIADO'
+}
+
 export default function GerenciarJogoPage() {
   const params = useParams()
   const router = useRouter()
@@ -102,13 +111,19 @@ export default function GerenciarJogoPage() {
     // Combinar data e hora em um objeto Date
     const dataHoraCompleta = new Date(`${formData.dataJogo}T${formData.horaJogo}`)
 
-    const dadosParaAtualizar = {
+    // ✅ GARANTIR que status seja do tipo correto
+    const statusValido: 'AGENDADO' | 'AO VIVO' | 'FINALIZADO' | 'ADIADO' =
+      (['AGENDADO', 'AO VIVO', 'FINALIZADO', 'ADIADO'] as const).includes(formData.status as any)
+        ? formData.status as 'AGENDADO' | 'AO VIVO' | 'FINALIZADO' | 'ADIADO'
+        : 'AGENDADO'
+
+    const dadosParaAtualizar: GerenciarJogoData = {
       placarCasa: formData.placarCasa,
       placarVisitante: formData.placarVisitante,
       dataJogo: dataHoraCompleta.toISOString(),
       local: formData.local.trim() || undefined,
       observacoes: formData.observacoes.trim() || undefined,
-      status: formData.status
+      status: statusValido
     }
 
     atualizarJogo({
@@ -120,6 +135,7 @@ export default function GerenciarJogoPage() {
       }
     })
   }
+
 
   if (isLoading) return <Loading />
 
@@ -370,7 +386,6 @@ export default function GerenciarJogoPage() {
                   <option value="AO VIVO">Ao Vivo</option>
                   <option value="FINALIZADO">Finalizado</option>
                   <option value="ADIADO">Adiado</option>
-                  <option value="CANCELADO">Cancelado</option>
                 </select>
               </div>
 

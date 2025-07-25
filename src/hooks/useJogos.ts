@@ -17,8 +17,14 @@ interface JogosFilters {
   limite?: number
 }
 
-// ✅ REMOVER A CLASSE JogosService DAQUI (ela deve ficar só no service)
-// ✅ MANTER APENAS OS HOOKS
+interface GerenciarJogoData {
+  placarCasa?: number
+  placarVisitante?: number
+  dataJogo?: string
+  local?: string
+  observacoes?: string
+  status?: 'AGENDADO' | 'AO VIVO' | 'FINALIZADO' | 'ADIADO'
+}
 
 export function useJogos(filters?: JogosFilters) {
   return useQuery({
@@ -130,6 +136,76 @@ export function useAdiarJogo() {
     },
     onError: (error: any) => {
       notifications.error('Erro ao adiar jogo', error.message)
+    },
+  })
+}
+
+export function useGerenciarJogo() {
+  const queryClient = useQueryClient()
+  const notifications = useNotifications()
+
+  return useMutation({
+    mutationFn: async ({ 
+      id, 
+      dados 
+    }: { 
+      id: number; 
+      dados: GerenciarJogoData
+    }): Promise<Jogo> => {
+      // Se há placar nos dados, usar endpoint de resultado
+      if (dados.placarCasa !== undefined && dados.placarVisitante !== undefined) {
+        const resultado = await JogosService.atualizarResultado(id, {
+          placarCasa: dados.placarCasa,
+          placarVisitante: dados.placarVisitante,
+          status: dados.status,
+          observacoes: dados.observacoes
+        })
+        // Retornar apenas o jogo do resultado
+        return resultado.jogo
+      }
+      
+      // Senão, usar endpoint de atualização geral
+      const dadosAtualizacao: Partial<Jogo> = {}
+      
+      if (dados.dataJogo) {
+        dadosAtualizacao.dataJogo = new Date(dados.dataJogo).toISOString()
+      }
+      if (dados.local !== undefined) {
+        dadosAtualizacao.local = dados.local
+      }
+      if (dados.observacoes !== undefined) {
+        dadosAtualizacao.observacoes = dados.observacoes
+      }
+      if (dados.status) {
+        dadosAtualizacao.status = dados.status
+      }
+      
+      return JogosService.atualizarJogo(id, dadosAtualizacao)
+    },
+    onSuccess: (jogoAtualizado, { id }) => {
+      // Atualizar cache do jogo específico
+      queryClient.setQueryData(queryKeys.jogos.detail(id), jogoAtualizado)
+
+      // Invalidar listas de jogos
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.jogos.lists()
+      })
+
+      // ✅ SOLUÇÃO: Invalidar superliga sempre, não importa se tem temporada ou não
+      // Isso garante que os dados sejam atualizados para qualquer jogo da superliga
+      queryClient.invalidateQueries({
+        queryKey: ['superliga']
+      })
+
+      // ✅ ADICIONAL: Se for especificamente superliga 2025, invalidar também
+      queryClient.invalidateQueries({
+        queryKey: ['superliga', '2025']
+      })
+
+      notifications.success('Jogo atualizado!', 'As alterações foram salvas com sucesso')
+    },
+    onError: (error: any) => {
+      notifications.error('Erro ao atualizar jogo', error.message || 'Tente novamente')
     },
   })
 }

@@ -371,11 +371,10 @@ export function useTemporadaAtual() {
 export function useClassificacaoSuperliga(temporada: string) {
   return useQuery({
     queryKey: [...superligaQueryKeys.classificacao(temporada)],
-    queryFn: () => SuperligaService.getClassificacaoGeral(temporada),
+    queryFn: () => SuperligaService.getClassificacao(temporada), // ✅ ESTE USA classificacao
     enabled: !!temporada,
-    staleTime: 1000 * 60 * 5, 
+    staleTime: 1000 * 60 * 10,
     retry: 2,
     refetchOnWindowFocus: false,
   })
 }
-

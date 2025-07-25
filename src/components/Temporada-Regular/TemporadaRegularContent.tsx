@@ -1,4 +1,7 @@
+"use client"
+
 import { Calendar, Eye, Play, RefreshCw } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 interface TemporadaRegularContentProps {
   jogosPorRodada: Record<number, any[]>
@@ -7,6 +10,9 @@ interface TemporadaRegularContentProps {
 }
 
 export function TemporadaRegularContent({ jogosPorRodada, jogosFiltrados, onRefresh }: TemporadaRegularContentProps) {
+
+  const router = useRouter()
+
   if (Object.keys(jogosPorRodada).length === 0) {
     return (
       <div className="text-center py-12">
@@ -51,7 +57,7 @@ export function TemporadaRegularContent({ jogosPorRodada, jogosFiltrados, onRefr
                         <p className="text-white font-medium">{jogo.timeCasa?.sigla || 'TBD'}</p>
                         <p className="text-gray-400 text-xs">{jogo.timeCasa?.nome || 'A definir'}</p>
                       </div>
-                      
+
                       <div className="text-center px-4">
                         <p className="text-gray-400 text-sm">vs</p>
                         {jogo.status === 'FINALIZADO' && (
@@ -60,7 +66,7 @@ export function TemporadaRegularContent({ jogosPorRodada, jogosFiltrados, onRefr
                           </p>
                         )}
                       </div>
-                      
+
                       <div className="text-center">
                         <p className="text-white font-medium">{jogo.timeVisitante?.sigla || 'TBD'}</p>
                         <p className="text-gray-400 text-xs">{jogo.timeVisitante?.nome || 'A definir'}</p>
@@ -68,17 +74,16 @@ export function TemporadaRegularContent({ jogosPorRodada, jogosFiltrados, onRefr
                     </div>
 
                     <div className="text-right">
-                      <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        jogo.status === 'FINALIZADO' ? 'bg-green-500/20 text-green-400' :
+                      <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${jogo.status === 'FINALIZADO' ? 'bg-green-500/20 text-green-400' :
                         jogo.status === 'AO VIVO' ? 'bg-red-500/20 text-red-400' :
-                        jogo.status === 'ADIADO' ? 'bg-yellow-500/20 text-yellow-400' : 
-                        'bg-gray-500/20 text-gray-400'
-                      }`}>
+                          jogo.status === 'ADIADO' ? 'bg-yellow-500/20 text-yellow-400' :
+                            'bg-gray-500/20 text-gray-400'
+                        }`}>
                         {jogo.status === 'FINALIZADO' ? 'Finalizado' :
-                         jogo.status === 'AO VIVO' ? 'Ao Vivo' :
-                         jogo.status === 'ADIADO' ? 'Adiado' : 'Agendado'}
+                          jogo.status === 'AO VIVO' ? 'Ao Vivo' :
+                            jogo.status === 'ADIADO' ? 'Adiado' : 'Agendado'}
                       </div>
-                      
+
                       {jogo.dataJogo && (
                         <p className="text-gray-400 text-sm mt-1">
                           {new Date(jogo.dataJogo).toLocaleDateString('pt-BR', {
@@ -88,7 +93,7 @@ export function TemporadaRegularContent({ jogosPorRodada, jogosFiltrados, onRefr
                           })}
                         </p>
                       )}
-                      
+
                       {jogo.local && (
                         <p className="text-gray-500 text-xs mt-1">
                           {jogo.local}
@@ -97,12 +102,16 @@ export function TemporadaRegularContent({ jogosPorRodada, jogosFiltrados, onRefr
                     </div>
 
                     <div className="flex gap-2 ml-4">
-                      <button className="p-2 bg-[#272731] text-gray-400 rounded-lg border border-gray-700 hover:border-gray-600 hover:text-white transition-colors">
+                      <button className="p-2 bg-[#272731] text-gray-400 rounded-lg border border-gray-700 hover:border-gray-600 hover:text-white transition-colors"
+                        onClick={() => router.push(`/admin/jogos/${jogo.id}`)}
+                      >
                         <Eye className="w-4 h-4" />
                       </button>
-                      
+
                       {jogo.status !== 'FINALIZADO' && (
-                        <button className="p-2 bg-[#63E300] text-black rounded-lg hover:bg-[#50B800] transition-colors">
+                        <button className="p-2 bg-[#63E300] text-black rounded-lg hover:bg-[#50B800] transition-colors"
+                          onClick={() => router.push(`/admin/jogos/${jogo.id}/gerenciar-jogo`)}
+                        >
                           <Play className="w-4 h-4" />
                         </button>
                       )}
