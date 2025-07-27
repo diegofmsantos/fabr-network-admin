@@ -211,9 +211,9 @@ export default function AdminSuperligaPage() {
         <div>
           <h2 className="text-xl font-bold text-white mb-4">Gerenciamento</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {managementSections.map((section) => (
+            {managementSections.map((section, index) => (
               <Link
-                key={section.id}
+                key={index}
                 href={section.enabled ? section.href : '#'}
                 className={`group bg-[#272731] rounded-lg border border-gray-700 p-6 transition-all ${section.enabled
                     ? 'hover:border-gray-600 hover:transform hover:scale-105'

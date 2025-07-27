@@ -73,7 +73,7 @@ export default function AdminImportarPage() {
       icon: Trophy,
       color: 'yellow',
       required: false,
-      status: importResultadosMutation?.isSuccess ? 'success' : 'pending', // ✅ CORRIGIDO - agora funciona
+      status: importResultadosMutation?.isSuccess ? 'success' : 'pending', 
       fileFormat: 'Excel (.xlsx)',
     },
     {
@@ -122,7 +122,7 @@ export default function AdminImportarPage() {
           await importAgendaMutation.mutateAsync(selectedFile)
           break
         case 'resultados':
-          await importResultadosMutation?.mutateAsync(selectedFile) // ✅ CORRIGIDO - agora funciona
+          await importResultadosMutation?.mutateAsync(selectedFile) 
           break
         case 'estatisticas':
           if (!formData.id_jogo || !formData.data_jogo) {
