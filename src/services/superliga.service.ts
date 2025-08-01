@@ -126,16 +126,6 @@ export class SuperligaService extends BaseService {
     const service = new SuperligaService()
     return service.get(`/superliga/${temporada}/wild-card-ranking/${conferencia}`)
   }
-  
-  static async gerarPlayoffs(temporada: string) {
-    const service = new SuperligaService()
-    return service.post(`/superliga/${temporada}/gerar-playoffs`)
-  }
-
-  static async resetarPlayoffs(temporada: string) {
-    const service = new SuperligaService()
-    return service.post(`/superliga/${temporada}/resetar-playoffs`)
-  }
 
   static async getBracket(temporada: string) {
     const service = new SuperligaService()
@@ -151,11 +141,6 @@ export class SuperligaService extends BaseService {
     const service = new SuperligaService()
     return service.get(`/superliga/${temporada}/fase-nacional`)
   }
-
-  static async gerarFaseNacional(temporada: string) {
-    const service = new SuperligaService()
-    return service.post(`/superliga/${temporada}/gerar-fase-nacional`)
-  }
   
   static async atualizarResultadoPlayoff(jogoId: number, placarTime1: number, placarTime2: number) {
     const service = new SuperligaService()
@@ -163,11 +148,6 @@ export class SuperligaService extends BaseService {
       placarTime1,
       placarTime2
     })
-  }
-
-  static async finalizarJogoPlayoff(jogoId: number) {
-    const service = new SuperligaService()
-    return service.post(`/superliga/playoff-jogos/${jogoId}/finalizar`)
   }
   
   static async validarEstrutura(temporada: string) {
@@ -183,11 +163,6 @@ export class SuperligaService extends BaseService {
   static async repararIntegridade(temporada: string) {
     const service = new SuperligaService()
     return service.post(`/superliga/${temporada}/reparar-integridade`)
-  }
-  
-  static async simularPlayoffs(temporada: string) {
-    const service = new SuperligaService()
-    return service.post(`/superliga/${temporada}/simular-playoffs`)
   }
 
   static async simularTemporadaCompleta(temporada: string) {

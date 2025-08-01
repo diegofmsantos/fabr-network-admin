@@ -228,54 +228,6 @@ export function useGerarJogosTemporada() {
   })
 }
 
-export function useGerarPlayoffs() {
-  const queryClient = useQueryClient()
-  const notifications = useNotifications()
-
-  return useMutation({
-    mutationFn: (temporada: string) => SuperligaService.gerarPlayoffs(temporada),
-    onSuccess: (_, temporada) => {
-      queryClient.invalidateQueries({ queryKey: superligaQueryKeys.bracket(temporada) })
-      notifications.success('Playoffs gerados!', 'Chaveamento criado')
-    },
-    onError: (error: any) => {
-      notifications.error('Erro ao gerar playoffs', error.message)
-    },
-  })
-}
-
-export function useResetarPlayoffs() {
-  const queryClient = useQueryClient()
-  const notifications = useNotifications()
-
-  return useMutation({
-    mutationFn: (temporada: string) => SuperligaService.resetarPlayoffs(temporada),
-    onSuccess: (_, temporada) => {
-      queryClient.invalidateQueries({ queryKey: superligaQueryKeys.bracket(temporada) })
-      notifications.success('Playoffs resetados!', 'Chaveamento limpo')
-    },
-    onError: (error: any) => {
-      notifications.error('Erro ao resetar playoffs', error.message)
-    },
-  })
-}
-
-export function useGerarFaseNacional() {
-  const queryClient = useQueryClient()
-  const notifications = useNotifications()
-
-  return useMutation({
-    mutationFn: (temporada: string) => SuperligaService.gerarFaseNacional(temporada),
-    onSuccess: (_, temporada) => {
-      queryClient.invalidateQueries({ queryKey: superligaQueryKeys.bracket(temporada) })
-      notifications.success('Fase nacional gerada!', 'Final da Superliga criada')
-    },
-    onError: (error: any) => {
-      notifications.error('Erro ao gerar fase nacional', error.message)
-    },
-  })
-}
-
 export function useRepararIntegridade() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
