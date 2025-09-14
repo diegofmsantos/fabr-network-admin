@@ -5,7 +5,7 @@ import { Trophy, Crown, Target, Play, CheckCircle, Clock, AlertTriangle, Zap, Ey
 import { Loading } from '@/components/ui/Loading'
 import Image from 'next/image'
 import { ImageService } from '@/utils/services/ImageService'
-import { usePlayoffBracket, useResetarPlayoffs } from '@/hooks/useSuperliga'
+import { usePlayoffBracket } from '@/hooks/useSuperliga'
 
 interface PlayoffsManagerProps {
   superligaId: number
@@ -47,7 +47,6 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
   const [selectedJogo, setSelectedJogo] = useState<JogoPlayoff | null>(null)
 
   const { data: rawBracket, isLoading, error } = usePlayoffBracket(temporada)
-  const { mutate: resetarPlayoffs, isPending: resetando } = useResetarPlayoffs()
 
   const bracket: BracketData | null = rawBracket && typeof rawBracket === 'object' ? rawBracket as BracketData : null
 
@@ -398,23 +397,6 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
             </p>
           </div>
 
-          {bracket && (
-            <div className="flex gap-3">
-              <button 
-                onClick={() => resetarPlayoffs(temporada)}
-                disabled={resetando}
-                className="flex items-center gap-2 px-3 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors disabled:opacity-50"
-              >
-                <RefreshCw className="w-4 h-4" />
-                {resetando ? 'Resetando...' : 'Resetar (Dev)'}
-              </button>
-
-              <button className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
-                <Download className="w-4 h-4" />
-                Exportar
-              </button>
-            </div>
-          )}
         </div>
       </div>
 
