@@ -2,17 +2,16 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Trophy, Plus, Settings, Eye, Calendar, Users, Target,  Clock, AlertTriangle, ArrowRight } from 'lucide-react'
+import { Trophy, Plus, Settings, Eye, Calendar, Users, Target, Clock, AlertTriangle, ArrowRight } from 'lucide-react'
 import { Loading } from '@/components/ui/Loading'
-import { useSuperliga, useStatusSuperliga } from '@/hooks/useSuperliga'
-import { useJogos } from '@/hooks/useJogos'
+import { useSuperliga, useStatusSuperliga, useJogosSuperliga } from '@/hooks/useSuperliga'
 
 export default function AdminSuperligaPage() {
   const [selectedTemporada] = useState('2025')
 
   const { data: superliga, isLoading: loadingSuperliga, refetch } = useSuperliga(selectedTemporada)
   const { data: status, isLoading: loadingStatus } = useStatusSuperliga(selectedTemporada)
-  const { data: jogos = [], isLoading: loadingJogos } = useJogos({ temporada: selectedTemporada })
+  const { data: jogos = [], isLoading: loadingJogos } = useJogosSuperliga(selectedTemporada)
 
   const isLoading = loadingSuperliga || loadingStatus || loadingJogos
 
@@ -20,11 +19,14 @@ export default function AdminSuperligaPage() {
 
   const superligaExists = !!superliga
 
+  // 🔧 CORREÇÃO: Verificação segura se jogos é um array
+  const jogosArray = Array.isArray(jogos) ? jogos : []
+
   const stats = {
-    totalJogos: jogos.length,
-    jogosFinalizados: jogos.filter(j => j.status === 'FINALIZADO').length,
-    jogosAgendados: jogos.filter(j => j.status === 'AGENDADO').length,
-    proximoJogo: jogos.find(j => j.status === 'AGENDADO' && new Date(j.dataJogo) > new Date()),
+    totalJogos: jogosArray.length,
+    jogosFinalizados: jogosArray.filter(j => j.status === 'FINALIZADO').length,
+    jogosAgendados: jogosArray.filter(j => j.status === 'AGENDADO').length,
+    proximoJogo: jogosArray.find(j => j.status === 'AGENDADO' && new Date(j.dataJogo) > new Date()),
   }
 
   const managementSections = [
@@ -57,8 +59,11 @@ export default function AdminSuperligaPage() {
       color: 'gray',
       stats: 'Configurar',
       enabled: true
-    },
-        {
+    }
+  ]
+
+  const quickActions = [
+    {
       title: 'Gerenciar Jogos',
       description: 'Inserir resultados e gerenciar agenda',
       href: '/admin/jogos',
@@ -119,132 +124,120 @@ export default function AdminSuperligaPage() {
       </div>
 
       {superligaExists ? (
-        <div className="bg-gradient-to-r from-[#272731] to-[#1C1C24] rounded-lg border border-gray-700 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-xl font-bold text-white mb-1">
-                {(superliga as any)?.nome || 'Superliga de Futebol Americano'}
-              </h3>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <span className="text-green-400 font-semibold">
-                    {(status as any)?.status || 'Ativa'}
-                  </span>
+        <div className="space-y-6">
+          {/* Status Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-[#272731] border border-gray-700 rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm">Total de Jogos</p>
+                  <p className="text-2xl font-bold text-white">{stats.totalJogos}</p>
                 </div>
-                <span className="text-gray-400">•</span>
-                <span className="text-gray-400">
-                  Temporada {(superliga as any)?.temporada || selectedTemporada}
-                </span>
+                <Calendar className="w-8 h-8 text-blue-500" />
               </div>
             </div>
 
-            <div className="flex items-center gap-6">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-[#63E300]">{stats.totalJogos}</div>
-                <div className="text-xs text-gray-400">Total Jogos</div>
+            <div className="bg-[#272731] border border-gray-700 rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm">Jogos Finalizados</p>
+                  <p className="text-2xl font-bold text-white">{stats.jogosFinalizados}</p>
+                </div>
+                <Trophy className="w-8 h-8 text-green-500" />
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-400">{stats.jogosFinalizados}</div>
-                <div className="text-xs text-gray-400">Finalizados</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-400">{stats.jogosAgendados}</div>
-                <div className="text-xs text-gray-400">Agendados</div>
+            </div>
+
+            <div className="bg-[#272731] border border-gray-700 rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm">Próximos Jogos</p>
+                  <p className="text-2xl font-bold text-white">{stats.jogosAgendados}</p>
+                </div>
+                <Clock className="w-8 h-8 text-yellow-500" />
               </div>
             </div>
           </div>
 
-          {stats.proximoJogo && (
-            <div className="mt-4 p-3 bg-[#1C1C24] rounded-lg">
-              <div className="flex items-center gap-3">
-                <Clock className="w-5 h-5 text-blue-400" />
-                <div>
-                  <span className="text-white font-medium">Próximo jogo: </span>
-                  <span className="text-gray-300">
-                    {stats.proximoJogo.timeCasa.nome} vs {stats.proximoJogo.timeVisitante.nome}
-                  </span>
-                  <span className="text-gray-400 ml-2">
-                    {new Date(stats.proximoJogo.dataJogo).toLocaleDateString('pt-BR')}
-                  </span>
-                </div>
-              </div>
+          {/* Management Sections */}
+          <div>
+            <h2 className="text-xl font-bold text-white mb-4">Gerenciamento</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {managementSections.map((section) => (
+                <Link
+                  key={section.id}
+                  href={section.enabled ? section.href : '#'}
+                  className={`p-6 rounded-lg border transition-colors ${
+                    section.enabled
+                      ? 'bg-[#272731] border-gray-700 hover:border-gray-600'
+                      : 'bg-[#1C1C24] border-gray-800 opacity-50 cursor-not-allowed'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <section.icon className={`w-8 h-8 ${
+                      section.color === 'blue' ? 'text-blue-500' :
+                      section.color === 'yellow' ? 'text-yellow-500' :
+                      section.color === 'gray' ? 'text-gray-500' : 'text-gray-500'
+                    }`} />
+                    {section.enabled && <ArrowRight className="w-5 h-5 text-gray-400" />}
+                  </div>
+                  <h3 className="text-lg font-semibold text-white mb-2">{section.title}</h3>
+                  <p className="text-gray-400 text-sm mb-3">{section.description}</p>
+                  <p className="text-sm font-medium text-[#63E300]">{section.stats}</p>
+                </Link>
+              ))}
             </div>
-          )}
+          </div>
+
+          {/* Quick Actions */}
+          <div>
+            <h2 className="text-xl font-bold text-white mb-4">Ações Rápidas</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {quickActions.map((action, index) => (
+                <Link
+                  key={index}
+                  href={action.href}
+                  className="p-4 bg-[#272731] border border-gray-700 rounded-lg hover:border-gray-600 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <action.icon className={`w-6 h-6 ${
+                      action.color === 'blue' ? 'text-blue-500' :
+                      action.color === 'purple' ? 'text-purple-500' : 'text-gray-500'
+                    }`} />
+                    <div>
+                      <h3 className="font-semibold text-white">{action.title}</h3>
+                      <p className="text-sm text-gray-400">{action.description}</p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       ) : (
-        <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 rounded-lg p-6">
-          <div className="flex items-start gap-4">
-            <AlertTriangle className="w-8 h-8 text-yellow-400 mt-1" />
-            <div className="flex-1">
-              <h3 className="text-xl font-bold text-yellow-400 mb-2">
-                Superliga não encontrada
-              </h3>
-              <p className="text-gray-300 mb-4">
-                A Superliga {selectedTemporada} ainda não foi criada.
-                Certifique-se de que times e jogadores foram importados antes de criar.
-              </p>
-
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={createSuperliga}
-                  className="flex items-center gap-2 bg-[#63E300] text-black px-6 py-3 rounded-md font-semibold hover:bg-[#50B800] transition-colors"
-                >
-                  <Plus className="w-5 h-5" />
-                  Criar Superliga {selectedTemporada}
-                </button>
-
-                <Link
-                  href="/admin/importar"
-                  className="flex items-center gap-2 text-yellow-400 hover:text-yellow-300 transition-colors"
-                >
-                  <ArrowRight className="w-4 h-4" />
-                  Importar dados primeiro
-                </Link>
-              </div>
+        /* Superliga não existe */
+        <div className="text-center py-12">
+          <Trophy className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-white mb-2">Superliga {selectedTemporada} não encontrada</h3>
+          <p className="text-gray-400 mb-6">
+            A Superliga para a temporada {selectedTemporada} ainda não foi criada.
+            Crie uma nova Superliga para começar a gerenciar os dados.
+          </p>
+          <div className="space-y-3">
+            <Link
+              href="/admin/superliga/criar"
+              className="inline-flex items-center gap-2 bg-[#63E300] text-black px-6 py-3 rounded-md font-semibold hover:bg-[#50B800] transition-colors"
+            >
+              <Plus className="w-5 h-5" />
+              Criar Superliga {selectedTemporada}
+            </Link>
+            <div className="text-sm text-gray-500">
+              <p>Passos necessários antes de criar:</p>
+              <ol className="mt-2 space-y-1 text-left max-w-md mx-auto">
+                <li>1. Importe os times (se ainda não fez)</li>
+                <li>2. Importe os jogadores</li>
+                <li>3. Configure as conferências</li>
+              </ol>
             </div>
-          </div>
-        </div>
-      )}
-
-      {superligaExists && (
-        <div>
-          <h2 className="text-xl font-bold text-white mb-4">Gerenciamento</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {managementSections.map((section, index) => (
-              <Link
-                key={index}
-                href={section.enabled ? section.href : '#'}
-                className={`group bg-[#272731] rounded-lg border border-gray-700 p-6 transition-all ${section.enabled
-                    ? 'hover:border-gray-600 hover:transform hover:scale-105'
-                    : 'opacity-50 cursor-not-allowed'
-                  }`}
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <div className={`p-2 bg-${section.color}-500/20 rounded-lg`}>
-                    <section.icon className={`w-6 h-6 text-${section.color}-400`} />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className={`font-semibold transition-colors ${section.enabled
-                        ? 'text-white group-hover:text-[#63E300]'
-                        : 'text-gray-400'
-                      }`}>
-                      {section.title}
-                    </h3>
-                    <p className="text-sm text-gray-400">
-                      {section.stats}
-                    </p>
-                  </div>
-                  {section.enabled && (
-                    <ArrowRight className="w-5 h-5 text-gray-600 group-hover:text-[#63E300] transition-colors" />
-                  )}
-                </div>
-
-                <p className="text-sm text-gray-400">
-                  {section.description}
-                </p>
-              </Link>
-            ))}
           </div>
         </div>
       )}
