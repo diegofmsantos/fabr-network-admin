@@ -26,32 +26,26 @@ export default function GerenciarJogoPage() {
   const { data: jogo, isLoading } = useJogo(jogoId)
   const { mutate: atualizarJogo, isPending } = useGerenciarJogo()
 
-  // Estados para todos os campos editáveis
   const [formData, setFormData] = useState({
-    // Resultado
     placarCasa: 0,
     placarVisitante: 0,
 
-    // Data e hora
     dataJogo: '',
     horaJogo: '',
 
-    // Local e observações
     local: '',
     observacoes: '',
 
-    // Status
     status: 'AGENDADO'
   })
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
 
-  // Preencher dados quando o jogo carrega
   useEffect(() => {
     if (jogo) {
       const dataJogo = new Date(jogo.dataJogo)
-      const dataFormatada = dataJogo.toISOString().split('T')[0] // YYYY-MM-DD
-      const horaFormatada = dataJogo.toTimeString().slice(0, 5) // HH:MM
+      const dataFormatada = dataJogo.toISOString().split('T')[0] 
+      const horaFormatada = dataJogo.toTimeString().slice(0, 5) 
 
       setFormData({
         placarCasa: jogo.placarCasa || 0,
@@ -94,7 +88,6 @@ export default function GerenciarJogoPage() {
       [field]: value
     }))
 
-    // Limpar erro do campo quando usuário começar a digitar
     if (errors[field]) {
       setErrors(prev => ({
         ...prev,
@@ -108,10 +101,8 @@ export default function GerenciarJogoPage() {
 
     if (!validateForm()) return
 
-    // Combinar data e hora em um objeto Date
     const dataHoraCompleta = new Date(`${formData.dataJogo}T${formData.horaJogo}`)
 
-    // ✅ GARANTIR que status seja do tipo correto
     const statusValido: 'AGENDADO' | 'AO VIVO' | 'FINALIZADO' | 'ADIADO' =
       (['AGENDADO', 'AO VIVO', 'FINALIZADO', 'ADIADO'] as const).includes(formData.status as any)
         ? formData.status as 'AGENDADO' | 'AO VIVO' | 'FINALIZADO' | 'ADIADO'
@@ -157,7 +148,6 @@ export default function GerenciarJogoPage() {
 
   return (
     <div className="min-h-screen bg-[#1C1C24] p-6">
-      {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <Link
           href={`/admin/jogos/${jogoId}`}
@@ -175,7 +165,6 @@ export default function GerenciarJogoPage() {
       </div>
 
       <div className="max-w-4xl mx-auto">
-        {/* Info do Jogo (Readonly) */}
         <div className="bg-[#272731] rounded-lg border border-gray-700 p-6 mb-6">
           <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
             <Trophy className="w-5 h-5 text-[#63E300]" />
@@ -208,10 +197,8 @@ export default function GerenciarJogoPage() {
           </div>
         </div>
 
-        {/* Formulário de Gerenciamento */}
         <form onSubmit={handleSubmit} className="space-y-6">
 
-          {/* Data e Horário */}
           <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
             <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
               <Calendar className="w-5 h-5" />
@@ -253,7 +240,6 @@ export default function GerenciarJogoPage() {
             </div>
           </div>
 
-          {/* Local */}
           <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
             <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
               <MapPin className="w-5 h-5" />
@@ -274,7 +260,6 @@ export default function GerenciarJogoPage() {
             </div>
           </div>
 
-          {/* Resultado do Jogo */}
           <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
             <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
               <Users className="w-5 h-5" />
@@ -282,7 +267,6 @@ export default function GerenciarJogoPage() {
             </h3>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
-              {/* Time Casa */}
               <div className="space-y-4">
                 <div className="flex items-center gap-3 mb-4">
                   <Image
@@ -320,12 +304,10 @@ export default function GerenciarJogoPage() {
                 </div>
               </div>
 
-              {/* VS */}
               <div className="flex items-center justify-center">
                 <span className="text-3xl font-bold text-gray-500">VS</span>
               </div>
 
-              {/* Time Visitante */}
               <div className="space-y-4">
                 <div className="flex items-center gap-3 mb-4">
                   <Image
@@ -365,7 +347,6 @@ export default function GerenciarJogoPage() {
             </div>
           </div>
 
-          {/* Status e Observações */}
           <div className="bg-[#272731] rounded-lg border border-gray-700 p-6">
             <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
               <FileText className="w-5 h-5" />
@@ -404,7 +385,6 @@ export default function GerenciarJogoPage() {
             </div>
           </div>
 
-          {/* Ações */}
           <div className="flex gap-4">
             <Link
               href={`/admin/jogos/${jogoId}`}

@@ -90,7 +90,7 @@ export default function HomePage() {
         </div>
         <div className='flex justify-center items-center mx-auto w-60 h-20'>
           <Image
-            src="/logo-fabr-color.png"
+            src="/assets/logo-fabr-color.png"
             alt="Logo"
             width={200}
             height={100}

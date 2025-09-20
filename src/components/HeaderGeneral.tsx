@@ -15,7 +15,7 @@ export const HeaderGeneral = ({ label }: Props) => {
                 <div className="flex items-center">
                     <Link href="/" className="text-white font-bold text-xl flex items-center">
                         <Image
-                            src="/logo-fabr-color.png"
+                            src="/assets/logo-fabr-color.png"
                             alt="Logo"
                             width={200}
                             height={100}

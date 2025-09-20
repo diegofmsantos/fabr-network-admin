@@ -66,7 +66,6 @@ export const Times = () => {
     const [activeTab, setActiveTab] = useState<'time' | 'jogador' | 'times-cadastrados'>('times-cadastrados')
     const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({})
 
-    // Hooks para operações
     const { data: times = [], isLoading: loading, error } = useTimes(temporada)
     const createTimeMutation = useCreateTime()
     const createJogadorMutation = useCreateJogador()
@@ -78,7 +77,6 @@ export const Times = () => {
     }
 
     const onSubmitTime: SubmitHandler<TimeFormData> = (data) => {
-        // Criar dados compatíveis com Omit<Time, 'id'>
         const timeData = {
             ...data,
             createdAt: new Date().toISOString(),
@@ -96,7 +94,6 @@ export const Times = () => {
     }
 
     const onSubmitJogador: SubmitHandler<JogadorFormData> = (data) => {
-        // Criar estrutura de estatísticas com tipagem correta
         const estatisticasCompletas: Estatisticas = {
             passe: {
                 passes_completos: 0,
@@ -147,7 +144,6 @@ export const Times = () => {
             }
         }
 
-        // Preencher com dados do formulário
         if (data.estatisticas) {
             const grupos: Array<keyof Estatisticas> = ['passe', 'corrida', 'recepcao', 'retorno', 'defesa', 'kicker', 'punter']
 
@@ -165,7 +161,6 @@ export const Times = () => {
             })
         }
 
-        // Criar dados do jogador SEM classificacoes (será calculado pelo backend)
         const jogadorData: Omit<Jogador, 'id'> = {
             nome: data.nome || '',
             posicao: data.posicao || '',
@@ -202,7 +197,6 @@ export const Times = () => {
     }
 
     const updateTime = (updatedTime: Time) => {
-        // Com TanStack Query, a atualização da lista é automática
         setIsTimeModalOpen(false)
     }
 

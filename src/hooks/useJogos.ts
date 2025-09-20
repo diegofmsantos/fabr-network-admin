@@ -28,12 +28,24 @@ interface GerenciarJogoData {
 export function useJogos(filters?: JogosFilters) {
   return useQuery({
     queryKey: queryKeys.jogos.list(filters || {}),
-    queryFn: () => JogosService.getJogos(filters),
+    queryFn: async () => {
+      const adminFilters = {
+        ...filters,
+        isAdminContext: true
+      }
+      
+      console.log('🔍 useJogos chamando service com filtros:', adminFilters)
+      
+      const result = await JogosService.getJogos(adminFilters)
+      
+      return Array.isArray(result) ? result : []
+    },
     enabled: true,
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    staleTime: 1000 * 60 * 5,
     retry: 2,
     refetchOnWindowFocus: false,
-    throwOnError: false
+    throwOnError: false,
+    select: (data) => Array.isArray(data) ? data : []
   })
 }
 

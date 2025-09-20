@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Trophy, Plus, Settings, Eye, Calendar, Users, Target, Clock, AlertTriangle, ArrowRight } from 'lucide-react'
+import { Trophy, Plus, Settings, Eye, Calendar, Users, Clock, ArrowRight } from 'lucide-react'
 import { Loading } from '@/components/ui/Loading'
 import { useSuperliga, useStatusSuperliga, useJogosSuperliga } from '@/hooks/useSuperliga'
 
@@ -19,7 +19,6 @@ export default function AdminSuperligaPage() {
 
   const superligaExists = !!superliga
 
-  // 🔧 CORREÇÃO: Verificação segura se jogos é um array
   const jogosArray = Array.isArray(jogos) ? jogos : []
 
   const stats = {
@@ -125,7 +124,6 @@ export default function AdminSuperligaPage() {
 
       {superligaExists ? (
         <div className="space-y-6">
-          {/* Status Overview */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-[#272731] border border-gray-700 rounded-lg p-4">
               <div className="flex items-center justify-between">
@@ -158,7 +156,6 @@ export default function AdminSuperligaPage() {
             </div>
           </div>
 
-          {/* Management Sections */}
           <div>
             <h2 className="text-xl font-bold text-white mb-4">Gerenciamento</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -188,7 +185,6 @@ export default function AdminSuperligaPage() {
             </div>
           </div>
 
-          {/* Quick Actions */}
           <div>
             <h2 className="text-xl font-bold text-white mb-4">Ações Rápidas</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -214,7 +210,7 @@ export default function AdminSuperligaPage() {
           </div>
         </div>
       ) : (
-        /* Superliga não existe */
+        
         <div className="text-center py-12">
           <Trophy className="w-16 h-16 text-gray-500 mx-auto mb-4" />
           <h3 className="text-xl font-bold text-white mb-2">Superliga {selectedTemporada} não encontrada</h3>

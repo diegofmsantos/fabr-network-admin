@@ -1,5 +1,3 @@
-// src/services/jogos.service.ts - SUBSTITUIR O ARQUIVO VAZIO POR ESTE CONTEÚDO
-
 import { BaseService } from './base.service'
 
 interface JogosFilters {
@@ -12,6 +10,7 @@ interface JogosFilters {
   regional?: string
   timeId?: number
   limite?: number
+  isAdminContext?: boolean
 }
 
 interface Time {
@@ -74,7 +73,38 @@ export class JogosService extends BaseService {
   static async getJogos(filters?: JogosFilters): Promise<Jogo[]> {
     const service = new JogosService()
 
-    // ✅ PRIORIZAR ROTA DA SUPERLIGA QUANDO TEMPORADA É INFORMADA
+    // 🔧 CORREÇÃO: Verificar se está em contexto admin PRIMEIRO
+    const isAdminRoute = window?.location?.pathname?.includes('/admin/')
+    const forceAdmin = filters?.isAdminContext || isAdminRoute
+
+    console.log('🔍 JogosService - Contexto detectado:', {
+      pathname: window?.location?.pathname,
+      isAdminRoute,
+      forceAdmin,
+      filters
+    })
+
+    // ✅ SE FOR ADMIN, SEMPRE USAR ROTA ADMIN
+    if (forceAdmin) {
+      const params = new URLSearchParams()
+      
+      // Adicionar temporada como parâmetro
+      if (filters?.temporada) params.append('temporada', filters.temporada)
+      if (filters?.status) params.append('status', filters.status)
+      if (filters?.fase) params.append('fase', filters.fase)
+      if (filters?.rodada) params.append('rodada', filters.rodada.toString())
+      if (filters?.conferencia) params.append('conferencia', filters.conferencia)
+      if (filters?.timeId) params.append('timeId', filters.timeId.toString())
+      if (filters?.limite) params.append('limite', filters.limite.toString())
+
+      const queryString = params.toString()
+      const url = `/admin/jogos${queryString ? `?${queryString}` : ''}`
+      
+      console.log('🔍 JogosService: Usando rota ADMIN:', url)
+      return service.get<Jogo[]>(url)
+    }
+
+    // ✅ ROTA DA SUPERLIGA (para frontend público)
     if (filters?.temporada) {
       const params = new URLSearchParams()
       if (filters.status) params.append('status', filters.status)
@@ -121,7 +151,6 @@ export class JogosService extends BaseService {
     console.log('🔍 JogosService: Usando rota admin padrão:', url)
     return service.get<Jogo[]>(url)
   }
-
   static async getJogo(id: number): Promise<Jogo> {
     const service = new JogosService()
     return service.get<Jogo>(`/admin/jogos/${id}`)

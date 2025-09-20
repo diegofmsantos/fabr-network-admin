@@ -10,10 +10,12 @@ export default function AdminJogosPage() {
   const [filterStatus, setFilterStatus] = useState<'todos' | 'AGENDADO' | 'AO_VIVO' | 'FINALIZADO'>('todos')
   const [filterTemporada, setFilterTemporada] = useState('2025')
 
-  const { data: jogos = [], isLoading } = useJogos({
+  const { data: jogosData, isLoading } = useJogos({
     temporada: filterTemporada,
     status: filterStatus === 'todos' ? undefined : filterStatus
   })
+
+   const jogos = Array.isArray(jogosData) ? jogosData : []
 
   const getStatusIcon = (status: string) => {
     switch (status) {

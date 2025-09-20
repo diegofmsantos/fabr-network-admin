@@ -37,10 +37,47 @@ export default function ModalTime({
         setFilteredJogadores(formData.jogadores || []);
     }, [formData.jogadores]);
 
+    useEffect(() => {
+        let jogadoresParaFiltrar = formData.jogadores || [];
+
+        if (filter.trim()) {
+            jogadoresParaFiltrar = jogadoresParaFiltrar.filter(jogadorTime =>
+                jogadorTime.nome?.toLowerCase().includes(filter.toLowerCase())
+            );
+        }
+
+        const jogadoresOrdenados = jogadoresParaFiltrar.sort((a, b) => {
+            const numeroA = parseInt(a.numero?.toString() || '999') || 999;
+            const numeroB = parseInt(b.numero?.toString() || '999') || 999;
+            return numeroA - numeroB;
+        });
+
+        setFilteredJogadores(jogadoresOrdenados);
+    }, [filter, formData.jogadores]);
+
     const updateTimeMutation = useUpdateTime()
     const deleteTimeMutation = useDeleteTime()
 
     const isLoading = updateTimeMutation.isPending || deleteTimeMutation.isPending || isSubmitting
+
+    useEffect(() => {
+        if (!filter.trim()) {
+            setFilteredJogadores(formData.jogadores || []);
+        } else {
+            const filtered = (formData.jogadores || []).filter(jogadorTime =>
+                jogadorTime.nome?.toLowerCase().includes(filter.toLowerCase())
+            );
+            setFilteredJogadores(filtered);
+        }
+    }, [filter, formData.jogadores]);
+
+    const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFilter(e.target.value);
+    };
+
+    const clearFilter = () => {
+        setFilter("");
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -87,16 +124,6 @@ export default function ModalTime({
                 }
             });
         }
-    };
-
-    const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value.toLowerCase();
-        setFilter(value);
-        setFilteredJogadores(
-            formData.jogadores?.filter((jogadorTime) =>
-                jogadorTime.jogador?.nome.toLowerCase().includes(value)
-            ) || []
-        );
     };
 
     return (

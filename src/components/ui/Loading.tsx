@@ -16,7 +16,7 @@ export const Loading = () => {
 
             <div className="absolute w-28 h-28 flex justify-center items-center">
                 <Image
-                    src="/logo-fabr-color.png"
+                    src="/assets/logo-fabr-color.png"
                     alt="Custom Image"
                     width={112}
                     height={112}

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNotifications } from './useNotifications'
 import { SuperligaService } from '@/services/superliga.service'
+import { JogosService } from '@/services/jogos.service'
 
 export const superligaQueryKeys = {
   all: ['superliga'] as const,
@@ -76,9 +77,32 @@ export function useJogosSuperliga(temporada: string, filters?: {
 }) {
   return useQuery({
     queryKey: [...superligaQueryKeys.jogos(temporada), filters],
-    queryFn: () => SuperligaService.getJogos(temporada, filters),
+    queryFn: async () => {
+      const isAdminContext = typeof window !== 'undefined' && 
+        window.location.pathname.includes('/admin/')
+
+      console.log('🔍 useJogosSuperliga - Contexto:', {
+        pathname: typeof window !== 'undefined' ? window.location.pathname : 'SSR',
+        isAdminContext,
+        temporada,
+        filters
+      })
+
+      if (isAdminContext) {
+        return JogosService.getJogos({ 
+          temporada, 
+          ...filters,
+          isAdminContext: true
+        })
+      } else {
+        return SuperligaService.getJogos(temporada, filters)
+      }
+    },
     enabled: !!temporada,
-    staleTime: 1000 * 60 * 2,
+    staleTime: 1000 * 60 * 5, 
+    retry: 2,
+    refetchOnWindowFocus: false,
+    select: (data) => Array.isArray(data) ? data : []
   })
 }
 
