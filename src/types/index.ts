@@ -184,6 +184,68 @@ export interface Estatisticas {
   }
 }
 
+export interface EstatisticaJogo extends BaseEntity {
+  id: number
+  jogoId: number
+  jogadorId: number
+  timeId: number
+  campeonatoId: number
+  estatisticas: Estatisticas
+  temporada?: string
+  rodada?: number
+  fase?: string
+
+  // Relacionamentos (quando incluídos)
+  jogo: {
+    id: number
+    dataJogo: string | Date
+    status: string
+    placarCasa?: number
+    placarVisitante?: number
+    rodada: number
+    fase: string
+    local?: string
+    observacoes?: string
+    timeCasaId?: number
+    timeVisitanteId?: number
+    
+    timeCasa?: {
+      id: number
+      nome: string
+      sigla: string
+      cor?: string
+      logo?: string
+    }
+    
+    timeVisitante?: {
+      id: number
+      nome: string
+      sigla: string
+      cor?: string
+      logo?: string
+    }
+    
+    campeonato?: {
+      id: number
+      nome: string
+      temporada: string
+    }
+  }
+
+  jogador?: {
+    id: number
+    nome: string
+    posicao?: string
+    setor?: string
+  }
+
+  time?: {
+    id: number
+    nome: string
+    sigla: string
+  }
+}
+
 // Versão com campos opcionais das estatísticas (frontend antigo)
 export type EstatisticasOptional = {
   passe?: {
@@ -453,24 +515,6 @@ export interface ClassificacaoGrupo extends BaseEntity {
     nome: string
     ordem: number
   }
-}
-
-export interface EstatisticaJogo extends BaseEntity {
-  jogoId: number
-  jogadorId: number
-  timeId: number
-  estatisticas: Estatisticas // Mesma estrutura das estatísticas existente
-
-  // Relacionamentos
-  jogo?: Jogo
-  jogador: {
-    id: number
-    nome: string
-    posicao: string
-    numero?: number
-    camisa?: string
-  }
-  time?: Time
 }
 
 // ==================== ESTATÍSTICAS E STATS ====================

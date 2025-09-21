@@ -1,4 +1,4 @@
-import { Jogador, Jogo } from '@/types'
+import { EstatisticaJogo, Estatisticas, Jogador, Jogo } from '@/types'
 import { BaseService } from './base.service'
 
 export class JogadoresService extends BaseService {
@@ -38,5 +38,26 @@ export class JogadoresService extends BaseService {
       id_jogo: idJogo,
       data_jogo: dataJogo
     })
+  }
+
+  static async updateEstatisticaJogo(id: number, estatisticas: Estatisticas): Promise<EstatisticaJogo> {
+    console.log(`🔄 [SERVICE] Atualizando estatística de jogo ${id}`)
+
+    const service = new JogadoresService()
+    return service.put<EstatisticaJogo>(`/admin/estatistica-jogo/${id}`, { estatisticas })
+  }
+
+  static async getEstatisticaJogoPorId(id: number): Promise<EstatisticaJogo> {
+    console.log(`🔍 [SERVICE] Buscando estatística de jogo ${id}`)
+
+    const service = new JogadoresService()
+    return service.get<EstatisticaJogo>(`/admin/estatistica-jogo/${id}`)
+  }
+
+   static async getEstatisticasJogo(jogadorId: number, temporada: string = '2025'): Promise<EstatisticaJogo[]> {
+    console.log(`🔍 [SERVICE] Chamando rota: /jogadores/${jogadorId}/estatisticas-jogo?temporada=${temporada}`)
+
+    const service = new JogadoresService()
+    return service.get<EstatisticaJogo[]>(`/jogadores/${jogadorId}/estatisticas-jogo`, { temporada })
   }
 }

@@ -6,14 +6,15 @@ import { estatisticasGroups } from "@/utils/stats";
 import { jogadorGroups } from "@/utils/jogador";
 import { Estatisticas, Jogador } from "@/types";
 import { useUpdateJogador, useDeleteJogador } from '@/hooks/useJogadores'
+import { TrendingUp, BarChart3, X, Trash2, Save, User, Info } from "lucide-react"
+import ModalEstatisticasJogo from "./ModalEstatisticaJogo";
 
-export default function ModalJogador({
-    jogador,
-    closeModal,
-}: {
+interface ModalJogadorProps {
     jogador: Jogador;
     closeModal: () => void;
-}) {
+}
+
+export default function ModalJogador({ jogador, closeModal }: ModalJogadorProps) {
     const router = useRouter();
 
     const [formData, setFormData] = useState({
@@ -21,19 +22,61 @@ export default function ModalJogador({
         altura: jogador.altura !== undefined ? String(jogador.altura).replace(".", ",") : "",
         temporada: jogador.times?.[0]?.temporada || "2025",
         estatisticas: jogador.estatisticas || {
-            passe: {},
-            corrida: {},
-            recepcao: {},
-            retorno: {},
-            defesa: {},
-            kicker: {},
-            punter: {}
+            passe: {
+                passes_completos: 0,
+                passes_tentados: 0,
+                jardas_de_passe: 0,
+                td_passados: 0,
+                interceptacoes_sofridas: 0,
+                sacks_sofridos: 0,
+                fumble_de_passador: 0
+            },
+            corrida: {
+                corridas: 0,
+                jardas_corridas: 0,
+                tds_corridos: 0,
+                fumble_de_corredor: 0
+            },
+            recepcao: {
+                recepcoes: 0,
+                alvo: 0,
+                jardas_recebidas: 0,
+                tds_recebidos: 0
+            },
+            retorno: {
+                retornos: 0,
+                jardas_retornadas: 0,
+                td_retornados: 0
+            },
+            defesa: {
+                tackles_totais: 0,
+                tackles_for_loss: 0,
+                sacks_forcado: 0,
+                fumble_forcado: 0,
+                interceptacao_forcada: 0,
+                passe_desviado: 0,
+                safety: 0,
+                td_defensivo: 0
+            },
+            kicker: {
+                xp_bons: 0,
+                tentativas_de_xp: 0,
+                fg_bons: 0,
+                tentativas_de_fg: 0,
+                fg_mais_longo: 0
+            },
+            punter: {
+                punts: 0,
+                jardas_de_punt: 0
+            }
         },
         camisa: jogador.camisa
     });
 
     const [activeTab, setActiveTab] = useState<'info' | 'estatisticas'>('info');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showEstatisticasJogo, setShowEstatisticasJogo] = useState(false);
+
     const updateJogadorMutation = useUpdateJogador()
     const deleteJogadorMutation = useDeleteJogador()
 
@@ -72,275 +115,293 @@ export default function ModalJogador({
     const handleSave = () => {
         const altura = formData.altura
             ? Number(String(formData.altura).replace(',', '.'))
-            : jogador.altura;
+            : undefined;
 
-        const parsedValues = {
-            altura: altura,
-            peso: Number(formData.peso),
-            idade: Number(formData.idade),
-            experiencia: Number(formData.experiencia),
-            numero: Number(formData.numero)
-        };
+        const peso = formData.peso
+            ? Number(String(formData.peso))
+            : undefined;
 
-        const apiData = {
+        const idade = formData.idade
+            ? Number(String(formData.idade))
+            : undefined;
+
+        const experiencia = formData.experiencia
+            ? Number(String(formData.experiencia))
+            : undefined;
+
+        const numero = formData.numero
+            ? Number(String(formData.numero))
+            : undefined;
+
+        setIsSubmitting(true);
+
+        const jogadorData = {
             ...formData,
-            ...parsedValues,
-            timeId: jogador.timeId
+            altura,
+            peso,
+            idade,
+            experiencia,
+            numero,
+            timeId: jogador.timeId,
+            temporada: formData.temporada,
+            camisa: formData.camisa,
+            estatisticas: formData.estatisticas
         };
 
-        updateJogadorMutation.mutate({
-            id: jogador.id,
-            data: {
-                ...apiData,
-                estatisticas: formData.estatisticas as Estatisticas
+        updateJogadorMutation.mutate(
+            { id: jogador.id!, data: jogadorData },
+            {
+                onSuccess: () => {
+                    setIsSubmitting(false);
+                    closeModal();
+                },
+                onError: (error) => {
+                    console.error('Erro ao atualizar jogador:', error);
+                    setIsSubmitting(false);
+                }
             }
-        }, {
-            onSuccess: () => {
-                closeModal();
-                router.refresh();
-            }
-        });
+        );
     };
 
-    const handleDelete = async () => {
-        if (confirm("Tem certeza que deseja excluir este jogador?")) {
-            deleteJogadorMutation.mutate(jogador.id, {
+    const handleDelete = () => {
+        if (confirm(`Tem certeza que deseja excluir o jogador ${jogador.nome}?`)) {
+            deleteJogadorMutation.mutate(jogador.id!, {
                 onSuccess: () => {
-                    closeModal(); if (confirm("Tem certeza que deseja excluir este jogador?")) {
-                        deleteJogadorMutation.mutate(jogador.id, {
-                            onSuccess: () => {
-                                closeModal();
-                                router.refresh();
-                            }
-                        });
-                    }
-                    router.refresh();
+                    closeModal();
+                },
+                onError: (error) => {
+                    console.error('Erro ao excluir jogador:', error);
                 }
             });
         }
     };
 
     return (
-        <div className="fixed inset-0 z-50 overflow-hidden">
-            <div
-                className="fixed inset-0 bg-black/70 backdrop-blur-sm"
-                onClick={closeModal}
-            ></div>
+        <>
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-[#272731] rounded-lg w-[90%] max-w-4xl max-h-[90vh] overflow-hidden">
 
-            <div className="absolute inset-12 bg-[#272731] rounded-xl shadow-lg overflow-hidden flex flex-col">
-
-                <div className="bg-[#1C1C24] px-6 py-4 flex justify-between items-center">
-                    <div className="flex items-center">
-                        <div
-                            className="w-8 h-8 rounded-md mr-3 flex items-center justify-center bg-[#63E300]"
-                        >
-                            <span className="text-black font-bold">{formData.numero}</span>
-                        </div>
-                        <h2 className="text-xl font-bold text-white">
-                            {formData.nome || 'Editar Jogador'}
-                        </h2>
-                    </div>
-
-                    <button
-                        className="text-gray-400 hover:text-white transition-colors"
-                        onClick={closeModal}
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-
-                <div className="bg-[#1C1C24] px-6 border-t border-gray-800">
-                    <div className="flex space-x-1">
-                        <button
-                            onClick={() => setActiveTab('info')}
-                            className={`px-4 py-3 text-sm font-medium transition-colors relative ${activeTab === 'info'
-                                ? 'text-[#63E300]'
-                                : 'text-gray-400 hover:text-white'
-                                }`}
-                        >
-                            Informações do Jogador
-                            {activeTab === 'info' && (
-                                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#63E300]"></span>
-                            )}
-                        </button>
-
-                        <button
-                            onClick={() => setActiveTab('estatisticas')}
-                            className={`px-4 py-3 text-sm font-medium transition-colors relative ${activeTab === 'estatisticas'
-                                ? 'text-[#63E300]'
-                                : 'text-gray-400 hover:text-white'
-                                }`}
-                        >
-                            Estatísticas
-                            {activeTab === 'estatisticas' && (
-                                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#63E300]"></span>
-                            )}
-                        </button>
-                    </div>
-                </div>
-
-                <div className="flex-grow overflow-y-auto p-6">
-                    {activeTab === 'info' && (
-                        <div className="space-y-6 animate-fadeIn">
-                            {jogadorGroups.map((group, groupIndex) => (
-                                <div key={groupIndex} className="bg-[#1C1C24] rounded-lg p-5">
-                                    <h3 className="text-[#63E300] font-semibold mb-4 text-sm uppercase tracking-wide">
-                                        {group.title}
-                                    </h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {group.fields.map((field) => (
-                                            <div key={field.name}>
-                                                <label className="block text-white text-sm font-medium mb-2">
-                                                    {field.label}
-                                                </label>
-                                                {field.type === "select" ? (
-                                                    <select
-                                                        name={field.name}
-                                                        value={formData[field.name as keyof typeof formData] as string}
-                                                        onChange={(e) => setFormData((prev) => ({ ...prev, [field.name]: e.target.value }))}
-                                                        className="w-full px-3 py-2 bg-[#272731] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
-                                                    >
-                                                        <option value="">Selecione uma opção</option>
-                                                        {field.options?.map((option) => (
-                                                            <option key={option} value={option}>
-                                                                {option}
-                                                            </option>
-                                                        ))}
-                                                    </select>
-                                                ) : (
-                                                    <input
-                                                        type={field.type}
-                                                        name={field.name}
-                                                        value={formData[field.name as keyof typeof formData] as string}
-                                                        onChange={handleChange}
-                                                        className="w-full px-3 py-2 bg-[#272731] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-[#63E300]"
-                                                    />
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
+                    {/* Header */}
+                    <div className="bg-[#1C1C24] p-6 border-b border-gray-700">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <User className="w-8 h-8 text-[#63E300]" />
+                                <div>
+                                    <h2 className="text-2xl font-bold text-white">
+                                        {jogador.nome}
+                                    </h2>
+                                    <p className="text-sm text-gray-400">
+                                        {jogador.times?.[0]?.time?.nome || 'Time não definido'} • #{jogador.numero}
+                                    </p>
                                 </div>
-                            ))}
-                        </div>
-                    )}
+                            </div>
 
-                    {activeTab === 'estatisticas' && (
-                        <div className="space-y-6 animate-fadeIn">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                                {estatisticasGroups.map((group) => (
-                                    <div key={group.id} className="bg-[#1C1C24] rounded-lg p-5">
-                                        <h3 className="text-[#63E300] font-semibold mb-4 text-sm uppercase tracking-wide">
-                                            {group.title}
-                                        </h3>
-                                        <div className="space-y-3">
-                                            {group.fields.map((field) => (
-                                                <div key={field.id} className="flex flex-col">
-                                                    <div className="flex justify-between items-center mb-1">
-                                                        <label className="text-xs text-gray-400 font-medium">
+                            {/* Botões de ação */}
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={() => setShowEstatisticasJogo(true)}
+                                    className="flex items-center gap-2 px-4 py-2 bg-[#63E300] hover:bg-[#52B800] text-black font-semibold rounded transition-colors"
+                                    disabled={isLoading}
+                                >
+                                    <BarChart3 className="w-4 h-4" />
+                                    Estatísticas por Jogo
+                                </button>
+
+                                <button
+                                    onClick={closeModal}
+                                    className="text-gray-400 hover:text-white transition-colors"
+                                    disabled={isLoading}
+                                >
+                                    <X className="w-6 h-6" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Informações básicas do jogador */}
+                        <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                            <div>
+                                <span className="text-gray-400">Posição:</span>
+                                <span className="text-white ml-2 font-semibold">{jogador.posicao}</span>
+                            </div>
+                            <div>
+                                <span className="text-gray-400">Setor:</span>
+                                <span className="text-white ml-2 font-semibold">{jogador.setor}</span>
+                            </div>
+                            <div>
+                                <span className="text-gray-400">Idade:</span>
+                                <span className="text-white ml-2 font-semibold">{jogador.idade} anos</span>
+                            </div>
+                            <div>
+                                <span className="text-gray-400">Temporada:</span>
+                                <span className="text-white ml-2 font-semibold">{formData.temporada}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Tabs */}
+                    <div className="bg-[#272731] border-b border-gray-700">
+                        <nav className="flex">
+                            <button
+                                onClick={() => setActiveTab('info')}
+                                className={`px-6 py-4 text-sm font-medium transition-colors relative flex items-center gap-2 ${activeTab === 'info'
+                                    ? 'text-[#63E300] border-b-2 border-[#63E300]'
+                                    : 'text-gray-400 hover:text-white'
+                                    }`}
+                                disabled={isLoading}
+                            >
+                                <Info className="w-4 h-4" />
+                                Informações
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('estatisticas')}
+                                className={`px-6 py-4 text-sm font-medium transition-colors relative flex items-center gap-2 ${activeTab === 'estatisticas'
+                                    ? 'text-[#63E300] border-b-2 border-[#63E300]'
+                                    : 'text-gray-400 hover:text-white'
+                                    }`}
+                                disabled={isLoading}
+                            >
+                                <TrendingUp className="w-4 h-4" />
+                                Estatísticas Consolidadas
+                            </button>
+                        </nav>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-6 overflow-y-auto max-h-[calc(90vh-280px)]">
+                        {activeTab === 'info' && (
+                            <div className="space-y-6">
+                                {/* Seção de Informações Pessoais */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {jogadorGroups.map((group, groupIndex) => (
+                                        <div key={groupIndex} className="space-y-4">
+                                            <h3 className="text-lg font-semibold text-[#63E300] border-b border-gray-600 pb-2">
+                                                {group.title}
+                                            </h3>
+                                            <div className="space-y-3">
+                                                {group.fields.map((field) => (
+                                                    <div key={field.name}>
+                                                        <label className="block text-sm text-gray-400 mb-1">
                                                             {field.label}
                                                         </label>
-                                                        <div className="flex items-center bg-[#272731] px-2 py-0.5 rounded text-xs">
+                                                        {field.type === 'select' ? (
+                                                            <select
+                                                                name={field.name}
+                                                                value={formData[field.name as keyof typeof formData] as string || ''}
+                                                                onChange={handleChange}
+                                                                disabled={isLoading}
+                                                                className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-600 rounded text-white focus:border-[#63E300] focus:outline-none disabled:opacity-50"
+                                                            >
+                                                                <option value="">Selecione...</option>
+                                                                {field.options?.map((option, optionIndex) => (
+                                                                    <option key={optionIndex} value={option}>
+                                                                        {option}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                        ) : (
                                                             <input
-                                                                type="text"
-                                                                name={`${group.id}.${field.id}`}
-                                                                value={(formData.estatisticas as any)?.[group.id]?.[field.id] ?? 0}
-                                                                onChange={handleStatisticChange}
-                                                                className="w-16 bg-transparent text-right border-none focus:outline-none text-white"
+                                                                type={field.type}
+                                                                name={field.name}
+                                                                value={formData[field.name as keyof typeof formData] as string || ''}
+                                                                onChange={handleChange}
+                                                                disabled={isLoading}
+                                                                className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-600 rounded text-white focus:border-[#63E300] focus:outline-none disabled:opacity-50 placeholder-gray-500"
                                                             />
-                                                        </div>
+                                                        )}
                                                     </div>
-                                                    <div className="w-full bg-[#272731] rounded-full h-1.5">
-                                                        <div
-                                                            className="bg-[#63E300] h-1.5 rounded-full"
-                                                            style={{
-                                                                width: `${Math.min(
-                                                                    100,
-                                                                    (Number((formData.estatisticas as any)?.[group.id]?.[field.id] || 0) /
-                                                                        (field.id.includes('jardasde') ? 500 : 100)) * 100
-                                                                )}%`
-                                                            }}
-                                                        ></div>
-                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'estatisticas' && (
+                            <div className="space-y-6">
+                                {/* Aviso sobre estatísticas consolidadas */}
+                                <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4">
+                                    <div className="flex items-start gap-3">
+                                        <TrendingUp className="w-5 h-5 text-blue-400 mt-0.5" />
+                                        <div>
+                                            <h4 className="text-blue-300 font-semibold mb-1">Estatísticas Consolidadas</h4>
+                                            <p className="text-blue-200 text-sm">
+                                                Estas são as estatísticas totais da temporada (soma de todos os jogos).
+                                                Para editar estatísticas de jogos específicos, use o botão "Estatísticas por Jogo" acima.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Estatísticas por categoria */}
+                                {estatisticasGroups.map((group, groupIndex) => (
+                                    <div key={groupIndex} className="space-y-4">
+                                        <h3 className="text-lg font-semibold text-[#63E300] border-b border-gray-600 pb-2">
+                                            {group.title}
+                                        </h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {group.fields.map((field, fieldIndex) => (
+                                                <div key={fieldIndex}>
+                                                    <label className="block text-sm text-gray-400 mb-1">
+                                                        {field.label}
+                                                    </label>
+                                                    <input
+                                                        type="number"
+                                                        name={`${group.id}.${field.id}`}
+                                                        value={(formData.estatisticas?.[group.id as keyof Estatisticas] as any)?.[field.id] || ''}
+                                                        onChange={handleStatisticChange}
+                                                        disabled={isLoading}
+                                                        min="0"
+                                                        className="w-full px-3 py-2 bg-[#1C1C24] border border-gray-600 rounded text-white focus:border-[#63E300] focus:outline-none disabled:opacity-50"
+                                                    />
                                                 </div>
                                             ))}
                                         </div>
                                     </div>
                                 ))}
                             </div>
-                        </div>
-                    )}
-                </div>
-
-                <div className="bg-[#1C1C24] px-6 py-4 border-t border-gray-800 flex justify-between">
-                    <button
-                        onClick={handleDelete}
-                        disabled={isLoading}
-                        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-                    >
-                        {isSubmitting ? (
-                            <>
-                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                Excluindo...
-                            </>
-                        ) : (
-                            <>
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                                Excluir Jogador
-                            </>
                         )}
-                    </button>
+                    </div>
 
-                    <div className="space-x-3 flex">
+                    {/* Footer */}
+                    <div className="bg-[#1C1C24] p-6 border-t border-gray-700 flex justify-between">
                         <button
-                            onClick={closeModal}
-                            className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                            onClick={handleDelete}
+                            disabled={isLoading}
+                            className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors disabled:opacity-50"
                         >
-                            Cancelar
+                            <Trash2 className="w-4 h-4" />
+                            {deleteJogadorMutation.isPending ? 'Excluindo...' : 'Excluir'}
                         </button>
 
-                        <button
-                            onClick={handleSave}
-                            disabled={isSubmitting}
-                            className="px-4 py-2 bg-[#63E300] text-black rounded-lg hover:bg-[#50B800] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-                        >
-                            {isSubmitting ? (
-                                <>
-                                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    Salvando...
-                                </>
-                            ) : (
-                                <>
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                    </svg>
-                                    Salvar Alterações
-                                </>
-                            )}
-                        </button>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={closeModal}
+                                disabled={isLoading}
+                                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition-colors disabled:opacity-50"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleSave}
+                                disabled={isLoading}
+                                className="flex items-center gap-2 px-4 py-2 bg-[#63E300] hover:bg-[#52B800] text-black font-semibold rounded transition-colors disabled:opacity-50"
+                            >
+                                <Save className="w-4 h-4" />
+                                {updateJogadorMutation.isPending ? 'Salvando...' : 'Salvar'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <style jsx global>{`
-                .animate-fadeIn {
-                    animation: fadeIn 0.3s ease-in-out;
-                }
-                
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(10px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-            `}</style>
-        </div>
+            {/* Modal de Estatísticas por Jogo */}
+            {showEstatisticasJogo && (
+                <ModalEstatisticasJogo
+                    jogador={jogador}
+                    closeModal={() => setShowEstatisticasJogo(false)}
+                />
+            )}
+        </>
     );
 }
