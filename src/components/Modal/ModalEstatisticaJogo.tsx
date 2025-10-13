@@ -156,6 +156,8 @@ export default function ModalEstatisticasJogo({ jogador, closeModal }: ModalEsta
                     { key: 'sacks_forcado', label: 'SACK' },
                     { key: 'fumble_forcado', label: 'FF' },
                     { key: 'interceptacao_forcada', label: 'INT' },
+                    { key: 'passe_desviado', label: 'PD' },
+                    { key: 'safety', label: 'SAFE' },
                     { key: 'td_defensivo', label: 'TD' },
                 ]
             },
@@ -166,6 +168,7 @@ export default function ModalEstatisticasJogo({ jogador, closeModal }: ModalEsta
                     { key: 'fg_bons', label: 'FG' },
                     { key: 'tentativas_de_fg', label: 'TENT' },
                     { key: 'xp_bons', label: 'XP' },
+                    { key: 'tentativas_de_xp', label: 'TENT XP' },
                     { key: 'fg_mais_longo', label: 'LONGO' },
                 ]
             },
