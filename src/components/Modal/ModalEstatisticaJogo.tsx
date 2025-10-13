@@ -139,6 +139,15 @@ export default function ModalEstatisticasJogo({ jogador, closeModal }: ModalEsta
                 ]
             },
             {
+                name: 'Retorno',
+                key: 'retorno' as keyof Estatisticas,
+                fields: [
+                    { key: 'retornos', label: 'RET' },
+                    { key: 'jardas_retornadas', label: 'JDS' },
+                    { key: 'td_retornados', label: 'TD' },
+                ]
+            },
+            {
                 name: 'Defesa',
                 key: 'defesa' as keyof Estatisticas,
                 fields: [
@@ -159,6 +168,14 @@ export default function ModalEstatisticasJogo({ jogador, closeModal }: ModalEsta
                     { key: 'xp_bons', label: 'XP' },
                     { key: 'fg_mais_longo', label: 'LONGO' },
                 ]
+            },
+            {
+                name: 'Punter',
+                key: 'punter' as keyof Estatisticas,
+                fields: [
+                    { key: 'punts', label: 'PUNTS' },
+                    { key: 'jardas_de_punt', label: 'JDS' },
+                ]
             }
         ]
 
@@ -166,9 +183,6 @@ export default function ModalEstatisticasJogo({ jogador, closeModal }: ModalEsta
             const categoryStats = stats?.[category.key]
             if (!categoryStats) return null
 
-            // Verificar se há algum valor > 0 nesta categoria
-            const hasData = Object.values(categoryStats).some((value: any) => value && value > 0)
-            if (!hasData) return null
 
             return (
                 <div key={category.key} className="bg-gray-800 rounded p-3">
