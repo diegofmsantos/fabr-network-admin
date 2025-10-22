@@ -348,7 +348,7 @@ export default function ModalJogador({ jogador, closeModal }: ModalJogadorProps)
                                                     <input
                                                         type="number"
                                                         name={`${group.id}.${field.id}`}
-                                                        value={(formData.estatisticas?.[group.id as keyof Estatisticas] as any)?.[field.id] || ''}
+                                                        value={(formData.estatisticas?.[group.id as keyof Estatisticas] as any)?.[field.id] ?? ''}
                                                         onChange={handleStatisticChange}
                                                         disabled={isLoading}
                                                         min="0"
