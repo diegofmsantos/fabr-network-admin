@@ -63,10 +63,17 @@ export const FormMateria = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
+    const criarDataISO = (dateTimeLocal: string) => {
+      const data = new Date(dateTimeLocal)
+      const offset = data.getTimezoneOffset()
+      const dataAjustada = new Date(data.getTime() - (offset * 60 * 1000))
+      return dataAjustada.toISOString()
+    }
+
     const materiaData = {
       ...formData,
-      createdAt: new Date(formData.createdAt).toISOString(),
-      updatedAt: new Date(formData.updatedAt).toISOString()
+      createdAt: criarDataISO(formData.createdAt),
+      updatedAt: criarDataISO(formData.updatedAt)
     }
 
     createMateriaMutation.mutate(materiaData, {
@@ -470,7 +477,7 @@ export const FormMateria = () => {
                         <div className="flex items-center gap-2">
                           <div className="relative w-8 h-8 rounded-full overflow-hidden bg-[#272731]">
                             <Image
-                              src={materia.autorImage || '/placeholder-avatar.png'} 
+                              src={materia.autorImage || '/placeholder-avatar.png'}
                               alt={materia.autor}
                               fill
                               className="object-cover"

@@ -39,7 +39,7 @@ export const Editor = ({ value, onChange }: EditorProps) => {
                 toolbar: 'undo redo | blocks | ' +
                     'bold italic | alignleft aligncenter ' +
                     'alignright alignjustify | bullist numlist outdent indent | ' +
-                    'link unlink | removeformat | help',
+                    'link image media | removeformat | help',
                 content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
                 link_context_toolbar: true,
                 default_link_target: '_blank',

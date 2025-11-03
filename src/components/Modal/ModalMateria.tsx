@@ -44,7 +44,7 @@ export function ModalMateria({ materia, closeModal, onUpdate }: ModalMateriaProp
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
-            if (file.size > 5 * 1024 * 1024) { 
+            if (file.size > 5 * 1024 * 1024) {
                 alert('A imagem deve ter no máximo 5MB')
                 return
             }
@@ -59,7 +59,7 @@ export function ModalMateria({ materia, closeModal, onUpdate }: ModalMateriaProp
     const handleAuthorImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
-            if (file.size > 5 * 1024 * 1024) { 
+            if (file.size > 5 * 1024 * 1024) {
                 alert('A foto do autor deve ter no máximo 5MB')
                 return
             }
@@ -74,10 +74,17 @@ export function ModalMateria({ materia, closeModal, onUpdate }: ModalMateriaProp
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
 
+        const criarDataISO = (dateTimeLocal: string) => {
+            const data = new Date(dateTimeLocal)
+            const offset = data.getTimezoneOffset()
+            const dataAjustada = new Date(data.getTime() - (offset * 60 * 1000))
+            return dataAjustada.toISOString()
+        }
+
         const materiaData = {
             ...formData,
-            createdAt: new Date(formData.createdAt).toISOString(),
-            updatedAt: new Date().toISOString(), 
+            createdAt: criarDataISO(formData.createdAt),
+            updatedAt: new Date().toISOString(),
             legenda: formData.legenda || null
         }
 
