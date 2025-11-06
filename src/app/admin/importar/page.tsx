@@ -1,11 +1,11 @@
 "use client"
 
 import { useState } from 'react'
-import { Upload, FileSpreadsheet, Users, Calendar, BarChart3, CheckCircle, AlertTriangle, Download, RefreshCw, ArrowRight, Trophy, Trash2 } from 'lucide-react'
-import { useImportarTimes, useImportarJogadores, useImportarAgendaJogos, useAtualizarEstatisticas, useImportarResultados, useResetDatabase } from '@/hooks/useImportacao'
+import { Upload, FileSpreadsheet, Users, Calendar, BarChart3, CheckCircle, AlertTriangle, Download, RefreshCw, ArrowRight, Trophy, Trash2, Video } from 'lucide-react'
+import { useImportarTimes, useImportarJogadores, useImportarAgendaJogos, useAtualizarEstatisticas, useImportarResultados, useResetDatabase, useAtualizarVideoPlayByPlay } from '@/hooks/useImportacao'
 
-
-type ImportStep = 'times' | 'jogadores' | 'agenda' | 'resultados' | 'estatisticas'
+// ✅ ATUALIZADO: Adicionado 'video-playbyplay' no type
+type ImportStep = 'times' | 'jogadores' | 'agenda' | 'resultados' | 'estatisticas' | 'video-playbyplay'
 
 interface ImportStepConfig {
   id: ImportStep
@@ -32,9 +32,11 @@ export default function AdminImportarPage() {
   const importAgendaMutation = useImportarAgendaJogos()
   const importResultadosMutation = useImportarResultados()
   const atualizarEstatisticasMutation = useAtualizarEstatisticas()
+  const atualizarVideoPlayByPlayMutation = useAtualizarVideoPlayByPlay() // ✅ NOVO HOOK
   const resetDatabaseMutation = useResetDatabase()
   const isResettingDatabase = resetDatabaseMutation.isPending
 
+  // ✅ ATUALIZADO: Adicionado novo step 'video-playbyplay'
   const steps: ImportStepConfig[] = [
     {
       id: 'times',
@@ -85,6 +87,17 @@ export default function AdminImportarPage() {
       required: false,
       status: atualizarEstatisticasMutation.isSuccess ? 'success' : 'pending',
       fileFormat: 'Excel (.xlsx)',
+    },
+    // ✅ NOVO STEP: Video e Play-by-Play
+    {
+      id: 'video-playbyplay',
+      title: 'Atualizar Vídeo/Play-by-Play',
+      description: 'Atualizar apenas o vídeo e play-by-play de um jogo já importado',
+      icon: Video,
+      color: 'pink',
+      required: false,
+      status: atualizarVideoPlayByPlayMutation.isSuccess ? 'success' : 'pending',
+      fileFormat: 'Excel (.xlsx)',
     }
   ]
 
@@ -94,7 +107,8 @@ export default function AdminImportarPage() {
     importJogadoresMutation.isPending ||
     importAgendaMutation.isPending ||
     importResultadosMutation?.isPending ||
-    atualizarEstatisticasMutation.isPending
+    atualizarEstatisticasMutation.isPending ||
+    atualizarVideoPlayByPlayMutation.isPending // ✅ ADICIONADO
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -102,6 +116,7 @@ export default function AdminImportarPage() {
     }
   }
 
+  // ✅ ATUALIZADO: Adicionado case para 'video-playbyplay'
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -137,6 +152,19 @@ export default function AdminImportarPage() {
             })
           }
           break
+        // ✅ NOVO CASE: Video e Play-by-Play
+        case 'video-playbyplay':
+          if (!formData.id_jogo) {
+            alert('Preencha o ID do jogo')
+            return
+          }
+          if (selectedFile) {
+            await atualizarVideoPlayByPlayMutation.mutateAsync({
+              arquivo: selectedFile,
+              idJogo: formData.id_jogo
+            })
+          }
+          break
       }
 
       setSelectedFile(null)
@@ -147,6 +175,7 @@ export default function AdminImportarPage() {
     }
   }
 
+  // ✅ ATUALIZADO: Adicionado case para 'video-playbyplay'
   const getStepStatus = (step: ImportStepConfig) => {
     switch (step.id) {
       case 'times':
@@ -159,6 +188,8 @@ export default function AdminImportarPage() {
         return importResultadosMutation?.isSuccess ? 'success' : 'pending'
       case 'estatisticas':
         return atualizarEstatisticasMutation.isSuccess ? 'success' : 'pending'
+      case 'video-playbyplay':
+        return atualizarVideoPlayByPlayMutation.isSuccess ? 'success' : 'pending'
       default:
         return 'pending'
     }
@@ -197,12 +228,13 @@ export default function AdminImportarPage() {
             <button
               key={step.id}
               onClick={() => setActiveStep(step.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeStep === step.id
-                ? 'bg-[#63E300] text-black'
-                : getStepStatus(step) === 'success'
-                  ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                  : 'bg-[#1C1C24] text-gray-300 hover:bg-gray-700'
-                }`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                activeStep === step.id
+                  ? 'bg-[#63E300] text-black'
+                  : getStepStatus(step) === 'success'
+                    ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                    : 'bg-[#1C1C24] text-gray-300 hover:bg-gray-700'
+              }`}
             >
               <step.icon className="w-4 h-4" />
               {step.title}
@@ -259,7 +291,8 @@ export default function AdminImportarPage() {
                 </div>
               </div>
 
-              {activeStep === 'estatisticas' && (
+              {/* ✅ ATUALIZADO: Campos para estatisticas E video-playbyplay */}
+              {(activeStep === 'estatisticas' || activeStep === 'video-playbyplay') && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm text-gray-400 mb-2">ID do Jogo *</label>
@@ -271,14 +304,33 @@ export default function AdminImportarPage() {
                       className="w-full px-4 py-3 bg-[#1C1C24] text-white rounded-md border border-gray-700 focus:border-[#63E300] focus:outline-none"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-2">Data do Jogo *</label>
-                    <input
-                      type="date"
-                      value={formData.data_jogo}
-                      onChange={(e) => setFormData({ ...formData, data_jogo: e.target.value })}
-                      className="w-full px-4 py-3 bg-[#1C1C24] text-white rounded-md border border-gray-700 focus:border-[#63E300] focus:outline-none"
-                    />
+                  
+                  {/* ✅ Data só para estatísticas */}
+                  {activeStep === 'estatisticas' && (
+                    <div>
+                      <label className="block text-sm text-gray-400 mb-2">Data do Jogo *</label>
+                      <input
+                        type="date"
+                        value={formData.data_jogo}
+                        onChange={(e) => setFormData({ ...formData, data_jogo: e.target.value })}
+                        className="w-full px-4 py-3 bg-[#1C1C24] text-white rounded-md border border-gray-700 focus:border-[#63E300] focus:outline-none"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ✅ NOVO: Aviso específico para video-playbyplay */}
+              {activeStep === 'video-playbyplay' && (
+                <div className="bg-yellow-900/20 border border-yellow-500 rounded-lg p-4">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm text-yellow-200">
+                      <p className="font-semibold mb-1">⚠️ Atenção:</p>
+                      <p>Esta opção atualiza APENAS os campos <strong>videoUrl</strong> e <strong>playByPlay</strong>.</p>
+                      <p className="mt-1">As estatísticas dos jogadores NÃO serão afetadas ou duplicadas.</p>
+                      <p className="mt-2 text-yellow-300">Use esta opção quando o jogo já foi importado e você quer adicionar apenas o vídeo e play-by-play.</p>
+                    </div>
                   </div>
                 </div>
               )}
@@ -286,25 +338,27 @@ export default function AdminImportarPage() {
               <button
                 type="submit"
                 disabled={!selectedFile || isUploading}
-                className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-md font-semibold transition-colors ${!selectedFile || isUploading
-                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                  : 'bg-[#63E300] text-black hover:bg-[#50B800]'
-                  }`}
+                className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-md font-semibold transition-colors ${
+                  !selectedFile || isUploading
+                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                    : 'bg-[#63E300] text-black hover:bg-[#50B800]'
+                }`}
               >
                 {isUploading ? (
                   <>
                     <RefreshCw className="w-5 h-5 animate-spin" />
-                    Importando...
+                    Processando...
                   </>
                 ) : (
                   <>
                     <Upload className="w-5 h-5" />
-                    Importar {currentStep.title}
+                    {activeStep === 'video-playbyplay' ? 'Atualizar Vídeo/Play-by-Play' : `Importar ${currentStep.title}`}
                   </>
                 )}
               </button>
             </form>
 
+            {/* Success Messages */}
             {importTimesMutation.isSuccess && activeStep === 'times' && (
               <div className="mt-4 p-4 bg-green-900/20 border border-green-500 rounded-lg">
                 <div className="flex items-center gap-2 text-green-400">
@@ -327,7 +381,7 @@ export default function AdminImportarPage() {
               <div className="mt-4 p-4 bg-green-900/20 border border-green-500 rounded-lg">
                 <div className="flex items-center gap-2 text-green-400">
                   <CheckCircle className="w-5 h-5" />
-                  <span className="font-semibold">Agenda de jogos importada com sucesso!</span>
+                  <span className="font-semibold">Agenda importada com sucesso!</span>
                 </div>
               </div>
             )}
@@ -336,7 +390,7 @@ export default function AdminImportarPage() {
               <div className="mt-4 p-4 bg-green-900/20 border border-green-500 rounded-lg">
                 <div className="flex items-center gap-2 text-green-400">
                   <CheckCircle className="w-5 h-5" />
-                  <span className="font-semibold">Resultados dos jogos importados com sucesso!</span>
+                  <span className="font-semibold">Resultados importados com sucesso!</span>
                 </div>
               </div>
             )}
@@ -350,14 +404,15 @@ export default function AdminImportarPage() {
               </div>
             )}
 
-            {(importTimesMutation.error || importJogadoresMutation.error || importAgendaMutation.error || importResultadosMutation?.error || atualizarEstatisticasMutation.error) && (
-              <div className="mt-4 p-4 bg-red-900/20 border border-red-500 rounded-lg">
-                <div className="flex items-center gap-2 text-red-400">
-                  <AlertTriangle className="w-5 h-5" />
-                  <span className="font-semibold">Erro na importação</span>
+            {/* ✅ NOVA MENSAGEM DE SUCESSO */}
+            {atualizarVideoPlayByPlayMutation.isSuccess && activeStep === 'video-playbyplay' && (
+              <div className="mt-4 p-4 bg-green-900/20 border border-green-500 rounded-lg">
+                <div className="flex items-center gap-2 text-green-400">
+                  <CheckCircle className="w-5 h-5" />
+                  <span className="font-semibold">Vídeo e Play-by-Play atualizados com sucesso!</span>
                 </div>
-                <p className="text-red-300 text-sm mt-1">
-                  {(importTimesMutation.error || importJogadoresMutation.error || importAgendaMutation.error || importResultadosMutation?.error || atualizarEstatisticasMutation.error)?.message}
+                <p className="text-sm text-green-300 mt-2">
+                  Os campos foram atualizados sem afetar as estatísticas dos jogadores.
                 </p>
               </div>
             )}
@@ -365,64 +420,50 @@ export default function AdminImportarPage() {
         </div>
       </div>
 
-      <div className="mt-12 border-t border-gray-700 pt-8">
-        <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-6">
-          <div className="flex items-start gap-4">
-            <AlertTriangle className="w-6 h-6 text-red-400 flex-shrink-0 mt-1" />
-
-            <div className="flex-1">
-              <h3 className="text-lg font-bold text-red-400 mb-2">
-                ⚠️ Zona de Perigo
-              </h3>
-
-              <p className="text-gray-300 text-sm mb-4">
-                Esta ação irá <strong>deletar TODOS os dados</strong> do banco de dados
-                e resetar os IDs para 1. Use apenas para desenvolvimento/teste.
-              </p>
-
-              <div className="bg-red-950/50 border border-red-600/30 rounded p-3 mb-4">
-                <p className="text-red-300 text-xs">
-                  <strong>⚠️ ATENÇÃO:</strong> Esta operação não pode ser desfeita!
-                  Todos os times, jogadores, jogos, estatísticas e campeonatos serão permanentemente removidos.
-                </p>
-              </div>
-
-              {!showResetConfirm ? (
-                <button
-                  onClick={handleResetDatabase}
-                  className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md font-medium transition-colors"
-                  disabled={isResettingDatabase}
-                >
+      {/* Reset Database Section */}
+      <div className="bg-red-900/10 border border-red-500/30 rounded-lg p-6">
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="w-6 h-6 text-red-400 flex-shrink-0 mt-1" />
+          <div className="flex-1">
+            <h3 className="text-lg font-bold text-red-400 mb-2">Zona de Perigo</h3>
+            <p className="text-gray-300 text-sm mb-4">
+              Esta ação irá remover TODOS os dados do banco (times, jogadores, jogos, estatísticas).
+              As notícias/matérias serão preservadas.
+            </p>
+            <button
+              onClick={handleResetDatabase}
+              disabled={isResettingDatabase}
+              className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold transition-colors ${
+                showResetConfirm
+                  ? 'bg-red-600 text-white hover:bg-red-700'
+                  : 'bg-red-900/40 text-red-300 hover:bg-red-900/60 border border-red-500/30'
+              }`}
+            >
+              {isResettingDatabase ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Resetando...
+                </>
+              ) : showResetConfirm ? (
+                <>
+                  <Trash2 className="w-4 h-4" />
+                  Confirmar Reset do Banco
+                </>
+              ) : (
+                <>
                   <Trash2 className="w-4 h-4" />
                   Resetar Banco de Dados
-                </button>
-              ) : (
-                <div className="space-y-3">
-                  <p className="text-yellow-300 text-sm font-medium">
-                    🔄 Tem certeza que deseja resetar o banco?
-                  </p>
-
-                  <div className="flex gap-3">
-                    <button
-                      onClick={handleResetDatabase}
-                      disabled={isResettingDatabase}
-                      className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md font-medium transition-colors disabled:opacity-50"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      {isResettingDatabase ? 'Resetando...' : 'Sim, Resetar Tudo'}
-                    </button>
-
-                    <button
-                      onClick={() => setShowResetConfirm(false)}
-                      disabled={isResettingDatabase}
-                      className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md font-medium transition-colors disabled:opacity-50"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                </div>
+                </>
               )}
-            </div>
+            </button>
+            {showResetConfirm && (
+              <button
+                onClick={() => setShowResetConfirm(false)}
+                className="ml-3 text-sm text-gray-400 hover:text-white"
+              >
+                Cancelar
+              </button>
+            )}
           </div>
         </div>
       </div>

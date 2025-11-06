@@ -106,6 +106,28 @@ export class ImportacaoService extends BaseService {
     }) as Promise<ImportResult>
   }
 
+  static async atualizarVideoPlayByPlay(arquivo: File, idJogo: string): Promise<ImportResult> {
+    const service = new ImportacaoService()
+
+    const formData = new FormData()
+    formData.append('arquivo', arquivo)
+    formData.append('id_jogo', idJogo)
+
+    try {
+      const response = await service.post<ImportResult>(
+        '/admin/atualizar-video-playbyplay',
+        formData
+      )
+
+      return response
+    } catch (error: any) {
+      if (error.response?.data) {
+        throw new Error(error.response.data.error || error.response.data.message || 'Erro ao atualizar vídeo/play-by-play')
+      }
+      throw new Error('Erro ao comunicar com o servidor')
+    }
+  }
+
   static async resetDatabase(): Promise<{
     success: boolean
     message: string

@@ -1,5 +1,3 @@
-// ==================== BASE TYPES ====================
-
 export interface Conferencia {
   id: number
   nome: string
@@ -53,7 +51,6 @@ export interface Titulo {
   estaduais?: string
 }
 
-// Versão principal do Time (usada no backend/admin)
 export interface Time extends BaseEntity {
   nome: string
   sigla: string
@@ -72,12 +69,10 @@ export interface Time extends BaseEntity {
   instagram_coach: string
   coord_ofen: string
   coord_defen: string
-  titulos: Titulo[] // Sempre array, nunca undefined
+  titulos: Titulo[]
 
-  // Relacionamentos (para frontend)
   jogadores?: JogadorTime[]
 
-  // Campos calculados (cache/otimização)
   _count?: {
     jogadores: number
     campeonatos: number
@@ -86,7 +81,6 @@ export interface Time extends BaseEntity {
   }
 }
 
-// Versão com campos opcionais (compatibilidade com frontend antigo)
 export type TimeOptional = {
   id?: number
   nome?: string
@@ -195,7 +189,6 @@ export interface EstatisticaJogo extends BaseEntity {
   rodada?: number
   fase?: string
 
-  // Relacionamentos (quando incluídos)
   jogo: {
     id: number
     dataJogo: string | Date
@@ -208,7 +201,7 @@ export interface EstatisticaJogo extends BaseEntity {
     observacoes?: string
     timeCasaId?: number
     timeVisitanteId?: number
-    
+
     timeCasa?: {
       id: number
       nome: string
@@ -216,7 +209,7 @@ export interface EstatisticaJogo extends BaseEntity {
       cor?: string
       logo?: string
     }
-    
+
     timeVisitante?: {
       id: number
       nome: string
@@ -224,7 +217,7 @@ export interface EstatisticaJogo extends BaseEntity {
       cor?: string
       logo?: string
     }
-    
+
     campeonato?: {
       id: number
       nome: string
@@ -246,7 +239,6 @@ export interface EstatisticaJogo extends BaseEntity {
   }
 }
 
-// Versão com campos opcionais das estatísticas (frontend antigo)
 export type EstatisticasOptional = {
   passe?: {
     passes_completos?: number
@@ -312,14 +304,13 @@ export interface ClassificacaoPorCategoria {
   punter?: Classificacao
 }
 
-// Versão principal do Jogador (backend/admin)
 export interface Jogador extends BaseEntity {
   nome: string
   posicao: string
   setor: 'Ataque' | 'Defesa' | 'Special'
   experiencia: number
   idade: number
-  altura: number // Float no banco
+  altura: number
   peso: number
   instagram: string
   instagram2: string
@@ -327,10 +318,8 @@ export interface Jogador extends BaseEntity {
   nacionalidade: string
   timeFormador: string
 
-  // Relacionamentos (para frontend - via JogadorTime)
   times?: JogadorTime[]
 
-  // Dados do relacionamento atual (para facilitar acesso)
   timeId?: number
   numero?: number
   camisa?: string
@@ -338,7 +327,6 @@ export interface Jogador extends BaseEntity {
   classificacoes?: ClassificacaoPorCategoria
 }
 
-// Versão com campos opcionais (compatibilidade frontend antigo)
 export type JogadorOptional = {
   id?: number
   nome?: string
@@ -360,7 +348,6 @@ export type JogadorOptional = {
   estatisticas?: EstatisticasOptional
 }
 
-// ✅ IMPORTANTE: JogadorType é um ALIAS para compatibilidade
 export type JogadorType = Jogador
 
 export interface JogadorTime extends BaseEntity {
@@ -369,24 +356,23 @@ export interface JogadorTime extends BaseEntity {
   temporada: string
   numero: number
   camisa: string
-  estatisticas: Estatisticas // Sempre presente, mesmo que vazio
+  estatisticas: Estatisticas
 
-  // Relacionamentos (quando incluídos)
   jogador?: Jogador
   time?: Time
 
-  nome?: string        // Do jogador
-  posicao?: string     // Do jogador  
-  setor?: 'Ataque' | 'Defesa' | 'Special'  // Do jogador
-  experiencia?: number // Do jogador
-  idade?: number       // Do jogador
-  altura?: number      // Do jogador
-  peso?: number        // Do jogador
-  instagram?: string   // Do jogador
-  instagram2?: string  // Do jogador
-  cidade?: string      // Do jogador
-  nacionalidade?: string // Do jogador
-  timeFormador?: string  // Do jogador
+  nome?: string
+  posicao?: string
+  setor?: 'Ataque' | 'Defesa' | 'Special'
+  experiencia?: number
+  idade?: number
+  altura?: number
+  peso?: number
+  instagram?: string
+  instagram2?: string
+  cidade?: string
+  nacionalidade?: string
+  timeFormador?: string
 }
 
 // ==================== MATÉRIAS/NOTÍCIAS ====================
@@ -399,12 +385,10 @@ export interface Materia extends BaseEntity {
   texto: string
   autor: string
   autorImage: string
-  // ✅ PADRONIZADO: sempre string ISO (vem da API assim)
   createdAt: string
   updatedAt: string
 }
 
-// Alias para compatibilidade com código existente
 export type Noticia = Materia
 
 // ==================== CAMPEONATOS ====================
@@ -425,16 +409,14 @@ export interface Campeonato extends BaseEntity {
   temporada: string
   tipo: 'REGULAR' | 'PLAYOFFS' | 'COPA'
   status: 'NAO INICIADO' | 'EM ANDAMENTO' | 'FINALIZADO'
-  dataInicio: string // ISO string
+  dataInicio: string
   dataFim?: string
   descricao?: string
   formato: FormatoCampeonato
 
-  // Relacionamentos
   grupos: Grupo[]
   jogos?: Jogo[]
 
-  // Contadores
   _count?: {
     grupos: number
     jogos: number
@@ -447,9 +429,8 @@ export interface Grupo extends BaseEntity {
   ordem: number
   regionalId?: number
 
-  // Relacionamentos
   campeonato?: Campeonato
-  regional?: Regional  // ADICIONAR ESTA LINHA
+  regional?: Regional
   times: GrupoTime[]
   classificacoes: ClassificacaoGrupo[]
   jogos?: Jogo[]
@@ -459,27 +440,28 @@ export interface GrupoTime extends BaseEntity {
   grupoId: number
   timeId: number
 
-  // Relacionamentos
   grupo?: Grupo
   time: Time
 }
 
 export interface Jogo extends BaseEntity {
   campeonatoId: number
-  grupoId?: number // Null se não for jogo de grupo
+  grupoId?: number
   timeVisitanteId: number
   timeCasaId: number
-  dataJogo: string // ISO string
+  dataJogo: string
   local?: string
   rodada: number
-  fase: string // "FASE_GRUPOS", "OITAVAS", "QUARTAS", "SEMI", "FINAL"
+  fase: string
   status: 'AGENDADO' | 'AO VIVO' | 'FINALIZADO' | 'ADIADO'
   placarCasa?: number
   placarVisitante?: number
   observacoes?: string
   estatisticasProcessadas: boolean
 
-  // Relacionamentos
+  videoUrl?: string
+  playByPlay?: string
+
   campeonato?: {
     id: number
     nome: string
@@ -505,10 +487,9 @@ export interface ClassificacaoGrupo extends BaseEntity {
   pontosPro: number
   pontosContra: number
   saldoPontos: number
-  pontos: number // Pontos na tabela (vitória = 3, empate = 1)
+  pontos: number 
   aproveitamento: number
 
-  // Relacionamentos
   time: Time
   grupo?: {
     id: number
@@ -536,7 +517,6 @@ export type StatKey =
   | 'field_goals'
   | 'jardas_punt_media'
 
-// Interfaces específicas para compatibilidade
 export interface PasseStats {
   passes_completos: number
   passes_tentados: number
@@ -996,13 +976,11 @@ export interface CreateJogadorRequest {
   instagram?: string
   instagram2?: string
 
-  // Dados do relacionamento atual
   timeId: number
   temporada: string
   numero: number
   camisa: string
 
-  // Estatísticas iniciais (opcional)
   estatisticas?: Partial<Estatisticas>
 }
 
@@ -1073,13 +1051,11 @@ export interface ApiError {
   field?: string
 }
 
-// ==================== TIPOS UTILITÁRIOS ====================
 
 export type EntityStatus = 'ativo' | 'inativo' | 'suspenso'
 export type Temporada = '2024' | '2025' | '2026'
 export type TipoSetor = 'Ataque' | 'Defesa' | 'Special'
 
-// ==================== PROPS DE COMPONENTES ====================
 
 export interface JogoCardProps {
   jogo: Jogo
@@ -1348,18 +1324,14 @@ export interface JogoValidation {
 
 // ==================== TYPES ESPECÍFICOS PARA PÁGINAS ====================
 
-// Tipos para página de jogos do admin
 export type FilterStatus = 'todos' | 'AGENDADO' | 'AO VIVO' | 'FINALIZADO' | 'ADIADO'
 export type ViewMode = 'calendar' | 'list' | 'table'
 
-// Tipos para comparação de times
 export interface TeamComparisonProps {
   currentTeam: Time
   selectedSetor: string
 }
 
-
-// Re-exports para facilitar imports
 export type {
   Estatisticas as Stats,
   EstatisticasOptional as StatsOptional,
@@ -1372,10 +1344,10 @@ export type {
 export type TipoConferencia = 'SUDESTE' | 'SUL' | 'NORDESTE' | 'CENTRO NORTE'
 
 export type TipoRegional =
-  | 'SERRAMAR' | 'CANASTRA' | 'CANTAREIRA' // Sudeste
-  | 'ARAUCARIA' | 'PAMPA' // Sul  
-  | 'ATLANTICO' // Nordeste
-  | 'CERRADO' | 'AMAZONIA' // Centro-Norte
+  | 'SERRAMAR' | 'CANASTRA' | 'CANTAREIRA'
+  | 'ARAUCARIA' | 'PAMPA'
+  | 'ATLANTICO'
+  | 'CERRADO' | 'AMAZONIA'
 
 export interface ConferenciaConfig {
   tipo: TipoConferencia
@@ -1395,17 +1367,15 @@ export interface RegionalConfig {
 }
 
 export interface PlayoffConfig {
-  semifinalDireta: number // quantos times vão direto
-  wildcardVagas: number // quantas vagas de wild card
+  semifinalDireta: number 
+  wildcardVagas: number 
   estrutura: 'CONFERENCIA' | 'REGIONAL' | 'GERAL'
 }
 
 // ==================== CONFIGURAÇÃO DA SUPERLIGA ====================
 
-// ADICIONAR ESTA CONFIGURAÇÃO NO ARQUIVO src/types/index.ts
 
 export const TIMES_SUPERLIGA: Record<TipoRegional, string[]> = {
-  // Conferência Sudeste - Regional Serramar
   SERRAMAR: [
     'Vasco Almirantes',
     'Flamengo Imperadores',
@@ -1413,7 +1383,6 @@ export const TIMES_SUPERLIGA: Record<TipoRegional, string[]> = {
     'Tritões FA'
   ],
 
-  // Conferência Sudeste - Regional Canastra
   CANASTRA: [
     'Galo FA',
     'Moura Lacerda Dragons',
@@ -1421,7 +1390,6 @@ export const TIMES_SUPERLIGA: Record<TipoRegional, string[]> = {
     'Spartans FA'
   ],
 
-  // Conferência Sudeste - Regional Cantareira
   CANTAREIRA: [
     'Corinthians Steamrollers',
     'Cruzeiro FA',
@@ -1429,7 +1397,6 @@ export const TIMES_SUPERLIGA: Record<TipoRegional, string[]> = {
     'Ocelots FA'
   ],
 
-  // Conferência Sul - Regional Araucária
   ARAUCARIA: [
     'Timbó Rex',
     'Coritiba Crocodiles',
@@ -1437,7 +1404,6 @@ export const TIMES_SUPERLIGA: Record<TipoRegional, string[]> = {
     'Brown Spiders'
   ],
 
-  // Conferência Sul - Regional Pampa
   PAMPA: [
     'Santa Maria Soldiers',
     'Juventude FA',
@@ -1445,7 +1411,6 @@ export const TIMES_SUPERLIGA: Record<TipoRegional, string[]> = {
     'Istepôs FA'
   ],
 
-  // Conferência Nordeste - Regional Atlântico
   ATLANTICO: [
     'Fortaleza Tritões',
     'Ceará Sabres',
@@ -1455,14 +1420,12 @@ export const TIMES_SUPERLIGA: Record<TipoRegional, string[]> = {
     'Caruaru Wolves'
   ],
 
-  // Conferência Centro-Norte - Regional Cerrado
   CERRADO: [
     'Rondonópolis Hawks',
     'Cuiabá Arsenal',
     'Tubarões do Cerrado'
   ],
 
-  // Conferência Centro-Norte - Regional Amazônia  
   AMAZONIA: [
     'Porto Velho Miners',
     'Manaus FA',
@@ -1470,9 +1433,7 @@ export const TIMES_SUPERLIGA: Record<TipoRegional, string[]> = {
   ]
 }
 
-// COMPLETAR A CONFIGURAÇÃO SUPERLIGA_CONFIG
 export const SUPERLIGA_CONFIG: ConferenciaConfig[] = [
-  // ✅ CONFERÊNCIA SUDESTE (12 times, 3 regionais)
   {
     tipo: 'SUDESTE',
     nome: 'Conferência Sudeste',
@@ -1484,7 +1445,7 @@ export const SUPERLIGA_CONFIG: ConferenciaConfig[] = [
         nome: 'Regional Serramar',
         conferencia: 'SUDESTE',
         timesPorRegional: 4,
-        times: [] // Preenchido dinamicamente
+        times: []
       },
       {
         tipo: 'CANASTRA',
@@ -1502,13 +1463,12 @@ export const SUPERLIGA_CONFIG: ConferenciaConfig[] = [
       }
     ],
     playoffConfig: {
-      semifinalDireta: 2, // 2 melhores 1º colocados vão direto
-      wildcardVagas: 4,   // 4 vagas de wild card
+      semifinalDireta: 2,
+      wildcardVagas: 4,
       estrutura: 'CONFERENCIA'
     }
   },
 
-  // ✅ CONFERÊNCIA SUL (8 times, 2 regionais)
   {
     tipo: 'SUL',
     nome: 'Conferência Sul',
@@ -1531,13 +1491,12 @@ export const SUPERLIGA_CONFIG: ConferenciaConfig[] = [
       }
     ],
     playoffConfig: {
-      semifinalDireta: 2, // 1º de cada regional vai direto
-      wildcardVagas: 4,   // 2º e 3º de cada regional
+      semifinalDireta: 2,
+      wildcardVagas: 4,
       estrutura: 'CONFERENCIA'
     }
   },
 
-  // ✅ CONFERÊNCIA NORDESTE (6 times, 1 regional) - ERA ISSO QUE ESTAVA FALTANDO!
   {
     tipo: 'NORDESTE',
     nome: 'Conferência Nordeste',
@@ -1553,13 +1512,12 @@ export const SUPERLIGA_CONFIG: ConferenciaConfig[] = [
       }
     ],
     playoffConfig: {
-      semifinalDireta: 2, // 1º e 2º lugar vão direto para semifinal
-      wildcardVagas: 2,   // 4º vs 5º (wild card)
+      semifinalDireta: 2,
+      wildcardVagas: 2,
       estrutura: 'CONFERENCIA'
     }
   },
 
-  // ✅ CONFERÊNCIA CENTRO-NORTE (6 times, 2 regionais)
   {
     tipo: 'CENTRO NORTE',
     nome: 'Conferência Centro-Norte',
@@ -1582,14 +1540,13 @@ export const SUPERLIGA_CONFIG: ConferenciaConfig[] = [
       }
     ],
     playoffConfig: {
-      semifinalDireta: 2, // 1º de cada regional vai direto para semifinal
-      wildcardVagas: 2,   // 2º de cada regional
+      semifinalDireta: 2,
+      wildcardVagas: 2,
       estrutura: 'CONFERENCIA'
     }
   }
 ]
 
-// ==================== TIPOS PARA PLAYOFFS ====================
 
 export interface PlayoffBracket {
   conferencia: TipoConferencia
@@ -1631,7 +1588,6 @@ export interface PlayoffTeam {
   classificacao: 'DIRETO' | 'WILD CARD'
 }
 
-// ==================== FASE NACIONAL ====================
 
 export interface SemifinalNacional {
   id: string
@@ -1659,13 +1615,11 @@ export interface SuperligaBracket {
   temporada: string
   status: 'CONFIGURANDO' | 'FASE GRUPOS' | 'PLAYOFFS' | 'FINALIZADO'
 
-  // Playoffs por conferência
   playoffsSudeste: PlayoffBracket
   playoffsSul: PlayoffBracket
   playoffsNordeste: PlayoffBracket
   playoffsCentroNorte: PlayoffBracket
 
-  // Fase Nacional
   semifinalNacional1: SemifinalNacional
   semifinalNacional2: SemifinalNacional
   finalNacional: FinalNacional
@@ -1717,8 +1671,6 @@ export interface ClassificacaoTime {
   aproveitamento: number
 }
 
-// Interface PlayoffBracket já existe no arquivo, não precisa redeclarar
-
 export interface FaseNacional {
   semifinais: PlayoffJogo[]
   final: PlayoffJogo
@@ -1752,7 +1704,7 @@ export interface SuperligaStatus {
 export interface DistribuirTimesRequest {
   campeonatoId: number
   distribuicao: {
-    [key in TipoRegional]?: number[] // IDs dos times
+    [key in TipoRegional]?: number[]
   }
 }
 
@@ -1845,7 +1797,7 @@ export interface RegionalViewProps {
 }
 
 export interface PlayoffBracketViewProps {
-  bracket: PlayoffBracket  // Usando a interface que já existe
+  bracket: PlayoffBracket
   onUpdateJogo?: (jogo: PlayoffJogo) => void
 }
 

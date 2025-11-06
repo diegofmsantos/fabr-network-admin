@@ -313,6 +313,54 @@ export function useImportarResultados() {
   })
 }
 
+export function useAtualizarVideoPlayByPlay() {
+  const queryClient = useQueryClient()
+  const notifications = useNotifications()
+
+  return useMutation({
+    mutationFn: ({ arquivo, idJogo }: {
+      arquivo: File
+      idJogo: string
+    }) => ImportacaoService.atualizarVideoPlayByPlay(arquivo, idJogo),
+
+    onSuccess: (result: ImportResult) => {
+      // Invalidar cache do jogo específico
+      if (result.jogoId) {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.jogos.detail(parseInt(result.jogoId))
+        })
+      }
+
+      // Invalidar lista de jogos
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.jogos.lists()
+      })
+
+      notifications.success(
+        'Vídeo e Play-by-Play atualizados!',
+        `Jogo ${result.jogoId} foi atualizado com sucesso`
+      )
+
+      if (result.erros && result.erros.length > 0) {
+        notifications.warning(
+          'Atualização com avisos',
+          `Alguns campos podem não ter sido preenchidos. Verifique o console.`
+        )
+        console.warn('Avisos na atualização:', result.erros)
+      }
+    },
+    onError: (error: any) => {
+      notifications.error(
+        'Erro ao atualizar vídeo/play-by-play',
+        error.message || 'Verifique o arquivo e tente novamente'
+      )
+    },
+    meta: {
+      timeout: 60000, // 60 segundos
+    }
+  })
+}
+
 export function useResetDatabase() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
