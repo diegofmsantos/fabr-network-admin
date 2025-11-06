@@ -106,6 +106,31 @@ export class ImportacaoService extends BaseService {
     }) as Promise<ImportResult>
   }
 
+  static async atualizarEstatisticasLote(arquivos: File[]): Promise<ImportResult> {
+    const service = new ImportacaoService()
+
+    const formData = new FormData()
+
+    // Adicionar todos os arquivos no FormData
+    arquivos.forEach((arquivo) => {
+      formData.append('arquivos', arquivo)
+    })
+
+    try {
+      const response = await service.post<ImportResult>(
+        '/admin/atualizar-estatisticas-lote',
+        formData
+      )
+
+      return response
+    } catch (error: any) {
+      if (error.response?.data) {
+        throw new Error(error.response.data.error || error.response.data.message || 'Erro ao processar lote')
+      }
+      throw new Error('Erro ao comunicar com o servidor')
+    }
+  }
+
   static async atualizarVideoPlayByPlay(arquivo: File, idJogo: string): Promise<ImportResult> {
     const service = new ImportacaoService()
 

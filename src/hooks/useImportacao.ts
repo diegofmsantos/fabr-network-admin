@@ -313,6 +313,49 @@ export function useImportarResultados() {
   })
 }
 
+export function useAtualizarEstatisticasLote() {
+  const queryClient = useQueryClient()
+  const notifications = useNotifications()
+
+  return useMutation({
+    mutationFn: (arquivos: File[]) => ImportacaoService.atualizarEstatisticasLote(arquivos),
+    onSuccess: (result: any) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.jogadores.lists()
+      })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.times.lists()
+      })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.admin.all
+      })
+
+      const { totalArquivos, sucessos, erros } = result
+
+      if (erros === 0) {
+        notifications.success(
+          'Lote processado com sucesso!',
+          `${sucessos} arquivos importados sem erros`
+        )
+      } else {
+        notifications.warning(
+          'Lote processado com avisos',
+          `${sucessos} sucessos, ${erros} erros. Verifique os detalhes.`
+        )
+      }
+    },
+    onError: (error: any) => {
+      notifications.error(
+        'Erro na importação em lote',
+        error.message || 'Verifique os arquivos e tente novamente'
+      )
+    },
+    meta: {
+      timeout: 300000, // 5 minutos para processar múltiplos arquivos
+    }
+  })
+}
+
 export function useAtualizarVideoPlayByPlay() {
   const queryClient = useQueryClient()
   const notifications = useNotifications()
