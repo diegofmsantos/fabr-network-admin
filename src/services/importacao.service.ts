@@ -111,7 +111,6 @@ export class ImportacaoService extends BaseService {
 
     const formData = new FormData()
 
-    // Adicionar todos os arquivos no FormData
     arquivos.forEach((arquivo) => {
       formData.append('arquivos', arquivo)
     })
@@ -148,6 +147,27 @@ export class ImportacaoService extends BaseService {
     } catch (error: any) {
       if (error.response?.data) {
         throw new Error(error.response.data.error || error.response.data.message || 'Erro ao atualizar vídeo/play-by-play')
+      }
+      throw new Error('Erro ao comunicar com o servidor')
+    }
+  }
+
+  static async atualizarVideosLote(arquivo: File): Promise<ImportResult> {
+    const service = new ImportacaoService()
+
+    const formData = new FormData()
+    formData.append('arquivo', arquivo)
+
+    try {
+      const response = await service.post<ImportResult>(
+        '/admin/atualizar-videos-lote',
+        formData
+      )
+
+      return response
+    } catch (error: any) {
+      if (error.response?.data) {
+        throw new Error(error.response.data.error || error.response.data.message || 'Erro ao processar lote de vídeos')
       }
       throw new Error('Erro ao comunicar com o servidor')
     }

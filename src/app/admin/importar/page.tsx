@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { Upload, FileSpreadsheet, Users, Calendar, BarChart3, CheckCircle, AlertTriangle, Download, RefreshCw, ArrowRight, Trophy, Trash2, Video, Package } from 'lucide-react'
-import { useImportarTimes, useImportarJogadores, useImportarAgendaJogos, useAtualizarEstatisticas, useImportarResultados, useResetDatabase, useAtualizarVideoPlayByPlay, useAtualizarEstatisticasLote } from '@/hooks/useImportacao'
+import { useImportarTimes, useImportarJogadores, useImportarAgendaJogos, useAtualizarEstatisticas, useImportarResultados, useResetDatabase, useAtualizarVideoPlayByPlay, useAtualizarEstatisticasLote, useAtualizarVideosLote } from '@/hooks/useImportacao'
 
 type ImportStep = 'times' | 'jogadores' | 'agenda' | 'resultados' | 'estatisticas' | 'video-playbyplay'
 
@@ -33,6 +33,7 @@ export default function AdminImportarPage() {
   const atualizarEstatisticasMutation = useAtualizarEstatisticas()
   const atualizarEstatisticasLoteMutation = useAtualizarEstatisticasLote()
   const atualizarVideoPlayByPlayMutation = useAtualizarVideoPlayByPlay()
+  const atualizarVideosLoteMutation = useAtualizarVideosLote()
   const resetDatabaseMutation = useResetDatabase()
   const isResettingDatabase = resetDatabaseMutation.isPending
 
@@ -73,7 +74,7 @@ export default function AdminImportarPage() {
       description: 'Upload de placares dos jogos após finalizados',
       icon: Trophy,
       color: 'yellow',
-      required: false,
+      required: true,
       status: importResultadosMutation?.isSuccess ? 'success' : 'pending',
       fileFormat: 'Excel (.xlsx)',
     },
@@ -83,18 +84,18 @@ export default function AdminImportarPage() {
       description: 'Upload de estatísticas individuais após cada jogo',
       icon: BarChart3,
       color: 'orange',
-      required: false,
+      required: true,
       status: atualizarEstatisticasMutation.isSuccess ? 'success' : 'pending',
       fileFormat: 'Excel (.xlsx)',
     },
     {
       id: 'video-playbyplay',
       title: 'Atualizar Vídeo/Play-by-Play',
-      description: 'Atualizar apenas o vídeo e play-by-play de um jogo já importado',
+      description: 'Atualizar vídeo e play-by-play de todos os jogos (até 84 de uma vez)',
       icon: Video,
-      color: 'pink',
-      required: false,
-      status: atualizarVideoPlayByPlayMutation.isSuccess ? 'success' : 'pending',
+      color: 'red',
+      required: true,
+      status: atualizarVideosLoteMutation.isSuccess ? 'success' : 'pending',
       fileFormat: 'Excel (.xlsx)',
     }
   ]
@@ -108,6 +109,7 @@ export default function AdminImportarPage() {
     atualizarEstatisticasMutation.isPending ||
     atualizarEstatisticasLoteMutation.isPending ||
     atualizarVideoPlayByPlayMutation.isPending
+  atualizarVideosLoteMutation.isPending
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -157,20 +159,13 @@ export default function AdminImportarPage() {
             await atualizarEstatisticasMutation.mutateAsync({
               arquivo: selectedFile,
               idJogo: formData.id_jogo,
-              dataJogo: '' // Não é mais necessário
+              dataJogo: ''
             })
           }
           break
         case 'video-playbyplay':
-          if (!formData.id_jogo) {
-            alert('Preencha o ID do jogo')
-            return
-          }
           if (selectedFile) {
-            await atualizarVideoPlayByPlayMutation.mutateAsync({
-              arquivo: selectedFile,
-              idJogo: formData.id_jogo
-            })
+            await atualizarVideosLoteMutation.mutateAsync(selectedFile)
           }
           break
       }
@@ -257,13 +252,12 @@ export default function AdminImportarPage() {
               <button
                 key={step.id}
                 onClick={() => setActiveStep(step.id)}
-                className={`p-4 rounded-lg border-2 transition-all ${
-                  isActive
-                    ? 'border-[#63E300] bg-[#63E300]/10'
-                    : status === 'success'
+                className={`p-4 rounded-lg border-2 transition-all ${isActive
+                  ? 'border-[#63E300] bg-[#63E300]/10'
+                  : status === 'success'
                     ? 'border-green-500 bg-green-500/10'
                     : 'border-gray-700 bg-[#1C1C24] hover:border-gray-600'
-                }`}
+                  }`}
               >
                 <div className="flex flex-col items-center gap-2">
                   <Icon className={`w-6 h-6 ${isActive ? 'text-[#63E300]' : status === 'success' ? 'text-green-400' : 'text-gray-400'}`} />
@@ -402,8 +396,8 @@ export default function AdminImportarPage() {
                   )}
                 </div>
 
-                {/* Campos específicos para estatísticas e vídeo */}
-                {(activeStep === 'estatisticas' || activeStep === 'video-playbyplay') && (
+                {/* Campos específicos APENAS para estatísticas */}
+                {activeStep === 'estatisticas' && (
                   <div>
                     <label className="block text-sm text-gray-400 mb-2">ID do Jogo *</label>
                     <input
@@ -418,13 +412,19 @@ export default function AdminImportarPage() {
 
                 {/* Aviso para vídeo/play-by-play */}
                 {activeStep === 'video-playbyplay' && (
-                  <div className="bg-yellow-900/20 border border-yellow-500 rounded-lg p-4">
+                  <div className="bg-blue-900/20 border border-blue-500 rounded-lg p-4">
                     <div className="flex items-start gap-2">
-                      <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
-                      <div className="text-sm text-yellow-200">
-                        <p className="font-semibold mb-1">⚠️ Atenção:</p>
-                        <p>Esta opção atualiza APENAS os campos <strong>videoUrl</strong> e <strong>playByPlay</strong>.</p>
-                        <p className="mt-1">As estatísticas dos jogadores NÃO serão afetadas ou duplicadas.</p>
+                      <AlertTriangle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                      <div className="text-sm text-blue-200">
+                        <p className="font-semibold mb-1">💡 Como usar:</p>
+                        <p>Crie uma planilha Excel com <strong>3 colunas</strong>:</p>
+                        <ul className="list-disc list-inside space-y-1 mt-2">
+                          <li><strong>jogo_id</strong> - ID do jogo no sistema</li>
+                          <li><strong>video_url</strong> - Link do vídeo do YouTube (embed)</li>
+                          <li><strong>play_by_play</strong> - Texto com as jogadas</li>
+                        </ul>
+                        <p className="mt-3 font-semibold">✅ Você pode importar todos os 84 jogos de uma vez!</p>
+                        <p className="mt-1 text-blue-300">As estatísticas dos jogadores NÃO serão afetadas.</p>
                       </div>
                     </div>
                   </div>
@@ -434,11 +434,10 @@ export default function AdminImportarPage() {
               <button
                 type="submit"
                 disabled={!selectedFile || isUploading}
-                className={`w-full mt-6 flex items-center justify-center gap-2 px-6 py-3 rounded-md font-semibold transition-colors ${
-                  !selectedFile || isUploading
-                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                    : 'bg-[#63E300] text-black hover:bg-[#50B800]'
-                }`}
+                className={`w-full mt-6 flex items-center justify-center gap-2 px-6 py-3 rounded-md font-semibold transition-colors ${!selectedFile || isUploading
+                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                  : 'bg-[#63E300] text-black hover:bg-[#50B800]'
+                  }`}
               >
                 {isUploading ? (
                   <>
@@ -448,7 +447,7 @@ export default function AdminImportarPage() {
                 ) : (
                   <>
                     <Upload className="w-5 h-5" />
-                    {activeStep === 'video-playbyplay' ? 'Atualizar Vídeo/Play-by-Play' : `Importar ${currentStep.title}`}
+                    {activeStep === 'video-playbyplay' ? 'Atualizar Vídeos em Lote' : `Importar ${currentStep.title}`}
                   </>
                 )}
               </button>
@@ -487,8 +486,8 @@ export default function AdminImportarPage() {
                       <label htmlFor="files-lote-upload" className="cursor-pointer">
                         <Package className="w-12 h-12 text-purple-500 mx-auto mb-4" />
                         <p className="text-white font-medium mb-1">
-                          {selectedFilesLote.length > 0 
-                            ? `${selectedFilesLote.length} arquivo(s) selecionado(s)` 
+                          {selectedFilesLote.length > 0
+                            ? `${selectedFilesLote.length} arquivo(s) selecionado(s)`
                             : 'Clique para selecionar múltiplos arquivos'}
                         </p>
                         <p className="text-sm text-gray-500">ou arraste os arquivos aqui</p>
@@ -526,11 +525,10 @@ export default function AdminImportarPage() {
                 <button
                   type="submit"
                   disabled={selectedFilesLote.length === 0 || isUploading}
-                  className={`w-full mt-6 flex items-center justify-center gap-2 px-6 py-3 rounded-md font-semibold transition-colors ${
-                    selectedFilesLote.length === 0 || isUploading
-                      ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                      : 'bg-purple-600 text-white hover:bg-purple-700'
-                  }`}
+                  className={`w-full mt-6 flex items-center justify-center gap-2 px-6 py-3 rounded-md font-semibold transition-colors ${selectedFilesLote.length === 0 || isUploading
+                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                    : 'bg-purple-600 text-white hover:bg-purple-700'
+                    }`}
                 >
                   {isUploading ? (
                     <>

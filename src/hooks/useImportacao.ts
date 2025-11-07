@@ -351,7 +351,7 @@ export function useAtualizarEstatisticasLote() {
       )
     },
     meta: {
-      timeout: 300000, // 5 minutos para processar múltiplos arquivos
+      timeout: 300000,
     }
   })
 }
@@ -367,14 +367,12 @@ export function useAtualizarVideoPlayByPlay() {
     }) => ImportacaoService.atualizarVideoPlayByPlay(arquivo, idJogo),
 
     onSuccess: (result: ImportResult) => {
-      // Invalidar cache do jogo específico
       if (result.jogoId) {
         queryClient.invalidateQueries({
           queryKey: queryKeys.jogos.detail(parseInt(result.jogoId))
         })
       }
 
-      // Invalidar lista de jogos
       queryClient.invalidateQueries({
         queryKey: queryKeys.jogos.lists()
       })
@@ -399,7 +397,44 @@ export function useAtualizarVideoPlayByPlay() {
       )
     },
     meta: {
-      timeout: 60000, // 60 segundos
+      timeout: 60000,
+    }
+  })
+}
+
+export function useAtualizarVideosLote() {
+  const queryClient = useQueryClient()
+  const notifications = useNotifications()
+
+  return useMutation({
+    mutationFn: (arquivo: File) => ImportacaoService.atualizarVideosLote(arquivo),
+    onSuccess: (result: any) => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.jogos.lists()
+      })
+
+      const { totalJogos, sucessos, erros } = result
+
+      if (erros === 0) {
+        notifications.success(
+          'Vídeos atualizados com sucesso!',
+          `${sucessos} jogos atualizados sem erros`
+        )
+      } else {
+        notifications.warning(
+          'Atualização concluída com avisos',
+          `${sucessos} sucessos, ${erros} erros. Verifique os detalhes.`
+        )
+      }
+    },
+    onError: (error: any) => {
+      notifications.error(
+        'Erro na atualização de vídeos',
+        error.message || 'Verifique o arquivo e tente novamente'
+      )
+    },
+    meta: {
+      timeout: 120000,
     }
   })
 }
@@ -411,10 +446,8 @@ export function useResetDatabase() {
   return useMutation({
     mutationFn: () => ImportacaoService.resetDatabase(),
     onSuccess: (result) => {
-      // Limpar todos os caches
       queryClient.clear()
 
-      // Invalidar queries específicas
       queryClient.invalidateQueries({
         queryKey: queryKeys.times.all
       })
@@ -453,7 +486,7 @@ export function useResetDatabase() {
       )
     },
     meta: {
-      timeout: 60000, // 1 minuto
+      timeout: 60000,
     }
   })
 }
