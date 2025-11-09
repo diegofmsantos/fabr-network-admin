@@ -120,15 +120,13 @@ export const FormMateria = () => {
     }
   }
 
-
-
   return (
     <div className="min-h-screen bg-[#0F0F13]">
       <header className="sticky top-0 z-10 bg-gradient-to-r from-[#191920] to-[#272731] shadow-xl">
         <div className="w-full px-2 py-4 flex justify-between items-center">
           <Link href="/" className="text-white font-bold text-xl flex items-center">
             <Image
-              src="/logo-fabr-color.png"
+              src="/assets/logo-fabr-color.png"
               alt="Logo"
               width={200}
               height={100}

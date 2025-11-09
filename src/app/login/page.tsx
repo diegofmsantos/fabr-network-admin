@@ -32,7 +32,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
           <Image
-            src="/logo-fabr-color.png"
+            src="/assets/logo-fabr-color.png"
             alt="FABR Network Logo"
             width={220}
             height={120}
