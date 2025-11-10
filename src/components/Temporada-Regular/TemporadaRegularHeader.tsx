@@ -17,13 +17,13 @@ export function TemporadaRegularHeader({ temporada, stats, onRefresh }: Temporad
   return (
     <>
       <div className="flex items-center gap-4 mb-6">
-        <Link 
+        <Link
           href="/admin/superliga"
           className="p-2 rounded-lg bg-[#272731] border border-gray-700 hover:border-gray-600 transition-colors"
         >
           <ArrowLeft className="w-5 h-5 text-white" />
         </Link>
-        
+
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-white">Temporada Regular</h1>
           <p className="text-gray-400">Gerenciar jogos da temporada regular {temporada}</p>
@@ -49,47 +49,53 @@ export function TemporadaRegularHeader({ temporada, stats, onRefresh }: Temporad
       </div>
 
       {/* Estatísticas */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-[#272731] rounded-lg p-4 border border-gray-700">
-          <div className="flex items-center gap-3">
-            <Trophy className="w-5 h-5 text-[#63E300]" />
-            <div>
-              <p className="text-gray-400 text-sm">Total de Jogos</p>
-              <p className="text-white text-xl font-bold">{stats.totalJogos}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-[#272731] rounded-lg p-4 border border-gray-700">
-          <div className="flex items-center gap-3">
-            <CheckCircle className="w-5 h-5 text-green-500" />
-            <div>
-              <p className="text-gray-400 text-sm">Finalizados</p>
-              <p className="text-white text-xl font-bold">{stats.jogosFinalizados}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-[#272731] rounded-lg p-4 border border-gray-700">
-          <div className="flex items-center gap-3">
-            <Clock className="w-5 h-5 text-blue-500" />
-            <div>
-              <p className="text-gray-400 text-sm">Agendados</p>
-              <p className="text-white text-xl font-bold">{stats.jogosAgendados}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-[#272731] rounded-lg p-4 border border-gray-700">
-          <div className="flex items-center gap-3">
-            <Play className="w-5 h-5 text-red-500" />
-            <div>
-              <p className="text-gray-400 text-sm">Ao Vivo</p>
-              <p className="text-white text-xl font-bold">{stats.jogosAoVivo}</p>
-            </div>
-          </div>
-        </div>
-      </div>
+     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+             <div className="bg-[#272731] border border-gray-700 rounded-lg p-4">
+               <div className="flex items-center justify-between">
+                 <div>
+                   <p className="text-gray-400 text-sm">Total de Jogos</p>
+                   <p className="text-2xl font-bold text-white">{stats.totalJogos}</p>
+                 </div>
+                 <Trophy className="w-8 h-8 text-yellow-500" />
+               </div>
+             </div>
+     
+             <div className="bg-[#272731] border border-gray-700 rounded-lg p-4">
+               <div className="flex items-center justify-between">
+                 <div>
+                   <p className="text-gray-400 text-sm">Finalizados</p>
+                   <p className="text-2xl font-bold text-white">{stats.jogosFinalizados}</p>
+                 </div>
+                 <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center">
+                   <span className="text-green-500 font-bold">✓</span>
+                 </div>
+               </div>
+             </div>
+     
+             <div className="bg-[#272731] border border-gray-700 rounded-lg p-4">
+               <div className="flex items-center justify-between">
+                 <div>
+                   <p className="text-gray-400 text-sm">Agendados</p>
+                   <p className="text-2xl font-bold text-white">{stats.jogosAgendados}</p>
+                 </div>
+                 <div className="w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center">
+                   <span className="text-blue-500 font-bold">📅</span>
+                 </div>
+               </div>
+             </div>
+     
+             <div className="bg-[#272731] border border-gray-700 rounded-lg p-4">
+               <div className="flex items-center justify-between">
+                 <div>
+                   <p className="text-gray-400 text-sm">Ao Vivo</p>
+                   <p className="text-2xl font-bold text-white">{stats.jogosAoVivo}</p>
+                 </div>
+                 <div className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center">
+                   <span className="text-red-500 font-bold">🔴</span>
+                 </div>
+               </div>
+             </div>
+           </div>
 
       {/* Próximo jogo */}
       {stats.proximoJogo && (

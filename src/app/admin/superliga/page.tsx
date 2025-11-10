@@ -36,18 +36,18 @@ export default function AdminSuperligaPage() {
       href: '/admin/superliga/temporada-regular',
       icon: Calendar,
       color: 'blue',
-      stats: `${stats.jogosFinalizados}/${stats.totalJogos} jogos`,
+      stats: `${jogos.filter(j => j.fase && j.fase == 'TEMPORADA REGULAR').length} jogos`,
       enabled: superligaExists && stats.totalJogos > 0
     },
     {
       id: 'playoffs',
       title: 'Playoffs',
-      description: 'Gerenciar playoffs e fase nacional',
+      description: 'Gerenciar jogos dos playoffs',
       href: '/admin/superliga/playoffs',
       icon: Trophy,
       color: 'yellow',
-      stats: (status as any)?.status === 'PLAYOFFS' ? 'Em andamento' : 'Aguardando',
-      enabled: superligaExists && (status as any)?.status === 'PLAYOFFS'
+      stats: `${jogos.filter(j => j.fase && j.fase !== 'TEMPORADA REGULAR').length} jogos`,
+      enabled: superligaExists && jogos.some(j => j.fase && j.fase !== 'TEMPORADA REGULAR')
     },
     {
       id: 'configuracoes',
@@ -110,13 +110,16 @@ export default function AdminSuperligaPage() {
                 Configurações
               </Link>
 
-              <Link
-                href={`/superliga/${selectedTemporada}`}
+              <a
+                href={`https://fabrnetwork.com.br`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center gap-2 bg-[#63E300] text-black px-4 py-2 rounded-md font-semibold hover:bg-[#50B800] transition-colors"
               >
                 <Eye className="w-4 h-4" />
                 Ver Site Público
-              </Link>
+              </a>
+
             </>
           )}
         </div>
@@ -163,18 +166,16 @@ export default function AdminSuperligaPage() {
                 <Link
                   key={section.id}
                   href={section.enabled ? section.href : '#'}
-                  className={`p-6 rounded-lg border transition-colors ${
-                    section.enabled
-                      ? 'bg-[#272731] border-gray-700 hover:border-gray-600'
-                      : 'bg-[#1C1C24] border-gray-800 opacity-50 cursor-not-allowed'
-                  }`}
+                  className={`p-6 rounded-lg border transition-colors ${section.enabled
+                    ? 'bg-[#272731] border-gray-700 hover:border-gray-600'
+                    : 'bg-[#1C1C24] border-gray-800 opacity-50 cursor-not-allowed'
+                    }`}
                 >
                   <div className="flex items-center justify-between mb-4">
-                    <section.icon className={`w-8 h-8 ${
-                      section.color === 'blue' ? 'text-blue-500' :
+                    <section.icon className={`w-8 h-8 ${section.color === 'blue' ? 'text-blue-500' :
                       section.color === 'yellow' ? 'text-yellow-500' :
-                      section.color === 'gray' ? 'text-gray-500' : 'text-gray-500'
-                    }`} />
+                        section.color === 'gray' ? 'text-gray-500' : 'text-gray-500'
+                      }`} />
                     {section.enabled && <ArrowRight className="w-5 h-5 text-gray-400" />}
                   </div>
                   <h3 className="text-lg font-semibold text-white mb-2">{section.title}</h3>
@@ -195,10 +196,9 @@ export default function AdminSuperligaPage() {
                   className="p-4 bg-[#272731] border border-gray-700 rounded-lg hover:border-gray-600 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <action.icon className={`w-6 h-6 ${
-                      action.color === 'blue' ? 'text-blue-500' :
+                    <action.icon className={`w-6 h-6 ${action.color === 'blue' ? 'text-blue-500' :
                       action.color === 'purple' ? 'text-purple-500' : 'text-gray-500'
-                    }`} />
+                      }`} />
                     <div>
                       <h3 className="font-semibold text-white">{action.title}</h3>
                       <p className="text-sm text-gray-400">{action.description}</p>
@@ -210,7 +210,7 @@ export default function AdminSuperligaPage() {
           </div>
         </div>
       ) : (
-        
+
         <div className="text-center py-12">
           <Trophy className="w-16 h-16 text-gray-500 mx-auto mb-4" />
           <h3 className="text-xl font-bold text-white mb-2">Superliga {selectedTemporada} não encontrada</h3>

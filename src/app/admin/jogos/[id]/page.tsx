@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Calendar, MapPin, Users, Edit, Upload, Clock, CheckCircle, PlayCircle, AlertTriangle } from 'lucide-react'
 import { Loading } from '@/components/ui/Loading'
@@ -11,6 +11,7 @@ import { ImageService } from '@/utils/services/ImageService'
 
 export default function DetalheJogoPage() {
   const params = useParams()
+  const router = useRouter()
   const jogoId = parseInt(params.id as string)
 
   const { data: jogo, isLoading, error } = useJogo(jogoId)
@@ -95,12 +96,12 @@ export default function DetalheJogoPage() {
     <div className="min-h-screen bg-[#1C1C24] p-6">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center gap-4 mb-6">
-          <Link
-            href="/admin/jogos"
+          <button
+            onClick={() => router.back()}
             className="p-2 rounded-lg bg-[#272731] border border-gray-700 hover:border-gray-600 transition-colors"
           >
             <ArrowLeft className="w-5 h-5 text-white" />
-          </Link>
+          </button>
 
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-white">Detalhes do Jogo</h1>

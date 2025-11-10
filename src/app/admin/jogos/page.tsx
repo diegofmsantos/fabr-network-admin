@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { Calendar, Eye, Edit, Clock, CheckCircle, AlertTriangle } from 'lucide-react'
+import { Calendar, Eye, Edit, Clock, CheckCircle, AlertTriangle, ArrowLeft } from 'lucide-react'
 import { Loading } from '@/components/ui/Loading'
 import { useJogos } from '@/hooks/useJogos'
 
@@ -40,6 +40,12 @@ export default function AdminJogosPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <Link
+            href="/admin/superliga"
+            className="p-2 rounded-lg bg-[#272731] border border-gray-700 hover:border-gray-600 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5 text-white" />
+          </Link>
         <div>
           <h1 className="text-2xl font-bold text-white">Jogos da Superliga</h1>
           <p className="mt-1 text-sm text-gray-400">

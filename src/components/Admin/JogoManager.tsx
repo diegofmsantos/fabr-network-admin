@@ -114,9 +114,7 @@ export const JogoManager: React.FC<JogoManagerProps> = ({ jogos, campeonato, vie
           <span className="text-xs font-medium bg-gray-100 px-2 py-1 rounded">
             {jogo.rodada}ª Rodada
           </span>
-          {jogo.grupo && (
-            <span className="text-xs text-gray-300">{jogo.grupo.nome}</span>
-          )}
+          
         </div>
 
         <div className="flex items-center gap-2">
@@ -229,16 +227,7 @@ export const JogoManager: React.FC<JogoManagerProps> = ({ jogos, campeonato, vie
             <option value="ADIADO">Adiados</option>
           </select>
 
-          <select
-            value={filterGrupo}
-            onChange={(e) => setFilterGrupo(e.target.value === 'todos' ? 'todos' : parseInt(e.target.value))}
-            className="text-sm p-2 border-gray-300 rounded"
-          >
-            <option value="todos">Todos os Grupos</option>
-            {campeonato.grupos.map(grupo => (
-              <option key={grupo.id} value={grupo.id}>{grupo.nome}</option>
-            ))}
-          </select>
+        
         </div>
       </div>
 

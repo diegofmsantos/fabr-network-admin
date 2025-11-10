@@ -1,7 +1,12 @@
 "use client"
 
-import { Calendar, Eye, Play, RefreshCw } from "lucide-react"
+import { ImageService } from "@/utils/services/ImageService"
+import { Calendar, RefreshCw } from "lucide-react"
+import Image from "next/image"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 
 interface TemporadaRegularContentProps {
   jogosPorRodada: Record<number, any[]>
@@ -9,8 +14,7 @@ interface TemporadaRegularContentProps {
   onRefresh: () => void
 }
 
-export function TemporadaRegularContent({ jogosPorRodada, jogosFiltrados, onRefresh }: TemporadaRegularContentProps) {
-
+export function TemporadaRegularContent({ jogosPorRodada, onRefresh }: TemporadaRegularContentProps) {
   const router = useRouter()
 
   if (Object.keys(jogosPorRodada).length === 0) {
@@ -32,92 +36,157 @@ export function TemporadaRegularContent({ jogosPorRodada, jogosFiltrados, onRefr
     )
   }
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'FINALIZADO': return 'bg-green-500/20 text-green-500'
+      case 'AO VIVO': return 'bg-red-500/20 text-red-500'
+      case 'AGENDADO': return 'bg-blue-500/20 text-blue-500'
+      case 'ADIADO': return 'bg-yellow-500/20 text-yellow-500'
+      default: return 'bg-gray-500/20 text-gray-500'
+    }
+  }
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'FINALIZADO': return 'Finalizado'
+      case 'AO VIVO': return 'Ao Vivo'
+      case 'AGENDADO': return 'Agendado'
+      case 'ADIADO': return 'Adiado'
+      default: return status
+    }
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {Object.entries(jogosPorRodada)
         .sort(([a], [b]) => parseInt(a) - parseInt(b))
         .map(([rodada, jogosRodada]) => (
-          <div key={rodada} className="bg-[#272731] rounded-lg border border-gray-700">
-            <div className="p-4 border-b border-gray-700">
-              <h3 className="text-white font-semibold flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-[#63E300]" />
-                Rodada {rodada}
+          <div key={rodada}>
+            <div className="flex items-center gap-2 mb-4">
+              <Calendar className="w-5 h-5 text-[#63E300]" />
+              <h3 className="text-white font-semibold">
+                Rodada {rodada}{' '}
                 <span className="text-gray-400 text-sm ml-2">
                   ({jogosRodada.length} jogo{jogosRodada.length !== 1 ? 's' : ''})
                 </span>
               </h3>
             </div>
 
-            <div className="p-4 space-y-3">
-              {jogosRodada.map((jogo: any) => (
-                <div key={jogo.id} className="bg-[#1C1C24] rounded-lg p-4 border border-gray-700">
-                  <div className="flex items-center">
-                    <div className="flex-1 justify-between flex items-center gap-5">
-                      <div className="text-center">
-                        <p className="text-white font-medium">{jogo.timeCasa?.sigla || 'TBD'}</p>
-                        <p className="text-gray-400 text-xs">{jogo.timeCasa?.nome || 'A definir'}</p>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {jogosRodada.map((jogo: any) => {
+                const dataFormatada = jogo.dataJogo
+                  ? format(new Date(jogo.dataJogo), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })
+                  : null
+
+                return (
+                  <div key={jogo.id} className="bg-[#1C1C24] rounded-lg p-4 border border-gray-700 hover:border-gray-600 transition-colors">
+                    <div className="flex items-center justify-between mb-4">
+                      <span className={`text-xs font-semibold px-2 py-1 rounded ${getStatusColor(jogo.status)}`}>
+                        {getStatusLabel(jogo.status)}
+                      </span>
+                      {dataFormatada && <span className="text-xs text-gray-400">{dataFormatada}</span>}
+                    </div>
+
+                    <div className="space-y-3">
+                      {/* Time Casa */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3 flex-1">
+                          {jogo.timeCasa ? (
+                            <>
+                              <Image
+                                src={ImageService.getTeamLogo(jogo.timeCasa.nome)}
+                                alt={jogo.timeCasa.nome}
+                                width={40}
+                                height={40}
+                                className="rounded-full object-contain"
+                              />
+                              <div className="flex-1">
+                                <p className="font-bold text-white">{jogo.timeCasa.sigla}</p>
+                                <p className="text-xs text-gray-400">{jogo.timeCasa.nome}</p>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center">
+                                <span className="text-gray-400 text-xs">?</span>
+                              </div>
+                              <div className="flex-1">
+                                <p className="font-bold text-gray-400">A Definir</p>
+                                <p className="text-xs text-gray-500">Aguardando</p>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                        <div className="text-2xl font-bold text-white w-12 text-center">
+                          {jogo.placarCasa ?? '-'}
+                        </div>
                       </div>
 
-                      <div className="text-center px-4">
-                        <p className="text-gray-400 text-sm">vs</p>
-                        {jogo.status === 'FINALIZADO' && (
-                          <p className="text-white font-bold">
-                            {jogo.placarCasa} - {jogo.placarVisitante}
-                          </p>
+                      <div className="border-t border-gray-700"></div>
+
+                      {/* Time Visitante */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3 flex-1">
+                          {jogo.timeVisitante ? (
+                            <>
+                              <Image
+                                src={ImageService.getTeamLogo(jogo.timeVisitante.nome)}
+                                alt={jogo.timeVisitante.nome}
+                                width={40}
+                                height={40}
+                                className="rounded-full object-contain"
+                              />
+                              <div className="flex-1">
+                                <p className="font-bold text-white">{jogo.timeVisitante.sigla}</p>
+                                <p className="text-xs text-gray-400">{jogo.timeVisitante.nome}</p>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center">
+                                <span className="text-gray-400 text-xs">?</span>
+                              </div>
+                              <div className="flex-1">
+                                <p className="font-bold text-gray-400">A Definir</p>
+                                <p className="text-xs text-gray-500">Aguardando</p>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                        <div className="text-2xl font-bold text-white w-12 text-center">
+                          {jogo.placarVisitante ?? '-'}
+                        </div>
+                      </div>
+                    </div>
+
+                    {(jogo.local || (jogo as any).conferencia) && (
+                      <div className="mt-4 pt-4 border-t border-gray-700 flex items-center justify-between text-xs text-gray-400">
+                        {jogo.local && <span>📍 {jogo.local}</span>}
+                        {(jogo as any).conferencia && (
+                          <span className="bg-gray-700 px-2 py-1 rounded">{(jogo as any).conferencia}</span>
                         )}
                       </div>
+                    )}
 
-                      <div className="text-center">
-                        <p className="text-white font-medium">{jogo.timeVisitante?.sigla || 'TBD'}</p>
-                        <p className="text-gray-400 text-xs">{jogo.timeVisitante?.nome || 'A definir'}</p>
-                      </div>
-                    </div>
-
-                    <div className="text-center flex-1">
-                      <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${jogo.status === 'FINALIZADO' ? 'bg-green-500/20 text-green-400' :
-                        jogo.status === 'AO VIVO' ? 'bg-red-500/20 text-red-400' :
-                          jogo.status === 'ADIADO' ? 'bg-yellow-500/20 text-yellow-400' :
-                            'bg-gray-500/20 text-gray-400'
-                        }`}>
-                        {jogo.status === 'FINALIZADO' ? 'Finalizado' :
-                          jogo.status === 'AO VIVO' ? 'Ao Vivo' :
-                            jogo.status === 'ADIADO' ? 'Adiado' : 'Agendado'}
-                      </div>
-
-                      {jogo.dataJogo && (
-                        <p className="text-gray-400 text-sm mt-1">
-                          {new Date(jogo.dataJogo).toLocaleDateString('pt-BR', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric'
-                          })}
-                        </p>
-                      )}
-
-                      {jogo.local && (
-                        <p className="text-gray-500 text-xs mt-1">
-                          {jogo.local}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="flex-1 flex justify-end gap-2 ml-4">
+                    <div className="mt-4 flex gap-2">
                       {jogo.status !== 'FINALIZADO' && (
-                        <button className="p-2 bg-[#63E300] text-black rounded-lg hover:bg-[#50B800] transition-colors"
+                        <button
+                          className="flex-1 bg-[#63E300] text-black py-2 rounded-md font-semibold hover:bg-[#50B800] transition-colors text-sm"
                           onClick={() => router.push(`/admin/jogos/${jogo.id}/gerenciar-jogo`)}
                         >
-                          <Play className="w-4 h-4" />
+                          Gerenciar
                         </button>
                       )}
-                      <button className="p-2 bg-[#272731] text-gray-400 rounded-lg border border-gray-700 hover:border-gray-600 hover:text-white transition-colors"
-                        onClick={() => router.push(`/admin/jogos/${jogo.id}`)}
+                      <Link
+                        href={`/admin/jogos/${jogo.id}`}
+                        className="flex-1 text-center bg-[#272731] text-white py-2 rounded-md border border-gray-700 hover:border-[#63E300] hover:text-[#63E300] transition-colors text-sm font-semibold"
                       >
-                        <Eye className="w-4 h-4" />
-                      </button>
+                        Ver Detalhes
+                      </Link>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         ))}

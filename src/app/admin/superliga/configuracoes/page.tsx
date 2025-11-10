@@ -2,11 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import {
-  ArrowLeft, Settings, Save, RefreshCw, AlertTriangle,
-  CheckCircle, Users, Trophy, Calendar, Target,
-  Database, Trash2, Download, Upload
-} from 'lucide-react'
+import { ArrowLeft, Settings, Save, RefreshCw, CheckCircle, Users, Trophy, Calendar, Target, Database, Download } from 'lucide-react'
 import { Loading } from '@/components/ui/Loading'
 import { useSuperliga } from '@/hooks/useSuperliga'
 
@@ -40,21 +36,6 @@ export default function AdminSuperligaConfiguracoesPage() {
     }
   }
 
-  const resetarSuperliga = async () => {
-    if (confirm('Tem certeza que deseja resetar toda a Superliga? Esta ação não pode ser desfeita.')) {
-      try {
-        alert('Superliga resetada com sucesso!')
-        refetch()
-      } catch (error) {
-        console.error('Erro ao resetar:', error)
-        alert('Erro ao resetar Superliga')
-      }
-    }
-  }
-
-  const exportarDados = () => {
-    alert('Funcionalidade de exportação será implementada')
-  }
 
   const estruturaConferencias = [
     {
@@ -104,14 +85,6 @@ export default function AdminSuperligaConfiguracoesPage() {
 
         <div className="flex gap-3">
           <button
-            onClick={exportarDados}
-            className="flex items-center gap-2 bg-[#1C1C24] text-white px-4 py-2 rounded-md border border-gray-700 hover:border-gray-600 transition-colors"
-          >
-            <Download className="w-4 h-4" />
-            Exportar
-          </button>
-
-          <button
             onClick={handleSave}
             disabled={!isEditing}
             className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold transition-colors ${
@@ -132,7 +105,6 @@ export default function AdminSuperligaConfiguracoesPage() {
             {[
               { id: 'geral', label: 'Configurações Gerais', icon: Settings },
               { id: 'estrutura', label: 'Estrutura', icon: Users },
-              { id: 'avancado', label: 'Avançado', icon: Database }
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -298,97 +270,6 @@ export default function AdminSuperligaConfiguracoesPage() {
                       </div>
                     </div>
                   ))}
-                </div>
-              </div>
-
-              <div className="bg-[#1C1C24] rounded-lg p-6">
-                <h4 className="text-white font-semibold mb-4">Ações da Estrutura</h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <button className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-3 rounded-md font-semibold hover:bg-blue-700 transition-colors">
-                    <RefreshCw className="w-5 h-5" />
-                    Redistribuir Times
-                  </button>
-                  
-                  <button className="flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-3 rounded-md font-semibold hover:bg-green-700 transition-colors">
-                    <CheckCircle className="w-5 h-5" />
-                    Validar Estrutura
-                  </button>
-                  
-                  <button className="flex items-center justify-center gap-2 bg-purple-600 text-white px-4 py-3 rounded-md font-semibold hover:bg-purple-700 transition-colors">
-                    <Download className="w-5 h-5" />
-                    Exportar Estrutura
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'avancado' && (
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-bold text-white mb-4">Configurações Avançadas</h3>
-                <p className="text-gray-400 mb-6">
-                  Ações administrativas e configurações avançadas do sistema
-                </p>
-
-                <div className="bg-[#1C1C24] rounded-lg p-6 mb-6">
-                  <h4 className="text-white font-semibold mb-4">Backup e Restauração</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <button
-                      onClick={exportarDados}
-                      className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-3 rounded-md font-semibold hover:bg-blue-700 transition-colors"
-                    >
-                      <Download className="w-5 h-5" />
-                      Fazer Backup Completo
-                    </button>
-                    
-                    <button className="flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-3 rounded-md font-semibold hover:bg-green-700 transition-colors">
-                      <Upload className="w-5 h-5" />
-                      Restaurar Backup
-                    </button>
-                  </div>
-                </div>
-
-                <div className="bg-[#1C1C24] rounded-lg p-6 mb-6">
-                  <h4 className="text-white font-semibold mb-4">Manutenção do Sistema</h4>
-                  <div className="space-y-4">
-                    <button className="w-full flex items-center justify-center gap-2 bg-yellow-600 text-white px-4 py-3 rounded-md font-semibold hover:bg-yellow-700 transition-colors">
-                      <RefreshCw className="w-5 h-5" />
-                      Recalcular Estatísticas
-                    </button>
-                    
-                    <button className="w-full flex items-center justify-center gap-2 bg-purple-600 text-white px-4 py-3 rounded-md font-semibold hover:bg-purple-700 transition-colors">
-                      <Database className="w-5 h-5" />
-                      Otimizar Base de Dados
-                    </button>
-                  </div>
-                </div>
-
-                <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <AlertTriangle className="w-5 h-5 text-red-400" />
-                    <h4 className="text-red-400 font-semibold">Zona de Perigo</h4>
-                  </div>
-                  
-                  <p className="text-gray-300 text-sm mb-4">
-                    As ações abaixo são irreversíveis e podem causar perda de dados.
-                    Use com extrema cautela.
-                  </p>
-
-                  <div className="space-y-3">
-                    <button
-                      onClick={resetarSuperliga}
-                      className="w-full flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-3 rounded-md font-semibold hover:bg-red-700 transition-colors"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                      Resetar Superliga Completa
-                    </button>
-                    
-                    <button className="w-full flex items-center justify-center gap-2 bg-red-700 text-white px-4 py-3 rounded-md font-semibold hover:bg-red-800 transition-colors">
-                      <Trash2 className="w-5 h-5" />
-                      Excluir Todos os Dados
-                    </button>
-                  </div>
                 </div>
               </div>
             </div>
