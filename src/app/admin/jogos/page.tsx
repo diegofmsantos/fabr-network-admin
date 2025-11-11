@@ -15,7 +15,7 @@ export default function AdminJogosPage() {
     status: filterStatus === 'todos' ? undefined : filterStatus
   })
 
-   const jogos = Array.isArray(jogosData) ? jogosData : []
+  const jogos = Array.isArray(jogosData) ? jogosData : []
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -41,11 +41,11 @@ export default function AdminJogosPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <Link
-            href="/admin/superliga"
-            className="p-2 rounded-lg bg-[#272731] border border-gray-700 hover:border-gray-600 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-white" />
-          </Link>
+          href="/admin/superliga"
+          className="p-2 rounded-lg bg-[#272731] border border-gray-700 hover:border-gray-600 transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5 text-white" />
+        </Link>
         <div>
           <h1 className="text-2xl font-bold text-white">Jogos da Superliga</h1>
           <p className="mt-1 text-sm text-gray-400">
@@ -119,16 +119,23 @@ export default function AdminJogosPage() {
             {jogos.map((jogo: any) => (
               <tr key={jogo.id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                  {new Date(jogo.dataJogo).toLocaleDateString('pt-BR')}
+                  {(() => {
+                    const d = new Date(jogo.dataJogo)
+                    const dia = String(d.getUTCDate()).padStart(2, '0')
+                    const mes = String(d.getUTCMonth() + 1).padStart(2, '0')
+                    const ano = d.getUTCFullYear()
+                    return `${dia}/${mes}/${ano}`
+                  })()}
                   <br />
                   <span className="text-gray-400">
-                    {new Date(jogo.dataJogo).toLocaleTimeString('pt-BR', {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
+                    {(() => {
+                      const d = new Date(jogo.dataJogo)
+                      const hora = String(d.getUTCHours()).padStart(2, '0')
+                      const min = String(d.getUTCMinutes()).padStart(2, '0')
+                      return `${hora}:${min}`
+                    })()}
                   </span>
                 </td>
-
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-white">
                     <div className="flex items-center space-x-2">
