@@ -7,6 +7,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { toZonedTime } from 'date-fns-tz'
 
 interface TemporadaRegularContentProps {
   jogosPorRodada: Record<number, any[]>
@@ -74,9 +75,12 @@ export function TemporadaRegularContent({ jogosPorRodada, onRefresh }: Temporada
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {jogosRodada.map((jogo: any) => {
-                const dataFormatada = jogo.dataJogo
-                  ? format(new Date(jogo.dataJogo), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })
-                  : null
+                const dataFormatada = jogo.dataJogo ? (() => {
+                  const [datePart, timePart] = jogo.dataJogo.split('T');
+                  const [ano, mes, dia] = datePart.split('-');
+                  const [hora, minuto] = timePart.split(':');
+                  return `${dia}/${mes}/${ano} às ${hora}:${minuto}`;
+                })() : null
 
                 return (
                   <div key={jogo.id} className="bg-[#1C1C24] rounded-lg p-4 border border-gray-700 hover:border-gray-600 transition-colors">

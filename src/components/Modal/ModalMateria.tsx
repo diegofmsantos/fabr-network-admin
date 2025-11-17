@@ -19,14 +19,14 @@ interface ModalMateriaProps {
 
 export function ModalMateria({ materia, closeModal, onUpdate }: ModalMateriaProps) {
     const formatDateForInput = (dateString: string) => {
-    const data = new Date(dateString);
-    const ano = data.getFullYear();
-    const mes = String(data.getMonth() + 1).padStart(2, '0');
-    const dia = String(data.getDate()).padStart(2, '0');
-    const hora = String(data.getHours()).padStart(2, '0');
-    const minuto = String(data.getMinutes()).padStart(2, '0');
-    return `${ano}-${mes}-${dia}T${hora}:${minuto}`;
-};
+        const data = new Date(dateString);
+        const ano = data.getFullYear();
+        const mes = String(data.getMonth() + 1).padStart(2, '0');
+        const dia = String(data.getDate()).padStart(2, '0');
+        const hora = String(data.getHours()).padStart(2, '0');
+        const minuto = String(data.getMinutes()).padStart(2, '0');
+        return `${ano}-${mes}-${dia}T${hora}:${minuto}`;
+    };
 
     const [formData, setFormData] = useState<MateriaFormData>({
         ...materia,

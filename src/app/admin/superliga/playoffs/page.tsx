@@ -10,6 +10,7 @@ import Image from 'next/image'
 import { ImageService } from '@/utils/services/ImageService'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { toZonedTime } from 'date-fns-tz'
 
 type FilterStatus = 'todos' | 'AGENDADO' | 'AO VIVO' | 'FINALIZADO' | 'ADIADO'
 type FilterFase = 'todas' | 'WILD CARD' | 'SEMIFINAL DE CONFERÊNCIA' | 'FINAL DE CONFERÊNCIA' | 'SEMIFINAL NACIONAL' | 'FINAL NACIONAL'
@@ -325,7 +326,12 @@ function JogoCard({ jogo, onRefresh }: JogoCardProps) {
     }
   }
 
-  const dataFormatada = format(new Date(jogo.dataJogo), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })
+  const dataFormatada = (() => {
+    const [datePart, timePart] = jogo.dataJogo.split('T');
+    const [ano, mes, dia] = datePart.split('-');
+    const [hora, minuto] = timePart.split(':');
+    return `${dia}/${mes}/${ano} às ${hora}:${minuto}`;
+  })()
 
   return (
     <div className="bg-[#1C1C24] rounded-lg p-4 border border-gray-700 hover:border-gray-600 transition-colors">

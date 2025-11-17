@@ -48,21 +48,25 @@ export default function DetalheJogoPage() {
     }
   }
 
-  const formatDateTime = (dateString: string) => {
-    const date = new Date(dateString)
-    return {
-      date: date.toLocaleDateString('pt-BR', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      }),
-      time: date.toLocaleTimeString('pt-BR', {
-        hour: '2-digit',
-        minute: '2-digit'
-      })
-    }
+ const formatDateTime = (dateString: string) => {
+  const [datePart, timePart] = dateString.split('T');
+  const [ano, mes, dia] = datePart.split('-');
+  const [hora, minuto] = timePart.split(':');
+  
+  const meses = [
+    'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+    'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+  ];
+  
+  const data = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
+  const diasSemana = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
+  const diaSemana = diasSemana[data.getDay()];
+  
+  return {
+    date: `${diaSemana}, ${parseInt(dia)} de ${meses[parseInt(mes) - 1]} de ${ano}`,
+    time: `${hora}:${minuto}`
   }
+}
 
   if (isLoading) return <Loading />
 
