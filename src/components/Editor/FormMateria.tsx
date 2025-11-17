@@ -17,18 +17,6 @@ export const FormMateria = () => {
   const { data: materias = [], isLoading: loadingMaterias } = useMaterias()
   const createMateriaMutation = useCreateMateria()
 
-  const [formData, setFormData] = useState({
-    titulo: '',
-    subtitulo: '',
-    imagem: '',
-    legenda: '',
-    texto: '',
-    autor: '',
-    autorImage: '',
-    createdAt: new Date().toISOString().slice(0, 16),
-    updatedAt: new Date().toISOString().slice(0, 16)
-  })
-
   const [selectedMateria, setSelectedMateria] = useState<Materia | null>(null)
   const [activeView, setActiveView] = useState<'grid' | 'list'>('grid')
   const [isFormMinimized, setIsFormMinimized] = useState(false)
@@ -38,6 +26,27 @@ export const FormMateria = () => {
 
   const isLoading = loadingMaterias || createMateriaMutation.isPending
 
+  const formatarDataLocal = () => {
+    const dataAtual = new Date();
+    const ano = dataAtual.getFullYear();
+    const mes = String(dataAtual.getMonth() + 1).padStart(2, '0');
+    const dia = String(dataAtual.getDate()).padStart(2, '0');
+    const hora = String(dataAtual.getHours()).padStart(2, '0');
+    const minuto = String(dataAtual.getMinutes()).padStart(2, '0');
+    return `${ano}-${mes}-${dia}T${hora}:${minuto}`;
+  };
+
+  const [formData, setFormData] = useState({
+    titulo: '',
+    subtitulo: '',
+    imagem: '',
+    legenda: '',
+    texto: '',
+    autor: '',
+    autorImage: '',
+    createdAt: formatarDataLocal(),
+    updatedAt: formatarDataLocal()
+  })
 
   useEffect(() => {
     if (successMessage) {
@@ -47,18 +56,6 @@ export const FormMateria = () => {
       return () => clearTimeout(timer)
     }
   }, [successMessage])
-
-  const formatarDataLocal = () => {
-    const dataAtual = new Date();
-
-    const ano = dataAtual.getFullYear();
-    const mes = String(dataAtual.getMonth() + 1).padStart(2, '0');
-    const dia = String(dataAtual.getDate()).padStart(2, '0');
-    const hora = String(dataAtual.getHours()).padStart(2, '0');
-    const minuto = String(dataAtual.getMinutes()).padStart(2, '0');
-
-    return `${ano}-${mes}-${dia}T${hora}:${minuto}`;
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -87,8 +84,8 @@ export const FormMateria = () => {
           texto: '',
           autor: '',
           autorImage: '',
-          createdAt: new Date().toISOString().slice(0, 16),
-          updatedAt: new Date().toISOString().slice(0, 16)
+          createdAt: formatarDataLocal(),
+          updatedAt: formatarDataLocal()
         })
       }
     })
@@ -415,7 +412,7 @@ export const FormMateria = () => {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-gray-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1M19 20a2 2 0 002-2V8a2 2 0 00-2-2h-9a2 2 0 00-2 2v8a2 2 0 002 2h9z" />
                 </svg>
-                <p className="text-gray-400 mb-4">Nenhuma matéria publicada ainda.</p>
+                <p className="text-gray-400 mb-4">Carregando matérias...</p>
                 <button
                   onClick={() => setIsFormMinimized(false)}
                   className="bg-[#63E300] text-black px-4 py-2 rounded-lg font-medium hover:bg-[#50B800] transition-colors inline-flex items-center"

@@ -5,6 +5,7 @@ import { HeaderGeneral } from '@/components/HeaderGeneral'
 import { Estatisticas, Jogador, Time } from '@/types'
 import { useTimes } from '@/hooks/useTimes'
 import { useJogadores } from '@/hooks/useJogadores'
+import { Loading } from '@/components/ui/Loading'
 
 interface Relatorio {
     id: string
@@ -389,7 +390,7 @@ export default function DashboardPage() {
     if (loading) {
         return (
             <div className="min-h-screen bg-[#1C1C24] p-6 flex justify-center items-center">
-                <div className="text-white text-xl">Carregando dados...</div>
+                <Loading />
             </div>
         )
     }
