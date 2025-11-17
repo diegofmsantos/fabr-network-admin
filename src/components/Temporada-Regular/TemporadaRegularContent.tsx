@@ -5,9 +5,6 @@ import { Calendar, RefreshCw } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
-import { toZonedTime } from 'date-fns-tz'
 
 interface TemporadaRegularContentProps {
   jogosPorRodada: Record<number, any[]>
