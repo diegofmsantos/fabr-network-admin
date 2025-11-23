@@ -60,4 +60,16 @@ export class JogadoresService extends BaseService {
     const service = new JogadoresService()
     return service.get<EstatisticaJogo[]>(`/jogadores/${jogadorId}/estatisticas-jogo`, { temporada })
   }
+
+  static async getRankingTemporadaRegular(
+  categoria: string, 
+  temporada: string = '2025', 
+  limite: number = 50
+) {
+  const service = new JogadoresService()
+  return service.get(`/ranking/temporada-regular/${categoria}`, {
+    temporada,
+    limite: limite.toString()
+  })
+}
 }
