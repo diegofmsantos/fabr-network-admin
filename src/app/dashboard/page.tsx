@@ -8,6 +8,7 @@ import { useJogadores } from '@/hooks/useJogadores'
 import { Loading } from '@/components/ui/Loading'
 import { Users, TrendingUp, Trophy, MapPin, Activity, Target, BarChart3, Globe, Ruler, Calendar, ChevronRight, PieChart, Award, Flag } from 'lucide-react'
 import { JogadoresService } from '@/services/jogadores.service'
+import { ExportarEstatisticas } from '@/components/ExportarEstatisticas'
 
 interface Relatorio {
     id: string
@@ -996,6 +997,8 @@ export default function DashboardPage() {
                         </div>
                     </div>
                 )}
+
+                <ExportarEstatisticas temporada="2025" />
 
                 {/* Filtros de categoria */}
                 <div className="bg-[#272731] rounded-xl border border-gray-700 p-6">

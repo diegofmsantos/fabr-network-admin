@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import "./globals.css"
-import { QueryProvider } from "@/providers/query-provider";
+import { QueryProvider } from "@/providers/query-provider"
+import { Toaster } from 'sonner'
 
 export const metadata: Metadata = {
   title: "FABR-Network-ADM",
@@ -21,6 +22,13 @@ export default function RootLayout({
         <QueryProvider>
           {children}
         </QueryProvider>
+        <Toaster 
+          position="top-right"
+          richColors
+          expand={false}
+          duration={4000}
+          theme="dark"
+        />
       </body>
     </html>
   )
