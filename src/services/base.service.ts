@@ -1,5 +1,13 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios'
 
+function getAuthToken(): string | undefined {
+  if (typeof document === 'undefined') return undefined
+  return document.cookie
+    .split('; ')
+    .find((row) => row.startsWith('fabr_auth_token='))
+    ?.split('=')[1]
+}
+
 export class BaseService {
   protected api: AxiosInstance
 
@@ -9,23 +17,37 @@ export class BaseService {
       timeout: 0,
     })
 
+    this.api.interceptors.request.use((config) => {
+      const token = getAuthToken()
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`
+      }
+      return config
+    })
+
     this.api.interceptors.response.use(
       (response: AxiosResponse) => response,
       (error) => {
         console.error('API Error:', error)
-        
+
+        if (error.response?.status === 401) {
+          document.cookie = 'fabr_auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+          window.location.href = '/login'
+          throw new Error('Sessão expirada, faça login novamente')
+        }
+
         if (error.response?.status === 404) {
           throw new Error('Recurso não encontrado')
         }
-        
+
         if (error.response?.status >= 500) {
           throw new Error('Erro interno do servidor')
         }
-        
+
         if (error.response?.data?.message) {
           throw new Error(error.response.data.message)
         }
-        
+
         throw new Error(error.message || 'Erro na requisição')
       }
     )

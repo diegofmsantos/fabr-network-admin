@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import { AuthService } from '@/services/auth.service'
 
 export default function LoginPage() {
   const [username, setUsername] = useState('')
@@ -16,13 +17,12 @@ export default function LoginPage() {
     setError('')
     setIsLoading(true)
 
-    if (username === 'fabrnetwork' && password === 'fabrnetwork321@@') {
-      setTimeout(() => {
-        document.cookie = "fabr_auth_token=true; path=/; max-age=86400; samesite=strict"
-        router.push('/')
-      }, 1000)
-    } else {
-      setError('Credenciais inválidas. Tente novamente.')
+    try {
+      const { token } = await AuthService.login(username, password)
+      document.cookie = `fabr_auth_token=${token}; path=/; max-age=43200; samesite=strict`
+      router.push('/')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao fazer login. Tente novamente.')
       setIsLoading(false)
     }
   }
