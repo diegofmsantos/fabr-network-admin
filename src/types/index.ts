@@ -100,12 +100,6 @@ export interface Transferencia {
   data: string
 }
 
-export interface TimeMercadoCardProps {
-  timeNome: string
-  jogadoresEntrando: Transferencia[]
-  jogadoresSaindo: Transferencia[]
-}
-
 // ==================== JOGADOR ====================
 
 export interface Estatisticas {
@@ -515,41 +509,6 @@ export interface CalculatedStats {
 
 export type StatType = 'PASSE' | 'CORRIDA' | 'RECEPCAO' | 'RETORNO' | 'DEFESA' | 'KICKER' | 'PUNTER'
 
-export interface StatConfig {
-  key: string
-  title: string
-  category: string
-  isCalculated?: boolean
-}
-
-export interface StatResult {
-  value: number | null
-  tier: number
-}
-
-export interface ProcessedPlayer {
-  player: Jogador
-  average: number
-  baseStat: number
-  teamInfo: any
-  value: string | number
-}
-
-export interface ProcessedStatCard {
-  title: string
-  category: string
-  players: Array<{
-    id: number
-    name: string
-    team: string
-    value: string
-    camisa: string
-    teamColor?: string
-    teamLogo?: string
-    isFirst?: boolean
-  }>
-}
-
 // ==================== TEAM STATS E COMPARAÇÕES ====================
 
 export interface TeamStats {
@@ -726,112 +685,6 @@ export interface TeamComparisonData {
   }
 }
 
-export interface ChartDataPoint {
-  name: string
-  [key: string]: string | number
-}
-
-export interface ComparisonCardData {
-  title: string
-  stat1: string
-  stat2: string
-  color1: string
-  color2: string
-  isFirstBetter?: boolean
-  isSecondBetter?: boolean
-  isEqual?: boolean
-}
-
-export interface PlayerComparisonData {
-  title: string
-  player1: TeamComparisonPlayer | null
-  player2: TeamComparisonPlayer | null
-  team1: TeamComparisonTeam
-  team2: TeamComparisonTeam
-  statKey: string
-  statCategory: StatCategory
-}
-
-export interface ComparisonFilters {
-  temporada: string
-  categoria?: StatCategory
-  tipoEstatistica?: StatTypeEnum
-  ordenarPor?: 'nome' | 'valor' | 'diferenca'
-  mostrarApenas?: 'melhores' | 'piores' | 'todos'
-}
-
-export interface ProcessedComparison {
-  teams: {
-    time1: TeamComparisonTeam
-    time2: TeamComparisonTeam
-  }
-  comparisons: {
-    [category in StatCategory]: ComparisonCardData[]
-  }
-  highlights: {
-    [category in StatCategory]: PlayerComparisonData[]
-  }
-  charts: {
-    [category in StatCategory]: ChartDataPoint[]
-  }
-  summary: {
-    vencedor: 'time1' | 'time2' | 'empate'
-    categorias_vencidas: {
-      time1: StatCategory[]
-      time2: StatCategory[]
-      empates: StatCategory[]
-    }
-    pontuacao: {
-      time1: number
-      time2: number
-    }
-  }
-}
-
-export interface TeamComparisonResponse {
-  success: boolean
-  data: TeamComparisonData
-  message?: string
-  error?: string
-}
-
-export type StatComparison = {
-  [K in StatCategory]: {
-    [key: string]: number
-  }
-}
-
-export enum StatTypeEnum {
-  TOTAL = 'total',
-  AVERAGE = 'average',
-  PERCENTAGE = 'percentage',
-  RATIO = 'ratio'
-}
-
-export interface TeamInfo {
-  nome: string
-  cor: string
-}
-
-export interface TeamCardProps {
-  id: number
-  name: string
-  value: string
-  teamColor?: string
-  isFirst?: boolean
-}
-
-export interface TeamStatCardProps {
-  title: string
-  category: string
-  teams: TeamCardProps[]
-}
-
-export interface TeamStatCardsGridProps {
-  stats: TeamStatCardProps[]
-  category: string
-}
-
 // ==================== REQUESTS/RESPONSES ====================
 
 export interface CriarCampeonatoRequest {
@@ -844,94 +697,6 @@ export interface CriarCampeonatoRequest {
   gerarJogos?: boolean
 }
 
-export interface CreateTimeRequest {
-  nome: string
-  sigla: string
-  temporada: string
-  cor: string
-  cidade: string
-  bandeira_estado: string
-  fundacao: string
-  logo: string
-  capacete: string
-  estadio: string
-  presidente: string
-  head_coach: string
-  coord_ofen: string
-  coord_defen: string
-  instagram?: string
-  instagram2?: string
-  instagram_coach?: string
-  titulos?: Titulo[]
-}
-
-export interface UpdateTimeRequest extends Partial<CreateTimeRequest> {
-  id: number
-}
-
-export interface CreateJogadorRequest {
-  nome: string
-  posicao: string
-  setor: 'Ataque' | 'Defesa' | 'Special'
-  experiencia: number
-  idade: number
-  altura: number
-  peso: number
-  cidade: string
-  nacionalidade: string
-  timeFormador: string
-  instagram?: string
-  instagram2?: string
-
-  timeId: number
-  temporada: string
-  numero: number
-  camisa: string
-
-  estatisticas?: Partial<Estatisticas>
-}
-
-export interface UpdateJogadorRequest extends Partial<CreateJogadorRequest> {
-  id: number
-}
-
-// ==================== FILTROS ====================
-
-export interface BaseFilters {
-  temporada?: string
-  page?: number
-  limit?: number
-  orderBy?: string
-  orderDirection?: 'asc' | 'desc'
-}
-
-export interface TimesFilters extends BaseFilters {
-  cidade?: string
-  setor?: string
-  ativo?: boolean
-}
-
-export interface JogadoresFilters extends BaseFilters {
-  timeId?: number
-  posicao?: string
-  setor?: 'Ataque' | 'Defesa' | 'Special'
-  idadeMin?: number
-  idadeMax?: number
-  nacionalidade?: string
-}
-
-export interface FiltroJogos {
-  campeonatoId?: number
-  timeId?: number
-  rodada?: number
-  status?: string
-  fase?: string
-  dataInicio?: string
-  dataFim?: string
-  limit?: number
-  offset?: number
-}
-
 // ==================== API RESPONSES ====================
 
 export interface ApiResponse<T> {
@@ -941,24 +706,6 @@ export interface ApiResponse<T> {
   timestamp: string
 }
 
-export interface PaginatedResponse<T> extends ApiResponse<T[]> {
-  pagination: {
-    page: number
-    limit: number
-    total: number
-    totalPages: number
-  }
-}
-
-export interface ApiError {
-  message: string
-  code?: string
-  status?: number
-  field?: string
-}
-
-
-export type EntityStatus = 'ativo' | 'inativo' | 'suspenso'
 export type Temporada = '2024' | '2025' | '2026'
 export type TipoSetor = 'Ataque' | 'Defesa' | 'Special'
 
@@ -970,28 +717,6 @@ export interface JogoCardProps {
   compact?: boolean
 }
 
-export interface CampeonatoHeaderProps {
-  campeonato: Campeonato
-  activeTab?: string
-  onTabChange?: (tab: string) => void
-}
-
-// ==================== HOOKS RETURN TYPES ====================
-
-export interface UseQueryResult<T> {
-  data: T | undefined
-  isLoading: boolean
-  error: Error | null
-  refetch: () => void
-}
-
-export interface UseMutationResult<TData, TVariables> {
-  mutate: (variables: TVariables) => void
-  mutateAsync: (variables: TVariables) => Promise<TData>
-  isPending: boolean
-  error: Error | null
-  reset: () => void
-}
 
 // ==================== TEMPORADA ====================
 
@@ -1173,42 +898,10 @@ export interface RecentActivityProps {
 
 // ==================== SCHEMAS ZOD (para referência) ====================
 
-export interface CampeonatoValidation {
-  id?: number
-  nome: string
-  temporada: string
-  tipo: 'REGULAR' | 'PLAYOFFS' | 'COPA'
-  status: 'NAO INICIADO' | 'EM ANDAMENTO' | 'FINALIZADO'
-  dataInicio: Date | string
-  dataFim?: Date | string
-  descricao?: string
-}
-
-export interface JogoValidation {
-  id?: number
-  campeonatoId: number
-  grupoId?: number
-  timeVisitanteId: number
-  timeCasaId: number
-  dataJogo: Date | string
-  local?: string
-  rodada: number
-  fase: 'FASE GRUPOS' | 'OITAVAS' | 'QUARTAS' | 'SEMI' | 'FINAL'
-  status: 'AGENDADO' | 'AO VIVO' | 'FINALIZADO' | 'ADIADO'
-  placarCasa?: number
-  placarVisitante?: number
-  observacoes?: string
-}
-
 // ==================== TYPES ESPECÍFICOS PARA PÁGINAS ====================
 
 export type FilterStatus = 'todos' | 'AGENDADO' | 'AO VIVO' | 'FINALIZADO' | 'ADIADO'
 export type ViewMode = 'calendar' | 'list' | 'table'
-
-export interface TeamComparisonProps {
-  currentTeam: Time
-  selectedSetor: string
-}
 
 export type {
   Estatisticas as Stats,
