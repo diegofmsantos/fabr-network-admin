@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from 'react'
-import { Trophy, Crown, Target, Play, CheckCircle, Clock, AlertTriangle, Zap, Eye, Edit, Download, RefreshCw } from 'lucide-react'
+import { Trophy, Crown, Target, Play, CheckCircle, Clock, AlertTriangle, Zap, Eye, Edit } from 'lucide-react'
 import { Loading } from '@/components/ui/Loading'
 import Image from 'next/image'
 import { ImageService } from '@/utils/services/ImageService'
@@ -56,7 +56,7 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
       nome: 'Sudeste',
       icone: '🏭',
       cor: 'bg-red-500',
-      descricao: '12 times • 3 regionais'
+      descricao: '7 times • 1 regional'
     },
     {
       tipo: 'SUL',
@@ -77,7 +77,7 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
       nome: 'Centro-Norte',
       icone: '🌲',
       cor: 'bg-green-500',
-      descricao: '6 times • 2 regionais'
+      descricao: '8 times • 2 regionais'
     }
   ]
 
@@ -104,8 +104,8 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
   const getFaseNome = (fase: string) => {
     switch (fase) {
       case 'WILD CARD': return 'Wild Card'
-      case 'SEMIFINAL CONFERENCIA': return 'Semifinal'
-      case 'FINAL CONFERENCIA': return 'Final'
+      case 'SEMIFINAL DE CONFERÊNCIA': return 'Semifinal'
+      case 'FINAL DE CONFERÊNCIA': return 'Final'
       case 'SEMIFINAL NACIONAL': return 'Semifinal Nacional'
       case 'FINAL NACIONAL': return 'Final Nacional'
       default: return fase
@@ -117,7 +117,7 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
     const cardPadding = isSmall ? 'p-3' : 'p-4'
 
     return (
-      <div 
+      <div
         className={`bg-[#272731] rounded-lg border border-gray-700 ${cardPadding} hover:border-[#63E300] transition-colors cursor-pointer`}
         onClick={() => { setSelectedJogo(jogo); setShowModal(true) }}
       >
@@ -165,15 +165,14 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
                 </>
               ) : (
                 <span className={`text-gray-500 ${isSmall ? 'text-sm' : ''}`}>
-                  Aguardando classificação
+                  Aguardando definição
                 </span>
               )}
             </div>
 
             {jogo.status === 'FINALIZADO' && jogo.placarTime1 !== undefined && (
-              <span className={`font-bold ${isSmall ? 'text-sm' : 'text-lg'} ${
-                (jogo.placarTime1 || 0) > (jogo.placarTime2 || 0) ? 'text-green-400' : 'text-gray-400'
-              }`}>
+              <span className={`font-bold ${isSmall ? 'text-sm' : 'text-lg'} ${(jogo.placarTime1 || 0) > (jogo.placarTime2 || 0) ? 'text-green-400' : 'text-gray-400'
+                }`}>
                 {jogo.placarTime1}
               </span>
             )}
@@ -197,15 +196,14 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
                 </>
               ) : (
                 <span className={`text-gray-500 ${isSmall ? 'text-sm' : ''}`}>
-                  Aguardando classificação
+                  Aguardando definição
                 </span>
               )}
             </div>
 
             {jogo.status === 'FINALIZADO' && jogo.placarTime2 !== undefined && (
-              <span className={`font-bold ${isSmall ? 'text-sm' : 'text-lg'} ${
-                (jogo.placarTime2 || 0) > (jogo.placarTime1 || 0) ? 'text-green-400' : 'text-gray-400'
-              }`}>
+              <span className={`font-bold ${isSmall ? 'text-sm' : 'text-lg'} ${(jogo.placarTime2 || 0) > (jogo.placarTime1 || 0) ? 'text-green-400' : 'text-gray-400'
+                }`}>
                 {jogo.placarTime2}
               </span>
             )}
@@ -225,8 +223,8 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
 
   const ConferenciaBracket = ({ conferencia, jogos }: { conferencia: any, jogos: JogoPlayoff[] }) => {
     const wildCards = jogos.filter(j => j.fase === 'WILD CARD')
-    const semifinais = jogos.filter(j => j.fase === 'SEMIFINAL CONFERENCIA')
-    const final = jogos.find(j => j.fase === 'FINAL CONFERENCIA')
+    const semifinais = jogos.filter(j => j.fase === 'SEMIFINAL DE CONFERÊNCIA')
+    const final = jogos.find(j => j.fase === 'FINAL DE CONFERÊNCIA')
 
     return (
       <div className="space-y-6">
@@ -273,7 +271,7 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
         {jogos.length === 0 && (
           <div className="text-center py-8 text-gray-500">
             <Trophy className="w-12 h-12 mx-auto mb-3" />
-            <p>Playoffs desta conferência ainda não foram gerados</p>
+            <p>Os jogos de playoff desta conferência ainda não foram importados</p>
           </div>
         )}
       </div>
@@ -340,7 +338,7 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
           <div className="text-center py-12 text-gray-500">
             <Crown className="w-16 h-16 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-white mb-2">Fase Nacional</h3>
-            <p className="mb-4">Aguardando conclusão das finais de conferência</p>
+            <p className="mb-4">Os jogos da fase nacional ainda não foram importados</p>
           </div>
         )}
       </div>
@@ -351,11 +349,11 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
     if (!bracket || typeof bracket !== 'object') return []
 
     const jogos: JogoPlayoff[] = []
-    
+
     Object.entries(bracket).forEach(([key, value]) => {
-      if (key.toLowerCase().includes(conferencia.toLowerCase()) || 
-          (typeof value === 'object' && value !== null && 'conferencia' in value && value.conferencia === conferencia)) {
-        
+      if (key.toLowerCase().includes(conferencia.toLowerCase()) ||
+        (typeof value === 'object' && value !== null && 'conferencia' in value && value.conferencia === conferencia)) {
+
         if (Array.isArray(value)) {
           jogos.push(...value)
         } else if (value && typeof value === 'object' && 'jogos' in value && Array.isArray(value.jogos)) {
@@ -390,9 +388,9 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
               Playoffs da Superliga {temporada}
             </h2>
             <p className="text-gray-400">
-              {!bracket 
-                ? 'Os playoffs são gerados automaticamente quando a temporada regular é finalizada'
-                : 'Playoffs gerados automaticamente após finalização da temporada regular'
+              {!bracket
+                ? 'Os jogos de playoff são cadastrados pela importação da agenda e preenchidos pela importação de resultados'
+                : 'Chave de playoffs da temporada'
               }
             </p>
           </div>
@@ -403,19 +401,18 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
       {!bracket ? (
         <div className="bg-[#272731] rounded-lg border border-gray-700 p-12 text-center">
           <Trophy className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-white mb-2">Playoffs serão gerados automaticamente</h3>
+          <h3 className="text-xl font-bold text-white mb-2">Playoffs ainda não importados</h3>
           <div className="text-gray-400 space-y-2">
-            <p>Os playoffs são criados automaticamente quando:</p>
+            <p>Os jogos de playoff aparecem aqui depois que você:</p>
             <ul className="list-disc list-inside space-y-1 mt-4">
-              <li>Todos os jogos da temporada regular forem finalizados</li>
-              <li>Você importar a última planilha de resultados</li>
-              <li>O sistema detectar que a temporada regular está completa</li>
+              <li>Importar a agenda da temporada (que já inclui a chave dos playoffs)</li>
+              <li>Importar os resultados conforme os jogos forem acontecendo</li>
             </ul>
             <div className="mt-6 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
               <p className="text-blue-300 text-sm">
-                💡 <strong>Dica:</strong> Continue importando as planilhas de resultados na ordem. 
-                Quando o último jogo da temporada regular for importado, os playoffs de todas as 
-                4 conferências serão gerados automaticamente.
+                💡 <strong>Dica:</strong> A agenda traz os confrontos de playoff com os descritores
+                de chave (ex.: "4º Atlântico", "Vencedor do Jogo 59"). Os times reais são preenchidos
+                quando você importa os resultados de cada fase.
               </p>
             </div>
           </div>
@@ -428,11 +425,10 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
                 <button
                   key={conf.tipo}
                   onClick={() => setSelectedConferencia(conf.tipo)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
-                    selectedConferencia === conf.tipo
+                  className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${selectedConferencia === conf.tipo
                       ? 'bg-[#63E300] text-black'
                       : 'bg-[#1C1C24] text-gray-300 hover:bg-[#2A2A35]'
-                  }`}
+                    }`}
                 >
                   <span className="text-lg">{conf.icone}</span>
                   <span className="font-medium">{conf.nome}</span>
@@ -441,11 +437,10 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
 
               <button
                 onClick={() => setSelectedConferencia('NACIONAL')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
-                  selectedConferencia === 'NACIONAL'
+                className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${selectedConferencia === 'NACIONAL'
                     ? 'bg-[#63E300] text-black'
                     : 'bg-[#1C1C24] text-gray-300 hover:bg-[#2A2A35]'
-                }`}
+                  }`}
               >
                 <Crown className="w-5 h-5" />
                 <span className="font-medium">Nacional</span>

@@ -2,8 +2,8 @@
 
 import { AdminSidebar } from '@/components/Admin/AdminSidebar'
 import { AdminErrorBoundary } from '@/components/Admin/ErrorBoundary'
-import { NotificationContainer } from '@/components/Admin/NotificationContainer'
 import { HeaderGeneral } from '../HeaderGeneral'
+import { TemporadaSelector } from '@/components/Admin/TemporadaSelector'
 
 interface AdminLayoutClientProps {
   children: React.ReactNode
@@ -20,6 +20,13 @@ export const AdminLayoutClient: React.FC<AdminLayoutClientProps> = ({ children }
 
           <main className="py-6">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <div className="mb-6 flex items-center justify-between gap-4">
+                <span className="text-sm text-gray-400">
+                  Temporada ativa do painel
+                </span>
+                <TemporadaSelector />
+              </div>
+
               {children}
             </div>
           </main>

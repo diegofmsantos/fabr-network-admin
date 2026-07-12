@@ -8,9 +8,9 @@ export class ImportacaoService extends BaseService {
     return service.upload('/admin/importar-times', arquivo) as Promise<ImportResult>
   }
 
-  static async importarJogadores(arquivo: File): Promise<ImportResult> {
+  static async importarJogadores(arquivo: File, temporada: string): Promise<ImportResult> {
     const service = new ImportacaoService()
-    return service.upload('/admin/importar-jogadores', arquivo) as Promise<ImportResult>
+    return service.upload('/admin/importar-jogadores', arquivo, { temporada }) as Promise<ImportResult>
   }
 
   static async iniciarTemporada(
@@ -89,13 +89,14 @@ export class ImportacaoService extends BaseService {
     return service.get(`/admin/estatisticas-importacao`, { temporada })
   }
 
-  static async importarAgendaJogos(arquivo: File): Promise<ImportResult> {
+  static async importarAgendaJogos(arquivo: File, temporada: string, divisao: string = 'D1'): Promise<ImportResult> {
     const service = new ImportacaoService()
-    return service.upload('/admin/importar-agenda-jogos', arquivo) as Promise<ImportResult>
+    return service.upload('/admin/importar-agenda-jogos', arquivo, { temporada, divisao }) as Promise<ImportResult>
   }
-  static async importarResultados(arquivo: File): Promise<ImportResult> {
+
+  static async importarResultados(arquivo: File, temporada: string): Promise<ImportResult> {
     const service = new ImportacaoService()
-    return service.upload('/admin/importar-resultados-jogos', arquivo) as Promise<ImportResult>
+    return service.upload('/admin/importar-resultados-jogos', arquivo, { temporada }) as Promise<ImportResult>
   }
 
   static async atualizarEstatisticas(arquivo: File, idJogo: string, dataJogo: string): Promise<ImportResult> {

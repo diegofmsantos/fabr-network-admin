@@ -5,6 +5,7 @@ import { HeaderGeneral } from '@/components/HeaderGeneral'
 import { Estatisticas, Jogador, Time } from '@/types'
 import { useTimes } from '@/hooks/useTimes'
 import { useJogadores } from '@/hooks/useJogadores'
+import { useTemporadaAdmin } from '@/hooks/useTemporadaAdmin'
 import { Loading } from '@/components/ui/Loading'
 import { Users, TrendingUp, Trophy, MapPin, Activity, Target, BarChart3, Globe, Ruler, Calendar, ChevronRight, PieChart, Award, Flag } from 'lucide-react'
 import { JogadoresService } from '@/services/jogadores.service'
@@ -20,7 +21,7 @@ interface Relatorio {
 }
 
 export default function DashboardPage() {
-    const [temporada, setTemporada] = useState("2025")
+    const { temporada } = useTemporadaAdmin()
     const [filtroAtivo, setFiltroAtivo] = useState<string | null>(null)
     const [resultados, setResultados] = useState<any>(null)
     const [categoriaAtiva, setCategoriaAtiva] = useState<'todos' | 'jogadores' | 'times' | 'estatisticas'>('todos')
@@ -323,7 +324,7 @@ export default function DashboardPage() {
 
                 const rankings = await Promise.all(
                     categoriasPrincipais.map(cat =>
-                        JogadoresService.getRankingTemporadaRegular(cat, '2025', 20)
+                        JogadoresService.getRankingTemporadaRegular(cat, temporada, 20)
                     )
                 )
 
@@ -849,6 +850,11 @@ export default function DashboardPage() {
                                 Selecione um dos relatórios abaixo para visualizar análises aprofundadas.
                             </p>
                         </div>
+                        <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#1C1C24] border border-gray-700 self-start">
+                            <Calendar className="w-4 h-4 text-[#63E300]" />
+                            <span className="text-sm text-gray-400">Temporada</span>
+                            <span className="text-sm font-bold text-white">{temporada}</span>
+                        </div>
                     </div>
                 </div>
 
@@ -998,7 +1004,7 @@ export default function DashboardPage() {
                     </div>
                 )}
 
-                <ExportarEstatisticas temporada="2025" />
+                <ExportarEstatisticas temporada={temporada} />
 
                 {/* Filtros de categoria */}
                 <div className="bg-[#272731] rounded-xl border border-gray-700 p-6">

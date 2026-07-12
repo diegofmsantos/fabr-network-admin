@@ -58,7 +58,8 @@ export function useImportarJogadores() {
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: (arquivo: File) => ImportacaoService.importarJogadores(arquivo),
+    mutationFn: ({ arquivo, temporada }: { arquivo: File; temporada: string }) =>
+      ImportacaoService.importarJogadores(arquivo, temporada),
     onSuccess: (result: ImportResult) => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.jogadores.lists()
@@ -251,13 +252,13 @@ export function useImportarAgendaJogos() {
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: (arquivo: File) => ImportacaoService.importarAgendaJogos(arquivo),
+    mutationFn: ({ arquivo, temporada, divisao = 'D1' }: { arquivo: File; temporada: string; divisao?: string }) =>
+      ImportacaoService.importarAgendaJogos(arquivo, temporada, divisao),
     onSuccess: (result: ImportResult) => {
       notifications.success(
         'Agenda importada!',
         `${result.sucesso || 0} jogos cadastrados com sucesso`
       )
-
       queryClient.invalidateQueries({ queryKey: ['jogos'] })
       queryClient.invalidateQueries({ queryKey: ['superliga'] })
       queryClient.invalidateQueries({ queryKey: ['campeonatos'] })
@@ -268,9 +269,7 @@ export function useImportarAgendaJogos() {
         error.message || 'Verifique o formato da planilha e tente novamente'
       )
     },
-    meta: {
-      timeout: 30000,
-    }
+    meta: { timeout: 30000 }
   })
 }
 
@@ -279,7 +278,8 @@ export function useImportarResultados() {
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: (arquivo: File) => ImportacaoService.importarResultados(arquivo),
+    mutationFn: ({ arquivo, temporada }: { arquivo: File; temporada: string }) =>
+      ImportacaoService.importarResultados(arquivo, temporada),
     onSuccess: (result: ImportResult) => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.jogos.lists()

@@ -22,7 +22,7 @@ export default function RootLayout({
         <QueryProvider>
           {children}
         </QueryProvider>
-        <Toaster 
+        <Toaster
           position="top-right"
           richColors
           expand={false}

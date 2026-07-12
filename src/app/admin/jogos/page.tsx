@@ -5,13 +5,15 @@ import Link from 'next/link'
 import { Calendar, Eye, Edit, Clock, CheckCircle, AlertTriangle, ArrowLeft } from 'lucide-react'
 import { Loading } from '@/components/ui/Loading'
 import { useJogos } from '@/hooks/useJogos'
+import { useTemporadaAdmin } from '@/hooks/useTemporadaAdmin'
 
 export default function AdminJogosPage() {
+  const { temporada } = useTemporadaAdmin()
+
   const [filterStatus, setFilterStatus] = useState<'todos' | 'AGENDADO' | 'AO_VIVO' | 'FINALIZADO'>('todos')
-  const [filterTemporada, setFilterTemporada] = useState('2025')
 
   const { data: jogosData, isLoading } = useJogos({
-    temporada: filterTemporada,
+    temporada,
     status: filterStatus === 'todos' ? undefined : filterStatus
   })
 
@@ -49,13 +51,13 @@ export default function AdminJogosPage() {
         <div>
           <h1 className="text-2xl font-bold text-white">Jogos da Superliga</h1>
           <p className="mt-1 text-sm text-gray-400">
-            Gerencie a agenda e resultados dos jogos
+            Gerencie a agenda e resultados dos jogos da temporada {temporada}
           </p>
         </div>
 
         <div className="mt-4 flex space-x-3 sm:mt-0">
           <Link
-            href="/importar"
+            href="/admin/importar"
             className="inline-flex items-center rounded-md bg-[#63E300] px-3 py-2 text-sm font-semibold text-black shadow-sm hover:bg-[#50B800] transition-colors"
           >
             <Calendar className="h-4 w-4 mr-2" />
@@ -82,14 +84,9 @@ export default function AdminJogosPage() {
 
           <div>
             <label className="block text-sm text-gray-400 mb-1">Temporada</label>
-            <select
-              value={filterTemporada}
-              onChange={(e) => setFilterTemporada(e.target.value)}
-              className="bg-[#1C1C24] text-white rounded-md border border-gray-700 px-3 py-2"
-            >
-              <option value="2025">2025</option>
-              <option value="2024">2024</option>
-            </select>
+            <div className="bg-[#1C1C24] text-white rounded-md border border-gray-700 px-3 py-2">
+              {temporada}
+            </div>
           </div>
         </div>
       </div>
@@ -198,7 +195,7 @@ export default function AdminJogosPage() {
               Importe a agenda da Superliga para visualizar os jogos
             </p>
             <Link
-              href="/importar"
+              href="/admin/importar"
               className="inline-flex items-center bg-[#63E300] text-black px-6 py-3 rounded-md font-semibold hover:bg-[#50B800] transition-colors"
             >
               <Calendar className="w-5 h-5 mr-2" />

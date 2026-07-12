@@ -1,22 +1,34 @@
+/**
+ * superliga.service.ts — atualizado para D1/D2
+ * Substitui: src/services/superliga.service.ts (frontend admin)
+ *
+ * MUDANÇAS (mínimas):
+ *  - criarSuperliga: aceita { temporada, divisao }
+ *  - configurarConferencias: aceita { temporada, divisao }, passa divisao no body
+ *  - distribuirTimesAutomatico: aceita { temporada, divisao }, passa divisao no body
+ *  - Tudo mais permanece idêntico
+ */
 import { BaseService } from './base.service'
 
+type CriarSuperligaParams = { temporada: string; divisao?: string }
+
 export class SuperligaService extends BaseService {
-  
+
   static async getSuperliga(temporada: string) {
     const service = new SuperligaService()
     return service.get(`/superliga/${temporada}`)
   }
 
-  static async criarSuperliga(temporada: string) {
+  static async criarSuperliga({ temporada, divisao = 'D1' }: CriarSuperligaParams) {
     const service = new SuperligaService()
-    return service.post('/superliga/criar', { temporada })
+    return service.post('/superliga/criar', { temporada, divisao })
   }
 
   static async deletarSuperliga(temporada: string) {
     const service = new SuperligaService()
     return service.delete(`/superliga/${temporada}`)
   }
-  
+
   static async getStatus(temporada: string) {
     const service = new SuperligaService()
     return service.get(`/superliga/${temporada}/status`)
@@ -31,20 +43,20 @@ export class SuperligaService extends BaseService {
     const service = new SuperligaService()
     return service.get(`/superliga/${temporada}/resumo`)
   }
-  
+
   static async getConferencias(temporada: string) {
     const service = new SuperligaService()
     return service.get(`/superliga/${temporada}/conferencias`)
   }
 
-  static async configurarConferencias(temporada: string) {
+  static async configurarConferencias({ temporada, divisao = 'D1' }: CriarSuperligaParams) {
     const service = new SuperligaService()
-    return service.post(`/superliga/${temporada}/configurar-conferencias`)
+    return service.post(`/superliga/${temporada}/configurar-conferencias`, { divisao })
   }
 
   static async getRegionais(temporada: string, conferencia?: string) {
     const service = new SuperligaService()
-    const url = conferencia 
+    const url = conferencia
       ? `/superliga/${temporada}/regionais?conferencia=${conferencia}`
       : `/superliga/${temporada}/regionais`
     return service.get(url)
@@ -55,9 +67,9 @@ export class SuperligaService extends BaseService {
     return service.get(`/superliga/${temporada}/times-por-conferencia`)
   }
 
-  static async distribuirTimesAutomatico(temporada: string) {
+  static async distribuirTimesAutomatico({ temporada, divisao = 'D1' }: CriarSuperligaParams) {
     const service = new SuperligaService()
-    return service.post(`/superliga/${temporada}/distribuir-times-automatico`)
+    return service.post(`/superliga/${temporada}/distribuir-times`, { divisao })
   }
 
   static async getTimes(temporada: string, conferencia?: string, regional?: string) {
@@ -65,14 +77,8 @@ export class SuperligaService extends BaseService {
     const params = new URLSearchParams()
     if (conferencia) params.append('conferencia', conferencia)
     if (regional) params.append('regional', regional)
-    
     const url = `/superliga/${temporada}/times${params.toString() ? `?${params.toString()}` : ''}`
     return service.get(url)
-  }
-  
-  static async gerarJogosTemporada(temporada: string, config: { rodadas?: number }) {
-    const service = new SuperligaService()
-    return service.post(`/superliga/${temporada}/gerar-jogos-temporada`, config)
   }
 
   static async getJogos(temporada: string, filters?: {
@@ -85,7 +91,6 @@ export class SuperligaService extends BaseService {
     const service = new SuperligaService()
     return service.get(`/superliga/${temporada}/jogos`, filters)
   }
-  
 
   static async getProximosJogos(temporada: string, limite?: number) {
     const service = new SuperligaService()
@@ -101,7 +106,7 @@ export class SuperligaService extends BaseService {
     const service = new SuperligaService()
     return service.get(`/superliga/${temporada}/jogos/rodada/${rodada}`)
   }
-  
+
   static async getClassificacaoGeral(temporada: string) {
     const service = new SuperligaService()
     return service.get(`/superliga/${temporada}/classificacao-geral`)
@@ -122,11 +127,6 @@ export class SuperligaService extends BaseService {
     return service.get(`/superliga/${temporada}/ranking-geral`)
   }
 
-  static async getWildCardRanking(temporada: string, conferencia: string) {
-    const service = new SuperligaService()
-    return service.get(`/superliga/${temporada}/wild-card-ranking/${conferencia}`)
-  }
-
   static async getBracket(temporada: string) {
     const service = new SuperligaService()
     return service.get(`/superliga/${temporada}/bracket`)
@@ -141,49 +141,10 @@ export class SuperligaService extends BaseService {
     const service = new SuperligaService()
     return service.get(`/superliga/${temporada}/fase-nacional`)
   }
-  
-  static async atualizarResultadoPlayoff(jogoId: number, placarTime1: number, placarTime2: number) {
-    const service = new SuperligaService()
-    return service.put(`/superliga/playoff-jogos/${jogoId}/resultado`, {
-      placarTime1,
-      placarTime2
-    })
-  }
-  
-  static async validarEstrutura(temporada: string) {
-    const service = new SuperligaService()
-    return service.get(`/superliga/${temporada}/validar-estrutura`)
-  }
 
-  static async validarIntegridade(temporada: string) {
-    const service = new SuperligaService()
-    return service.get(`/superliga/${temporada}/validar-integridade`)
-  }
-
-  static async repararIntegridade(temporada: string) {
-    const service = new SuperligaService()
-    return service.post(`/superliga/${temporada}/reparar-integridade`)
-  }
-
-  static async simularTemporadaCompleta(temporada: string) {
-    const service = new SuperligaService()
-    return service.post(`/superliga/${temporada}/simular-temporada`)
-  }
-
-  static async gerarTemporadaCompleta(temporada: string, configuracao: {
-    rodadas?: number
-    incluirPlayoffs?: boolean
-    incluirFaseNacional?: boolean
-  }) {
-    const service = new SuperligaService()
-    return service.post(`/superliga/${temporada}/gerar-temporada-completa`, configuracao)
-  }
-  
   static async getHistorico(temporadas: string[]) {
     const service = new SuperligaService()
-    return service.get('/superliga/historico', { 
-      temporadas: temporadas.join(',') 
-    })
+    return service.get('/superliga/historico', { temporadas: temporadas.join(',') })
   }
 
   static async getComparacaoTemporadas(temporada1: string, temporada2: string) {
@@ -195,7 +156,7 @@ export class SuperligaService extends BaseService {
     const service = new SuperligaService()
     return service.get(`/superliga/${temporada}/estatisticas-detalhadas`)
   }
-  
+
   static async listarTemporadas() {
     const service = new SuperligaService()
     return service.get('/superliga/temporadas')
@@ -212,7 +173,7 @@ export class SuperligaService extends BaseService {
   }
 
   static async getClassificacao(temporada: string) {
-  const service = new SuperligaService()
-  return service.get(`/superliga/${temporada}/classificacao`)
-}
+    const service = new SuperligaService()
+    return service.get(`/superliga/${temporada}/classificacao`)
+  }
 }

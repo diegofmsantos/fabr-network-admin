@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ArrowLeft, Calendar, Plus, AlertTriangle, RefreshCw } from 'lucide-react'
 import { Loading } from '@/components/ui/Loading'
 import { useClassificacaoSuperliga, useJogosSuperliga, useSuperliga } from '@/hooks/useSuperliga'
+import { useTemporadaAdmin } from '@/hooks/useTemporadaAdmin'
 import { TemporadaRegularHeader } from '@/components/Temporada-Regular/TemporadaRegularHeader'
 import { TemporadaRegularFilters } from '@/components/Temporada-Regular/TemporadaRegularFilters'
 import { TemporadaRegularContent } from '@/components/Temporada-Regular/TemporadaRegularContent'
@@ -13,20 +14,20 @@ type FilterStatus = 'todos' | 'AGENDADO' | 'AO VIVO' | 'FINALIZADO' | 'ADIADO'
 export type FilterRodada = 'todas' | number
 
 export default function AdminTemporadaRegularPage() {
+  const { temporada } = useTemporadaAdmin()
+
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('todos')
   const [filterRodada, setFilterRodada] = useState<FilterRodada>('todas')
   const [filterConferencia, setFilterConferencia] = useState('todas')
 
-  const temporada = '2025'
-  
   const { data: superliga, isLoading: loadingSuperliga, error: superligaError } = useSuperliga(temporada)
 
-  const { 
-    data: jogos = [], 
-    isLoading: loadingJogos, 
+  const {
+    data: jogos = [],
+    isLoading: loadingJogos,
     error: jogosError,
     refetch
-  } = useJogosSuperliga(temporada, { 
+  } = useJogosSuperliga(temporada, {
     fase: 'TEMPORADA REGULAR'
   }) as { data: any[], isLoading: boolean, error: any, refetch: () => void }
 
@@ -49,13 +50,13 @@ export default function AdminTemporadaRegularPage() {
     return (
       <div className="min-h-screen bg-[#1C1C24] p-6">
         <div className="flex items-center gap-4 mb-6">
-          <Link 
+          <Link
             href="/admin/superliga"
             className="p-2 rounded-lg bg-[#272731] border border-gray-700 hover:border-gray-600 transition-colors"
           >
             <ArrowLeft className="w-5 h-5 text-white" />
           </Link>
-          
+
           <div>
             <h1 className="text-2xl font-bold text-white">Temporada Regular</h1>
             <p className="text-gray-400">Gerenciar jogos da temporada regular {temporada}</p>
@@ -91,13 +92,13 @@ export default function AdminTemporadaRegularPage() {
     return (
       <div className="min-h-screen bg-[#1C1C24] p-6">
         <div className="flex items-center gap-4 mb-6">
-          <Link 
+          <Link
             href="/admin/superliga"
             className="p-2 rounded-lg bg-[#272731] border border-gray-700 hover:border-gray-600 transition-colors"
           >
             <ArrowLeft className="w-5 h-5 text-white" />
           </Link>
-          
+
           <div>
             <h1 className="text-2xl font-bold text-white">Temporada Regular</h1>
             <p className="text-gray-400">Gerenciar jogos da temporada regular {temporada}</p>
@@ -176,7 +177,7 @@ export default function AdminTemporadaRegularPage() {
   const jogosFiltrados = jogos.filter(jogo => {
     const statusMatch = filterStatus === 'todos' || jogo.status === filterStatus
     const rodadaMatch = filterRodada === 'todas' || jogo.rodada === filterRodada
-    const conferenciaMatch = filterConferencia === 'todas' || 
+    const conferenciaMatch = filterConferencia === 'todas' ||
       (jogo as any).conferencia === filterConferencia
     return statusMatch && rodadaMatch && conferenciaMatch
   })
@@ -198,12 +199,12 @@ export default function AdminTemporadaRegularPage() {
 
   return (
     <div className="min-h-screen bg-[#1C1C24] p-6">
-      <TemporadaRegularHeader 
+      <TemporadaRegularHeader
         temporada={temporada}
         stats={stats}
         onRefresh={() => refetch()}
       />
-      
+
       <TemporadaRegularFilters
         filterStatus={filterStatus}
         filterRodada={filterRodada}

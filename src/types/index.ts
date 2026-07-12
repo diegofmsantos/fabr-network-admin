@@ -1253,64 +1253,6 @@ export interface PlayoffConfig {
 // ==================== CONFIGURAÇÃO DA SUPERLIGA ====================
 
 
-export const TIMES_SUPERLIGA: Record<TipoRegional, string[]> = {
-  SERRAMAR: [
-    'Vasco Almirantes',
-    'Flamengo Imperadores',
-    'Locomotiva FA',
-    'Tritões FA'
-  ],
-
-  CANASTRA: [
-    'Galo FA',
-    'Moura Lacerda Dragons',
-    'Rio Preto Weilers',
-    'Spartans FA'
-  ],
-
-  CANTAREIRA: [
-    'Corinthians Steamrollers',
-    'Cruzeiro FA',
-    'Guarulhos Rhynos',
-    'Ocelots FA'
-  ],
-
-  ARAUCARIA: [
-    'Timbó Rex',
-    'Coritiba Crocodiles',
-    'Calvary Cavaliers',
-    'Brown Spiders'
-  ],
-
-  PAMPA: [
-    'Santa Maria Soldiers',
-    'Juventude FA',
-    'Bravos FA',
-    'Istepôs FA'
-  ],
-
-  ATLANTICO: [
-    'Fortaleza Tritões',
-    'Ceará Sabres',
-    'João Pessoa Espectros',
-    'Recife Mariners',
-    'Cavalaria 2 de Julho',
-    'Caruaru Wolves'
-  ],
-
-  CERRADO: [
-    'Rondonópolis Hawks',
-    'Cuiabá Arsenal',
-    'Tubarões do Cerrado'
-  ],
-
-  AMAZONIA: [
-    'Porto Velho Miners',
-    'Manaus FA',
-    'São Raimundo Cavaliers'
-  ]
-}
-
 export const SUPERLIGA_CONFIG: ConferenciaConfig[] = [
   {
     tipo: 'SUDESTE',
@@ -1440,9 +1382,6 @@ export function getRegionalConfig(tipo: TipoRegional): RegionalConfig {
   throw new Error(`Regional ${tipo} não encontrada`)
 }
 
-export function getTimesByRegional(regional: TipoRegional): string[] {
-  return TIMES_SUPERLIGA[regional] || []
-}
 
 // ==================== TIPOS ADICIONAIS SUPERLIGA ====================
 

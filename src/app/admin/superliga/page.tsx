@@ -1,15 +1,15 @@
 "use client"
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { Trophy, Plus, Settings, Eye, Calendar, Users, Clock, ArrowRight } from 'lucide-react'
 import { Loading } from '@/components/ui/Loading'
 import { useSuperliga, useStatusSuperliga, useJogosSuperliga } from '@/hooks/useSuperliga'
+import { useTemporadaAdmin } from '@/hooks/useTemporadaAdmin'
 
 export default function AdminSuperligaPage() {
-  const [selectedTemporada] = useState('2025')
+  const { temporada: selectedTemporada } = useTemporadaAdmin()
 
-  const { data: superliga, isLoading: loadingSuperliga, refetch } = useSuperliga(selectedTemporada)
+  const { data: superliga, isLoading: loadingSuperliga } = useSuperliga(selectedTemporada)
   const { data: status, isLoading: loadingStatus } = useStatusSuperliga(selectedTemporada)
   const { data: jogos = [], isLoading: loadingJogos } = useJogosSuperliga(selectedTemporada)
 
@@ -36,7 +36,7 @@ export default function AdminSuperligaPage() {
       href: '/admin/superliga/temporada-regular',
       icon: Calendar,
       color: 'blue',
-      stats: `${jogos.filter(j => j.fase && j.fase == 'TEMPORADA REGULAR').length} jogos`,
+      stats: `${jogosArray.filter(j => j.fase && j.fase == 'TEMPORADA REGULAR').length} jogos`,
       enabled: superligaExists && stats.totalJogos > 0
     },
     {
@@ -46,8 +46,8 @@ export default function AdminSuperligaPage() {
       href: '/admin/superliga/playoffs',
       icon: Trophy,
       color: 'yellow',
-      stats: `${jogos.filter(j => j.fase && j.fase !== 'TEMPORADA REGULAR').length} jogos`,
-      enabled: superligaExists && jogos.some(j => j.fase && j.fase !== 'TEMPORADA REGULAR')
+      stats: `${jogosArray.filter(j => j.fase && j.fase !== 'TEMPORADA REGULAR').length} jogos`,
+      enabled: superligaExists && jogosArray.some(j => j.fase && j.fase !== 'TEMPORADA REGULAR')
     },
     {
       id: 'configuracoes',
@@ -79,15 +79,6 @@ export default function AdminSuperligaPage() {
       enabled: true
     }
   ]
-
-  const createSuperliga = async () => {
-    try {
-      alert('Funcionalidade de criar Superliga será implementada')
-      refetch()
-    } catch (error) {
-      console.error('Erro ao criar Superliga:', error)
-    }
-  }
 
   return (
     <div className="space-y-6">

@@ -16,6 +16,8 @@ import { HeaderGeneral } from "./HeaderGeneral"
 import { Time, Estatisticas, Jogador } from "@/types"
 import { useTimes, useCreateTime } from '@/hooks/useTimes'
 import { useCreateJogador } from '@/hooks/useJogadores'
+import { useTemporadaAdmin } from '@/hooks/useTemporadaAdmin'
+import { TemporadaSelector } from '@/components/Admin/TemporadaSelector'
 import Image from "next/image"
 import { ImageService } from "@/utils/services/ImageService"
 
@@ -23,6 +25,8 @@ type TimeFormData = z.infer<typeof TimeSchema>
 type JogadorFormData = z.infer<typeof JogadorSchema>
 
 export const Times = () => {
+    const { temporada } = useTemporadaAdmin()
+
     const {
         register,
         handleSubmit,
@@ -31,7 +35,7 @@ export const Times = () => {
     } = useForm<TimeFormData>({
         resolver: zodResolver(TimeSchema),
         defaultValues: {
-            temporada: "2025"
+            temporada: temporada
         }
     })
 
@@ -61,8 +65,6 @@ export const Times = () => {
     const [isJogadorModalOpen, setIsJogadorModalOpen] = useState(false)
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false)
     const [successMessage, setSuccessMessage] = useState("")
-    const [temporada, setTemporada] = useState("2025")
-    const [jogadorTemporada, setJogadorTemporada] = useState("2025")
     const [activeTab, setActiveTab] = useState<'time' | 'jogador' | 'times-cadastrados'>('times-cadastrados')
     const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({})
 
@@ -298,7 +300,7 @@ export const Times = () => {
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-2xl font-bold text-white">Adicionar Jogador</h2>
                             <span className="bg-[#272731] px-3 py-1 rounded-full text-xs text-gray-400">
-                                Temporada {jogadorTemporada}
+                                Temporada {temporada}
                             </span>
                         </div>
 
@@ -417,14 +419,7 @@ export const Times = () => {
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-2xl font-bold text-white">Times Cadastrados</h2>
                             <div className="flex items-center gap-4">
-                                <select
-                                    value={temporada}
-                                    onChange={(e) => setTemporada(e.target.value)}
-                                    className="bg-[#272731] border border-gray-600 rounded-lg text-white px-3 py-2"
-                                >
-                                    <option value="2024">Temporada 2024</option>
-                                    <option value="2025">Temporada 2025</option>
-                                </select>
+                                <TemporadaSelector />
                             </div>
                         </div>
 
@@ -450,11 +445,11 @@ export const Times = () => {
                                         }}
                                     >
                                         {/* Header com cor do time */}
-                                        <div 
+                                        <div
                                             className="h-2 w-full"
                                             style={{ backgroundColor: time.cor || '#63E300' }}
                                         ></div>
-                                        
+
                                         <div className="p-6">
                                             {/* Logo e informações principais */}
                                             <div className="flex items-center justify-between mb-4">

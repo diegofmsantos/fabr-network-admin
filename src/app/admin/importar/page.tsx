@@ -3,8 +3,10 @@
 import React, { useState } from 'react'
 import { Upload, FileSpreadsheet, Users, Calendar, BarChart3, CheckCircle, AlertTriangle, Download, RefreshCw, ArrowRight, Trophy, Trash2, Video, Package } from 'lucide-react'
 import { useImportarTimes, useImportarJogadores, useImportarAgendaJogos, useAtualizarEstatisticas, useImportarResultados, useResetDatabase, useAtualizarVideoPlayByPlay, useAtualizarEstatisticasLote, useAtualizarVideosLote } from '@/hooks/useImportacao'
+import { useTemporadaAdmin } from '@/hooks/useTemporadaAdmin'
 
 type ImportStep = 'times' | 'jogadores' | 'agenda' | 'resultados' | 'estatisticas' | 'video-playbyplay'
+type Divisao = 'D1' | 'D2'
 
 interface ImportStepConfig {
   id: ImportStep
@@ -18,13 +20,13 @@ interface ImportStepConfig {
 }
 
 export default function AdminImportarPage() {
+  const { temporada } = useTemporadaAdmin()
   const [activeStep, setActiveStep] = useState<ImportStep>('times')
+  const [divisao, setDivisao] = useState<Divisao>('D1')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [selectedFilesLote, setSelectedFilesLote] = useState<File[]>([])
   const [showResetConfirm, setShowResetConfirm] = useState(false)
-  const [formData, setFormData] = useState({
-    id_jogo: ''
-  })
+  const [formData, setFormData] = useState({ id_jogo: '' })
 
   const importTimesMutation = useImportarTimes()
   const importJogadoresMutation = useImportarJogadores()
@@ -37,11 +39,14 @@ export default function AdminImportarPage() {
   const resetDatabaseMutation = useResetDatabase()
   const isResettingDatabase = resetDatabaseMutation.isPending
 
+  // Abas que precisam do seletor de divisão
+  const ABAS_COM_DIVISAO: ImportStep[] = ['agenda', 'jogadores', 'resultados']
+
   const steps: ImportStepConfig[] = [
     {
       id: 'times',
       title: 'Importar Times',
-      description: 'Upload da planilha com os 32 times da Superliga',
+      description: 'Upload da planilha com os 26 times D1 ou 26 times D2',
       icon: Users,
       color: 'blue',
       required: true,
@@ -108,8 +113,8 @@ export default function AdminImportarPage() {
     importResultadosMutation?.isPending ||
     atualizarEstatisticasMutation.isPending ||
     atualizarEstatisticasLoteMutation.isPending ||
-    atualizarVideoPlayByPlayMutation.isPending
-  atualizarVideosLoteMutation.isPending
+    atualizarVideoPlayByPlayMutation.isPending ||
+    atualizarVideosLoteMutation.isPending
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -130,11 +135,7 @@ export default function AdminImportarPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    if (!selectedFile) {
-      alert('Selecione um arquivo')
-      return
-    }
+    if (!selectedFile) { alert('Selecione um arquivo'); return }
 
     try {
       switch (activeStep) {
@@ -142,37 +143,28 @@ export default function AdminImportarPage() {
           await importTimesMutation.mutateAsync(selectedFile)
           break
         case 'jogadores':
-          await importJogadoresMutation.mutateAsync(selectedFile)
+          await importJogadoresMutation.mutateAsync({ arquivo: selectedFile, temporada })
           break
         case 'agenda':
-          await importAgendaMutation.mutateAsync(selectedFile)
+          await importAgendaMutation.mutateAsync({ arquivo: selectedFile, temporada, divisao })
           break
         case 'resultados':
-          await importResultadosMutation?.mutateAsync(selectedFile)
+          await importResultadosMutation?.mutateAsync({ arquivo: selectedFile, temporada })
           break
         case 'estatisticas':
-          if (!formData.id_jogo) {
-            alert('Preencha o ID do jogo')
-            return
-          }
-          if (selectedFile) {
-            await atualizarEstatisticasMutation.mutateAsync({
-              arquivo: selectedFile,
-              idJogo: formData.id_jogo,
-              dataJogo: ''
-            })
-          }
+          if (!formData.id_jogo) { alert('Preencha o ID do jogo'); return }
+          await atualizarEstatisticasMutation.mutateAsync({
+            arquivo: selectedFile,
+            idJogo: formData.id_jogo,
+            dataJogo: ''
+          })
           break
         case 'video-playbyplay':
-          if (selectedFile) {
-            await atualizarVideosLoteMutation.mutateAsync(selectedFile)
-          }
+          await atualizarVideosLoteMutation.mutateAsync(selectedFile)
           break
       }
-
       setSelectedFile(null)
       setFormData({ id_jogo: '' })
-
     } catch (error) {
       console.error('Erro no upload:', error)
     }
@@ -180,17 +172,8 @@ export default function AdminImportarPage() {
 
   const handleSubmitLote = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    if (selectedFilesLote.length === 0) {
-      alert('Selecione pelo menos um arquivo')
-      return
-    }
-
-    if (selectedFilesLote.length > 20) {
-      alert('Máximo de 20 arquivos por vez')
-      return
-    }
-
+    if (selectedFilesLote.length === 0) { alert('Selecione pelo menos um arquivo'); return }
+    if (selectedFilesLote.length > 20) { alert('Máximo de 20 arquivos por vez'); return }
     try {
       await atualizarEstatisticasLoteMutation.mutateAsync(selectedFilesLote)
       setSelectedFilesLote([])
@@ -201,29 +184,18 @@ export default function AdminImportarPage() {
 
   const getStepStatus = (step: ImportStepConfig) => {
     switch (step.id) {
-      case 'times':
-        return importTimesMutation.isSuccess ? 'success' : 'pending'
-      case 'jogadores':
-        return importJogadoresMutation.isSuccess ? 'success' : 'pending'
-      case 'agenda':
-        return importAgendaMutation.isSuccess ? 'success' : 'pending'
-      case 'resultados':
-        return importResultadosMutation?.isSuccess ? 'success' : 'pending'
-      case 'estatisticas':
-        return atualizarEstatisticasMutation.isSuccess ? 'success' : 'pending'
-      case 'video-playbyplay':
-        return atualizarVideoPlayByPlayMutation.isSuccess ? 'success' : 'pending'
-      default:
-        return 'pending'
+      case 'times': return importTimesMutation.isSuccess ? 'success' : 'pending'
+      case 'jogadores': return importJogadoresMutation.isSuccess ? 'success' : 'pending'
+      case 'agenda': return importAgendaMutation.isSuccess ? 'success' : 'pending'
+      case 'resultados': return importResultadosMutation?.isSuccess ? 'success' : 'pending'
+      case 'estatisticas': return atualizarEstatisticasMutation.isSuccess ? 'success' : 'pending'
+      case 'video-playbyplay': return atualizarVideoPlayByPlayMutation.isSuccess ? 'success' : 'pending'
+      default: return 'pending'
     }
   }
 
   const handleResetDatabase = async () => {
-    if (!showResetConfirm) {
-      setShowResetConfirm(true)
-      return
-    }
-
+    if (!showResetConfirm) { setShowResetConfirm(true); return }
     try {
       await resetDatabaseMutation.mutateAsync()
       setShowResetConfirm(false)
@@ -238,7 +210,14 @@ export default function AdminImportarPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">Importar Dados</h1>
-          <p className="text-gray-400">Upload das planilhas para popular a base de dados da Superliga</p>
+          <p className="text-gray-400">
+            Temporada ativa: <span className="text-[#63E300] font-bold">{temporada}</span>
+            {ABAS_COM_DIVISAO.includes(activeStep) && (
+              <span className="ml-2 text-gray-400">
+                — Divisão: <span className="text-[#63E300] font-bold">{divisao}</span>
+              </span>
+            )}
+          </p>
         </div>
 
         {/* Steps Navigation */}
@@ -247,101 +226,70 @@ export default function AdminImportarPage() {
             const Icon = step.icon
             const status = getStepStatus(step)
             const isActive = activeStep === step.id
-
             return (
               <button
                 key={step.id}
                 onClick={() => setActiveStep(step.id)}
-                className={`p-4 rounded-lg border-2 transition-all ${isActive
-                  ? 'border-[#63E300] bg-[#63E300]/10'
-                  : status === 'success'
-                    ? 'border-green-500 bg-green-500/10'
-                    : 'border-gray-700 bg-[#1C1C24] hover:border-gray-600'
+                className={`p-4 rounded-lg border-2 transition-all ${isActive ? 'border-[#63E300] bg-[#63E300]/10'
+                    : status === 'success' ? 'border-green-500 bg-green-500/10'
+                      : 'border-gray-700 bg-[#1C1C24] hover:border-gray-600'
                   }`}
               >
                 <div className="flex flex-col items-center gap-2">
                   <Icon className={`w-6 h-6 ${isActive ? 'text-[#63E300]' : status === 'success' ? 'text-green-400' : 'text-gray-400'}`} />
-                  <span className={`text-sm font-medium text-center ${isActive ? 'text-white' : 'text-gray-400'}`}>
+                  <span className={`text-sm font-medium text-center ${isActive ? 'text-[#63E300]' : status === 'success' ? 'text-green-400' : 'text-gray-400'}`}>
                     {step.title}
                   </span>
-                  {status === 'success' && (
-                    <CheckCircle className="w-4 h-4 text-green-400" />
-                  )}
+                  {status === 'success' && <CheckCircle className="w-4 h-4 text-green-400" />}
                 </div>
               </button>
             )
           })}
         </div>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Panel - Step Info */}
-          <div className="lg:col-span-1">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Panel */}
+          <div className="space-y-6">
+            {/* Info do step atual */}
             <div className="bg-[#1C1C24] rounded-lg p-6 border border-gray-800">
               <div className="flex items-center gap-3 mb-4">
-                {React.createElement(currentStep.icon, {
-                  className: `w-8 h-8 text-${currentStep.color}-400`
-                })}
-                <div>
-                  <h3 className="text-lg font-bold text-white">{currentStep.title}</h3>
-                  <p className="text-sm text-gray-400">{currentStep.description}</p>
-                </div>
+                <currentStep.icon className="w-6 h-6 text-[#63E300]" />
+                <h3 className="text-lg font-bold text-white">{currentStep.title}</h3>
               </div>
-
-              <div className="space-y-3">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-400">Formato:</span>
-                  <span className="text-white font-medium">{currentStep.fileFormat}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-400">Obrigatório:</span>
-                  <span className={`font-medium ${currentStep.required ? 'text-red-400' : 'text-gray-500'}`}>
-                    {currentStep.required ? 'Sim' : 'Não'}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-400">Status:</span>
-                  <span className={`font-medium ${getStepStatus(currentStep) === 'success' ? 'text-green-400' : 'text-yellow-400'}`}>
-                    {getStepStatus(currentStep) === 'success' ? '✓ Completo' : 'Pendente'}
-                  </span>
-                </div>
+              <p className="text-gray-400 text-sm mb-4">{currentStep.description}</p>
+              <div className="text-xs text-gray-500">
+                <p>Formato: {currentStep.fileFormat}</p>
+                <p className="mt-1">Temporada: <span className="text-[#63E300]">{temporada}</span></p>
+                {ABAS_COM_DIVISAO.includes(activeStep) && (
+                  <p className="mt-1">Divisão: <span className="text-[#63E300]">{divisao}</span></p>
+                )}
               </div>
             </div>
 
-            {/* Zona de Perigo */}
-            <div className="mt-6 bg-red-900/20 border border-red-500 rounded-lg p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <AlertTriangle className="w-5 h-5 text-red-400" />
-                <h3 className="text-lg font-bold text-red-400">Zona de Perigo</h3>
-              </div>
-              <p className="text-sm text-red-200 mb-4">
-                Resetar o banco de dados irá APAGAR TODOS os dados permanentemente (exceto matérias).
-              </p>
+            {/* Reset Database */}
+            <div className="bg-[#1C1C24] rounded-lg p-6 border border-red-900/50">
+              <h3 className="text-lg font-bold text-red-400 mb-2 flex items-center gap-2">
+                <Trash2 className="w-5 h-5" /> Reset do Banco
+              </h3>
+              <p className="text-gray-400 text-sm mb-4">Remove todos os dados (exceto matérias)</p>
               {!showResetConfirm ? (
                 <button
                   onClick={handleResetDatabase}
                   disabled={isResettingDatabase}
-                  className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md font-semibold transition-colors flex items-center justify-center gap-2"
+                  className="w-full bg-red-900/50 hover:bg-red-800 text-red-400 px-4 py-2 rounded-md font-semibold transition-colors border border-red-800"
                 >
-                  <Trash2 className="w-4 h-4" />
-                  Resetar Banco de Dados
+                  Resetar Banco
                 </button>
               ) : (
                 <div className="space-y-3">
-                  <p className="text-sm text-red-300 font-semibold">Tem certeza? Esta ação não pode ser desfeita!</p>
+                  <p className="text-red-400 text-sm font-semibold">⚠️ Esta ação não pode ser desfeita!</p>
                   <div className="flex gap-2">
-                    <button
-                      onClick={handleResetDatabase}
-                      disabled={isResettingDatabase}
-                      className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md font-semibold transition-colors"
-                    >
+                    <button onClick={handleResetDatabase} disabled={isResettingDatabase}
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md font-semibold transition-colors">
                       {isResettingDatabase ? 'Resetando...' : 'Sim, Resetar!'}
                     </button>
-                    <button
-                      onClick={() => setShowResetConfirm(false)}
-                      disabled={isResettingDatabase}
-                      className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md font-semibold transition-colors"
-                    >
+                    <button onClick={() => setShowResetConfirm(false)} disabled={isResettingDatabase}
+                      className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md font-semibold transition-colors">
                       Cancelar
                     </button>
                   </div>
@@ -350,11 +298,8 @@ export default function AdminImportarPage() {
             </div>
           </div>
 
-          {/* Right Panel - Upload Form */}
+          {/* Right Panel */}
           <div className="lg:col-span-2 space-y-6">
-            {/* ============================================ */}
-            {/* IMPORTAÇÃO UNITÁRIA (1 ARQUIVO) */}
-            {/* ============================================ */}
             <form onSubmit={handleSubmit} className="bg-[#1C1C24] rounded-lg p-6 border border-gray-800">
               <div className="flex items-center gap-2 mb-6">
                 <FileSpreadsheet className="w-5 h-5 text-[#63E300]" />
@@ -364,6 +309,33 @@ export default function AdminImportarPage() {
               </div>
 
               <div className="space-y-6">
+                {/* Seletor de Divisão — aparece apenas nas abas relevantes */}
+                {ABAS_COM_DIVISAO.includes(activeStep) && (
+                  <div>
+                    <label className="block text-sm text-gray-400 mb-2">Divisão</label>
+                    <div className="flex gap-3">
+                      {(['D1', 'D2'] as Divisao[]).map(d => (
+                        <button
+                          key={d}
+                          type="button"
+                          onClick={() => setDivisao(d)}
+                          className={`px-6 py-2 rounded-md font-bold transition-colors ${divisao === d
+                              ? 'bg-[#63E300] text-black'
+                              : 'bg-[#272731] text-white border border-gray-700 hover:border-gray-500'
+                            }`}
+                        >
+                          {d}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">
+                      {divisao === 'D1'
+                        ? 'Superliga D1 — 26 times (Sudeste, Sul, Nordeste, Centro-Norte)'
+                        : 'Superliga D2 — 26 times (Norte, Sul)'}
+                    </p>
+                  </div>
+                )}
+
                 {/* Upload Area */}
                 <div>
                   <label className="block text-sm text-gray-400 mb-2">Arquivo Excel (.xlsx)</label>
@@ -375,16 +347,8 @@ export default function AdminImportarPage() {
                       </p>
                       <p className="text-sm text-gray-500">ou arraste o arquivo aqui</p>
                     </label>
-                    <input
-                      id="file-upload"
-                      type="file"
-                      accept=".xlsx,.xls"
-                      onChange={handleFileChange}
-                      className="hidden"
-                    />
-                    <p className="text-xs text-gray-500 mt-2">
-                      Apenas arquivos Excel (.xlsx, .xls)
-                    </p>
+                    <input id="file-upload" type="file" accept=".xlsx,.xls" onChange={handleFileChange} className="hidden" />
+                    <p className="text-xs text-gray-500 mt-2">Apenas arquivos Excel (.xlsx, .xls)</p>
                   </div>
 
                   {selectedFile && (
@@ -396,7 +360,7 @@ export default function AdminImportarPage() {
                   )}
                 </div>
 
-                {/* Campos específicos APENAS para estatísticas */}
+                {/* Campo ID do jogo — só para estatísticas */}
                 {activeStep === 'estatisticas' && (
                   <div>
                     <label className="block text-sm text-gray-400 mb-2">ID do Jogo *</label>
@@ -410,7 +374,7 @@ export default function AdminImportarPage() {
                   </div>
                 )}
 
-                {/* Aviso para vídeo/play-by-play */}
+                {/* Aviso vídeo/play-by-play */}
                 {activeStep === 'video-playbyplay' && (
                   <div className="bg-blue-900/20 border border-blue-500 rounded-lg p-4">
                     <div className="flex items-start gap-2">
@@ -419,12 +383,11 @@ export default function AdminImportarPage() {
                         <p className="font-semibold mb-1">💡 Como usar:</p>
                         <p>Crie uma planilha Excel com <strong>3 colunas</strong>:</p>
                         <ul className="list-disc list-inside space-y-1 mt-2">
-                          <li><strong>jogo_id</strong> - ID do jogo no sistema</li>
-                          <li><strong>video_url</strong> - Link do vídeo do YouTube (embed)</li>
-                          <li><strong>play_by_play</strong> - Texto com as jogadas</li>
+                          <li><strong>jogo_id</strong> — ID do jogo no sistema</li>
+                          <li><strong>video_url</strong> — Link do YouTube (embed)</li>
+                          <li><strong>play_by_play</strong> — Texto com as jogadas</li>
                         </ul>
-                        <p className="mt-3 font-semibold">✅ Você pode importar todos os 84 jogos de uma vez!</p>
-                        <p className="mt-1 text-blue-300">As estatísticas dos jogadores NÃO serão afetadas.</p>
+                        <p className="mt-3 font-semibold">✅ Você pode importar todos os jogos de uma vez!</p>
                       </div>
                     </div>
                   </div>
@@ -435,27 +398,22 @@ export default function AdminImportarPage() {
                 type="submit"
                 disabled={!selectedFile || isUploading}
                 className={`w-full mt-6 flex items-center justify-center gap-2 px-6 py-3 rounded-md font-semibold transition-colors ${!selectedFile || isUploading
-                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                  : 'bg-[#63E300] text-black hover:bg-[#50B800]'
+                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                    : 'bg-[#63E300] text-black hover:bg-[#50B800]'
                   }`}
               >
                 {isUploading ? (
-                  <>
-                    <RefreshCw className="w-5 h-5 animate-spin" />
-                    Processando...
-                  </>
+                  <><RefreshCw className="w-5 h-5 animate-spin" /> Processando...</>
                 ) : (
-                  <>
-                    <Upload className="w-5 h-5" />
+                  <><Upload className="w-5 h-5" />
                     {activeStep === 'video-playbyplay' ? 'Atualizar Vídeos em Lote' : `Importar ${currentStep.title}`}
+                    {ABAS_COM_DIVISAO.includes(activeStep) && ` — ${divisao}`}
                   </>
                 )}
               </button>
             </form>
 
-            {/* ============================================ */}
-            {/* IMPORTAÇÃO EM LOTE (ATÉ 20 ARQUIVOS) */}
-            {/* ============================================ */}
+            {/* Importação em lote — só para estatísticas */}
             {activeStep === 'estatisticas' && (
               <form onSubmit={handleSubmitLote} className="bg-[#1C1C24] rounded-lg p-6 border border-gray-800">
                 <div className="flex items-center gap-2 mb-6">
@@ -478,96 +436,37 @@ export default function AdminImportarPage() {
                   </div>
                 </div>
 
-                <div className="space-y-6">
-                  {/* Upload Area */}
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-2">Arquivos Excel (.xlsx) - Máximo 20</label>
-                    <div className="border-2 border-dashed border-purple-700 rounded-lg p-8 text-center hover:border-purple-500 transition-colors cursor-pointer">
-                      <label htmlFor="files-lote-upload" className="cursor-pointer">
-                        <Package className="w-12 h-12 text-purple-500 mx-auto mb-4" />
-                        <p className="text-white font-medium mb-1">
-                          {selectedFilesLote.length > 0
-                            ? `${selectedFilesLote.length} arquivo(s) selecionado(s)`
-                            : 'Clique para selecionar múltiplos arquivos'}
-                        </p>
-                        <p className="text-sm text-gray-500">ou arraste os arquivos aqui</p>
-                      </label>
-                      <input
-                        id="files-lote-upload"
-                        type="file"
-                        accept=".xlsx,.xls"
-                        multiple
-                        onChange={handleFilesLoteChange}
-                        className="hidden"
-                      />
-                      <p className="text-xs text-gray-500 mt-2">
-                        Selecione de 1 a 20 arquivos Excel
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Arquivos Excel (.xlsx) — Máximo 20</label>
+                  <div className="border-2 border-dashed border-purple-700 rounded-lg p-8 text-center hover:border-purple-500 transition-colors cursor-pointer">
+                    <label htmlFor="files-lote-upload" className="cursor-pointer">
+                      <Package className="w-12 h-12 text-purple-500 mx-auto mb-4" />
+                      <p className="text-white font-medium mb-1">
+                        {selectedFilesLote.length > 0
+                          ? `${selectedFilesLote.length} arquivo(s) selecionado(s)`
+                          : 'Clique para selecionar múltiplos arquivos'}
                       </p>
-                    </div>
-
-                    {selectedFilesLote.length > 0 && (
-                      <div className="mt-4 space-y-2">
-                        <p className="text-sm text-gray-400 font-semibold">Arquivos selecionados:</p>
-                        <div className="max-h-60 overflow-y-auto space-y-2">
-                          {selectedFilesLote.map((file, index) => (
-                            <div key={index} className="p-3 bg-[#0A0A0F] rounded-md border border-gray-700">
-                              <p className="text-sm text-white">
-                                <span className="text-purple-400 font-mono">{index + 1}.</span> {file.name}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                      <p className="text-sm text-gray-500">ou arraste os arquivos aqui</p>
+                    </label>
+                    <input id="files-lote-upload" type="file" accept=".xlsx,.xls" multiple onChange={handleFilesLoteChange} className="hidden" />
                   </div>
                 </div>
 
                 <button
                   type="submit"
-                  disabled={selectedFilesLote.length === 0 || isUploading}
-                  className={`w-full mt-6 flex items-center justify-center gap-2 px-6 py-3 rounded-md font-semibold transition-colors ${selectedFilesLote.length === 0 || isUploading
-                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                    : 'bg-purple-600 text-white hover:bg-purple-700'
+                  disabled={selectedFilesLote.length === 0 || atualizarEstatisticasLoteMutation.isPending}
+                  className={`w-full mt-6 flex items-center justify-center gap-2 px-6 py-3 rounded-md font-semibold transition-colors ${selectedFilesLote.length === 0 || atualizarEstatisticasLoteMutation.isPending
+                      ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                      : 'bg-purple-600 text-white hover:bg-purple-700'
                     }`}
                 >
-                  {isUploading ? (
-                    <>
-                      <RefreshCw className="w-5 h-5 animate-spin" />
-                      Processando {selectedFilesLote.length} arquivo(s)...
-                    </>
+                  {atualizarEstatisticasLoteMutation.isPending ? (
+                    <><RefreshCw className="w-5 h-5 animate-spin" /> Processando lote...</>
                   ) : (
-                    <>
-                      <Package className="w-5 h-5" />
-                      Importar {selectedFilesLote.length} Jogo(s) em Lote
-                    </>
+                    <><Package className="w-5 h-5" /> Importar {selectedFilesLote.length} arquivo(s) em Lote</>
                   )}
                 </button>
               </form>
-            )}
-
-            {/* Success/Error Messages */}
-            {atualizarEstatisticasMutation.isSuccess && (
-              <div className="bg-green-900/20 border border-green-500 rounded-lg p-4">
-                <div className="flex items-center gap-2 text-green-400">
-                  <CheckCircle className="w-5 h-5" />
-                  <span className="font-semibold">Estatísticas importadas com sucesso!</span>
-                </div>
-              </div>
-            )}
-
-            {atualizarEstatisticasLoteMutation.isSuccess && atualizarEstatisticasLoteMutation.data && (
-              <div className="bg-green-900/20 border border-green-500 rounded-lg p-4">
-                <div className="flex items-center gap-2 text-green-400 mb-3">
-                  <CheckCircle className="w-5 h-5" />
-                  <span className="font-semibold">Lote processado!</span>
-                </div>
-                <div className="text-sm text-gray-300 space-y-1">
-                  <p>✅ Sucessos: {atualizarEstatisticasLoteMutation.data.sucessos}/{atualizarEstatisticasLoteMutation.data.totalArquivos}</p>
-                  {atualizarEstatisticasLoteMutation.data.erros > 0 && (
-                    <p className="text-yellow-400">⚠️ Erros: {atualizarEstatisticasLoteMutation.data.erros}</p>
-                  )}
-                </div>
-              </div>
             )}
           </div>
         </div>
