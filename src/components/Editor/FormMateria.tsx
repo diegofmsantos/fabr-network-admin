@@ -44,6 +44,7 @@ export const FormMateria = () => {
     texto: '',
     autor: '',
     autorImage: '',
+    tipo: 'NORMAL' as 'NORMAL' | 'AO_VIVO',
     createdAt: formatarDataLocal(),
     updatedAt: formatarDataLocal()
   })
@@ -84,6 +85,7 @@ export const FormMateria = () => {
           texto: '',
           autor: '',
           autorImage: '',
+          tipo: 'NORMAL',
           createdAt: formatarDataLocal(),
           updatedAt: formatarDataLocal()
         })
@@ -288,6 +290,35 @@ export const FormMateria = () => {
                   </div>
 
                   <div className="bg-[#0F0F13] p-4 rounded-lg border border-gray-800">
+                    <label className="block text-white text-sm font-medium mb-2">Categoria</label>
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, tipo: 'NORMAL' }))}
+                        className={`flex-1 px-4 py-2 rounded-lg font-medium border transition-colors
+                          ${formData.tipo === 'NORMAL'
+                            ? 'bg-[#63E300] text-black border-[#63E300]'
+                            : 'bg-[#1C1C24] text-gray-400 border-gray-700 hover:border-[#63E300]'}`}
+                      >
+                        Notícia Normal
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, tipo: 'AO_VIVO' }))}
+                        className={`flex-1 px-4 py-2 rounded-lg font-medium border transition-colors
+                          ${formData.tipo === 'AO_VIVO'
+                            ? 'bg-red-600 text-white border-red-600'
+                            : 'bg-[#1C1C24] text-gray-400 border-gray-700 hover:border-red-600'}`}
+                      >
+                        Ao Vivo (fim de semana)
+                      </button>
+                    </div>
+                    <p className="text-gray-500 text-xs mt-2">
+                      &quot;Ao Vivo&quot; substitui a matéria em destaque na página /ao-vivo do site. Use para o post semanal com os embeds dos jogos do fim de semana.
+                    </p>
+                  </div>
+
+                  <div className="bg-[#0F0F13] p-4 rounded-lg border border-gray-800">
                     <FormField label="Conteúdo da Matéria">
                       <Editor
                         value={formData.texto}
@@ -458,6 +489,11 @@ export const FormMateria = () => {
                         }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-70"></div>
+                      {materia.tipo === 'AO_VIVO' && (
+                        <span className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">
+                          AO VIVO
+                        </span>
+                      )}
                     </div>
 
                     <div className={`p-4 ${activeView === 'list' ? 'flex-1' : ''}`}>

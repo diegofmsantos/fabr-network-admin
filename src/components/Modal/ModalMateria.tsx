@@ -220,6 +220,34 @@ export function ModalMateria({ materia, closeModal, onUpdate }: ModalMateriaProp
                         </div>
 
                         <div>
+                            <label className="block text-white text-sm font-medium mb-2">Categoria</label>
+                            <div className="flex gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData(prev => ({ ...prev, tipo: 'NORMAL' }))}
+                                    disabled={isLoading}
+                                    className={`flex-1 px-4 py-2 rounded-lg font-medium border transition-colors
+                                        ${formData.tipo === 'NORMAL'
+                                            ? 'bg-[#63E300] text-black border-[#63E300]'
+                                            : 'bg-[#1C1C24] text-gray-400 border-gray-700 hover:border-[#63E300]'}`}
+                                >
+                                    Notícia Normal
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData(prev => ({ ...prev, tipo: 'AO_VIVO' }))}
+                                    disabled={isLoading}
+                                    className={`flex-1 px-4 py-2 rounded-lg font-medium border transition-colors
+                                        ${formData.tipo === 'AO_VIVO'
+                                            ? 'bg-red-600 text-white border-red-600'
+                                            : 'bg-[#1C1C24] text-gray-400 border-gray-700 hover:border-red-600'}`}
+                                >
+                                    Ao Vivo (fim de semana)
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
                             <label className="block text-white text-sm font-medium mb-2">Conteúdo</label>
                             <div className="bg-[#1C1C24] border border-gray-700 rounded-lg p-3">
                                 <Editor
