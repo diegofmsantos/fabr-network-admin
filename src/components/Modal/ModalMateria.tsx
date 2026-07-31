@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Editor } from '../Editor/Editor'
 import Image from 'next/image'
 import { Materia } from '@/types'
-import { useUpdateMateria, useDeleteMateria } from '@/hooks/useMaterias'
+import { useMateria, useUpdateMateria, useDeleteMateria } from '@/hooks/useMaterias'
+import { MateriasService } from '@/services/materias.service'
 
 interface MateriaFormData extends Omit<Materia, 'createdAt' | 'updatedAt'> {
     createdAt: string;
@@ -18,6 +19,10 @@ interface ModalMateriaProps {
 }
 
 export function ModalMateria({ materia, closeModal, onUpdate }: ModalMateriaProps) {
+    // A listagem que alimenta `materia` não traz mais o corpo (`texto`) do artigo
+    // — busca o registro completo aqui pra não abrir o formulário com o conteúdo vazio.
+    const { data: materiaCompleta, isLoading: carregandoMateria } = useMateria(materia.id)
+
     const formatDateForInput = (dateString: string) => {
         const data = new Date(dateString);
         const ano = data.getFullYear();
@@ -28,20 +33,29 @@ export function ModalMateria({ materia, closeModal, onUpdate }: ModalMateriaProp
         return `${ano}-${mes}-${dia}T${hora}:${minuto}`;
     };
 
-    const [formData, setFormData] = useState<MateriaFormData>({
-        ...materia,
-        createdAt: formatDateForInput(materia.createdAt),
-        updatedAt: formatDateForInput(materia.updatedAt)
-    });
+    const [formData, setFormData] = useState<MateriaFormData | null>(null);
+
+    useEffect(() => {
+        if (materiaCompleta) {
+            setFormData({
+                ...materiaCompleta,
+                createdAt: formatDateForInput(materiaCompleta.createdAt),
+                updatedAt: formatDateForInput(materiaCompleta.updatedAt)
+            })
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [materiaCompleta])
 
     const updateMateriaMutation = useUpdateMateria()
     const deleteMateriaMutation = useDeleteMateria()
+    const [uploadingImagem, setUploadingImagem] = useState(false)
+    const [uploadingAutorImage, setUploadingAutorImage] = useState(false)
 
-    const isLoading = updateMateriaMutation.isPending || deleteMateriaMutation.isPending
+    const isLoading = updateMateriaMutation.isPending || deleteMateriaMutation.isPending || uploadingImagem || uploadingAutorImage
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
-        setFormData(prev => ({
+        setFormData(prev => prev && ({
             ...prev,
             [name]: value
         }))
@@ -49,36 +63,37 @@ export function ModalMateria({ materia, closeModal, onUpdate }: ModalMateriaProp
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
-        if (file) {
-            if (file.size > 5 * 1024 * 1024) {
-                alert('A imagem deve ter no máximo 5MB')
-                return
-            }
-            const reader = new FileReader()
-            reader.onloadend = () => {
-                setFormData(prev => ({ ...prev, imagem: reader.result as string }))
-            }
-            reader.readAsDataURL(file)
+        if (!file) return
+        if (file.size > 5 * 1024 * 1024) {
+            alert('A imagem deve ter no máximo 5MB')
+            return
         }
+
+        setUploadingImagem(true)
+        MateriasService.uploadImagem(file)
+            .then(({ url }) => setFormData(prev => prev && ({ ...prev, imagem: url })))
+            .catch(() => alert('Erro ao enviar a imagem. Tente novamente.'))
+            .finally(() => setUploadingImagem(false))
     }
 
     const handleAuthorImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
-        if (file) {
-            if (file.size > 5 * 1024 * 1024) {
-                alert('A foto do autor deve ter no máximo 5MB')
-                return
-            }
-            const reader = new FileReader()
-            reader.onloadend = () => {
-                setFormData(prev => ({ ...prev, autorImage: reader.result as string }))
-            }
-            reader.readAsDataURL(file)
+        if (!file) return
+        if (file.size > 5 * 1024 * 1024) {
+            alert('A foto do autor deve ter no máximo 5MB')
+            return
         }
+
+        setUploadingAutorImage(true)
+        MateriasService.uploadImagem(file)
+            .then(({ url }) => setFormData(prev => prev && ({ ...prev, autorImage: url })))
+            .catch(() => alert('Erro ao enviar a foto do autor. Tente novamente.'))
+            .finally(() => setUploadingAutorImage(false))
     }
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
+        if (!formData) return
 
         const criarDataISO = (dateTimeLocal: string) => {
             const data = new Date(dateTimeLocal)
@@ -113,6 +128,22 @@ export function ModalMateria({ materia, closeModal, onUpdate }: ModalMateriaProp
                 }
             })
         }
+    }
+
+    if (carregandoMateria || !formData) {
+        return (
+            <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+                <div className="bg-[#272731] p-6 rounded-lg w-2/3 h-[90vh] relative flex items-center justify-center">
+                    <button
+                        className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+                        onClick={closeModal}
+                    >
+                        ✖
+                    </button>
+                    <p className="text-white">Carregando matéria...</p>
+                </div>
+            </div>
+        )
     }
 
     return (
@@ -224,7 +255,7 @@ export function ModalMateria({ materia, closeModal, onUpdate }: ModalMateriaProp
                             <div className="flex gap-3">
                                 <button
                                     type="button"
-                                    onClick={() => setFormData(prev => ({ ...prev, tipo: 'NORMAL' }))}
+                                    onClick={() => setFormData(prev => prev && ({ ...prev, tipo: 'NORMAL' }))}
                                     disabled={isLoading}
                                     className={`flex-1 px-4 py-2 rounded-lg font-medium border transition-colors
                                         ${formData.tipo === 'NORMAL'
@@ -235,14 +266,14 @@ export function ModalMateria({ materia, closeModal, onUpdate }: ModalMateriaProp
                                 </button>
                                 <button
                                     type="button"
-                                    onClick={() => setFormData(prev => ({ ...prev, tipo: 'AO_VIVO' }))}
+                                    onClick={() => setFormData(prev => prev && ({ ...prev, tipo: 'REDZONE' }))}
                                     disabled={isLoading}
                                     className={`flex-1 px-4 py-2 rounded-lg font-medium border transition-colors
-                                        ${formData.tipo === 'AO_VIVO'
+                                        ${formData.tipo === 'REDZONE'
                                             ? 'bg-red-600 text-white border-red-600'
                                             : 'bg-[#1C1C24] text-gray-400 border-gray-700 hover:border-red-600'}`}
                                 >
-                                    Ao Vivo (fim de semana)
+                                    Redzone (fim de semana)
                                 </button>
                             </div>
                         </div>
@@ -252,7 +283,7 @@ export function ModalMateria({ materia, closeModal, onUpdate }: ModalMateriaProp
                             <div className="bg-[#1C1C24] border border-gray-700 rounded-lg p-3">
                                 <Editor
                                     value={formData.texto}
-                                    onChange={(value) => setFormData(prev => ({ ...prev, texto: value }))}
+                                    onChange={(value) => setFormData(prev => prev && ({ ...prev, texto: value }))}
                                 />
                             </div>
                         </div>

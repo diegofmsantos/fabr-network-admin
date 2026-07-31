@@ -10,6 +10,7 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { Materia } from '@/types'
 import { useMaterias, useCreateMateria } from '@/hooks/useMaterias'
+import { MateriasService } from '@/services/materias.service'
 
 export const FormMateria = () => {
   console.log('🔍 API Base URL:', process.env.NEXT_PUBLIC_API_BASE_URL)
@@ -23,8 +24,10 @@ export const FormMateria = () => {
   const [previewImage, setPreviewImage] = useState<string | null>(null)
   const [previewAuthorImage, setPreviewAuthorImage] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [uploadingImagem, setUploadingImagem] = useState(false)
+  const [uploadingAutorImage, setUploadingAutorImage] = useState(false)
 
-  const isLoading = loadingMaterias || createMateriaMutation.isPending
+  const isLoading = loadingMaterias || createMateriaMutation.isPending || uploadingImagem || uploadingAutorImage
 
   const formatarDataLocal = () => {
     const dataAtual = new Date();
@@ -44,7 +47,7 @@ export const FormMateria = () => {
     texto: '',
     autor: '',
     autorImage: '',
-    tipo: 'NORMAL' as 'NORMAL' | 'AO_VIVO',
+    tipo: 'NORMAL' as 'NORMAL' | 'REDZONE',
     createdAt: formatarDataLocal(),
     updatedAt: formatarDataLocal()
   })
@@ -95,28 +98,32 @@ export const FormMateria = () => {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        setFormData(prev => ({ ...prev, imagem: result }))
-        setPreviewImage(result)
-      }
-      reader.readAsDataURL(file)
-    }
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onloadend = () => setPreviewImage(reader.result as string)
+    reader.readAsDataURL(file)
+
+    setUploadingImagem(true)
+    MateriasService.uploadImagem(file)
+      .then(({ url }) => setFormData(prev => ({ ...prev, imagem: url })))
+      .catch(() => alert('Erro ao enviar a imagem. Tente novamente.'))
+      .finally(() => setUploadingImagem(false))
   }
 
   const handleAuthorImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        setFormData(prev => ({ ...prev, autorImage: result }))
-        setPreviewAuthorImage(result)
-      }
-      reader.readAsDataURL(file)
-    }
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onloadend = () => setPreviewAuthorImage(reader.result as string)
+    reader.readAsDataURL(file)
+
+    setUploadingAutorImage(true)
+    MateriasService.uploadImagem(file)
+      .then(({ url }) => setFormData(prev => ({ ...prev, autorImage: url })))
+      .catch(() => alert('Erro ao enviar a foto do autor. Tente novamente.'))
+      .finally(() => setUploadingAutorImage(false))
   }
 
   return (
@@ -304,17 +311,17 @@ export const FormMateria = () => {
                       </button>
                       <button
                         type="button"
-                        onClick={() => setFormData(prev => ({ ...prev, tipo: 'AO_VIVO' }))}
+                        onClick={() => setFormData(prev => ({ ...prev, tipo: 'REDZONE' }))}
                         className={`flex-1 px-4 py-2 rounded-lg font-medium border transition-colors
-                          ${formData.tipo === 'AO_VIVO'
+                          ${formData.tipo === 'REDZONE'
                             ? 'bg-red-600 text-white border-red-600'
                             : 'bg-[#1C1C24] text-gray-400 border-gray-700 hover:border-red-600'}`}
                       >
-                        Ao Vivo (fim de semana)
+                        Redzone (fim de semana)
                       </button>
                     </div>
                     <p className="text-gray-500 text-xs mt-2">
-                      &quot;Ao Vivo&quot; substitui a matéria em destaque na página /ao-vivo do site. Use para o post semanal com os embeds dos jogos do fim de semana.
+                      &quot;Redzone&quot; substitui a matéria em destaque na página /redzone do site. Use para o post semanal com os embeds dos jogos do fim de semana.
                     </p>
                   </div>
 
@@ -489,9 +496,9 @@ export const FormMateria = () => {
                         }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-70"></div>
-                      {materia.tipo === 'AO_VIVO' && (
+                      {materia.tipo === 'REDZONE' && (
                         <span className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">
-                          AO VIVO
+                          REDZONE
                         </span>
                       )}
                     </div>

@@ -12,6 +12,11 @@ export class MateriasService extends BaseService {
     return service.get<Materia>(`/materias/${id}`)
   }
 
+  static async uploadImagem(file: File): Promise<{ url: string }> {
+    const service = new MateriasService()
+    return service.upload<{ url: string }>('/materias/upload-imagem', file)
+  }
+
   static async createMateria(materia: Omit<Materia, 'id'>): Promise<Materia> {
     const service = new MateriasService()
     return service.post<Materia>('/materias', materia)
