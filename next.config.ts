@@ -3,7 +3,11 @@ import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
     images: {
-        domains: ['localhost', 'your-app.vercel.app'],
+        remotePatterns: [
+            { protocol: 'http', hostname: 'localhost' },
+            { protocol: 'https', hostname: 'your-app.vercel.app' },
+            { protocol: 'https', hostname: '*.public.blob.vercel-storage.com' },
+        ],
     },
     webpack: (config) => {
         config.resolve = {
