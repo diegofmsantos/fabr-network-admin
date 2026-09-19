@@ -8,6 +8,9 @@ import { useJogosSuperliga, useSuperliga } from '@/hooks/useSuperliga'
 import { Jogo } from '@/hooks/useJogos'
 import Image from 'next/image'
 import { ImageService } from '@/utils/services/ImageService'
+import { useTemporadaAdmin } from '@/hooks/useTemporadaAdmin'
+import { useTimes } from '@/hooks/useTimes'
+import { JogosService } from '@/services/jogos.service'
 
 type FilterStatus = 'todos' | 'AGENDADO' | 'AO VIVO' | 'FINALIZADO' | 'ADIADO'
 type FilterFase = 'todas' | 'WILD CARD' | 'SEMIFINAL DE CONFERÊNCIA' | 'FINAL DE CONFERÊNCIA' | 'SEMIFINAL NACIONAL' | 'FINAL NACIONAL'
@@ -17,7 +20,7 @@ export default function AdminPlayoffsPage() {
   const [filterFase, setFilterFase] = useState<FilterFase>('todas')
   const [filterConferencia, setFilterConferencia] = useState('todas')
 
-  const temporada = '2025'
+  const { temporada } = useTemporadaAdmin()
 
   const { data: superliga, isLoading: loadingSuperliga } = useSuperliga(temporada)
 
@@ -284,7 +287,7 @@ export default function AdminPlayoffsPage() {
                 <div className="p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {jogosDaFase.map((jogo: Jogo) => (
-                      <JogoCard key={jogo.id} jogo={jogo} onRefresh={refetch} />
+                      <JogoCard key={jogo.id} jogo={jogo} temporada={temporada} onRefresh={refetch} />
                     ))}
                   </div>
                 </div>
@@ -299,10 +302,43 @@ export default function AdminPlayoffsPage() {
 
 interface JogoCardProps {
   jogo: Jogo
+  temporada: string
   onRefresh: () => void
 }
 
-function JogoCard({ jogo, onRefresh }: JogoCardProps) {
+function JogoCard({ jogo, temporada, onRefresh }: JogoCardProps) {
+  const [editando, setEditando] = useState(false)
+  const [timeCasaId, setTimeCasaId] = useState<string>(jogo.timeCasa ? String(jogo.timeCasa.id) : '')
+  const [timeVisitanteId, setTimeVisitanteId] = useState<string>(jogo.timeVisitante ? String(jogo.timeVisitante.id) : '')
+  const [salvando, setSalvando] = useState(false)
+  const [erroConfronto, setErroConfronto] = useState<string | null>(null)
+
+  const { data: times = [] } = useTimes(temporada)
+
+  const salvarConfronto = async () => {
+    if (!timeCasaId || !timeVisitanteId) {
+      setErroConfronto('Selecione os dois times')
+      return
+    }
+    if (timeCasaId === timeVisitanteId) {
+      setErroConfronto('Os times mandante e visitante não podem ser o mesmo')
+      return
+    }
+
+    setSalvando(true)
+    setErroConfronto(null)
+
+    try {
+      await JogosService.definirTimes(jogo.id, parseInt(timeCasaId), parseInt(timeVisitanteId))
+      setEditando(false)
+      onRefresh()
+    } catch (err) {
+      setErroConfronto(err instanceof Error ? err.message : 'Erro ao salvar o confronto')
+    } finally {
+      setSalvando(false)
+    }
+  }
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'FINALIZADO': return 'bg-green-500/20 text-green-500'
@@ -418,12 +454,73 @@ function JogoCard({ jogo, onRefresh }: JogoCardProps) {
         </div>
       )}
 
-      <Link
-        href={`/admin/jogos/${jogo.id}`}
-        className="mt-4 w-full block text-center bg-[#272731] text-white py-2 px-4 rounded-md border border-gray-700 hover:border-[#63E300] hover:text-[#63E300] transition-colors text-sm font-semibold"
-      >
-        Ver Detalhes
-      </Link>
+      {jogo.status !== 'FINALIZADO' && (
+        editando ? (
+          <div className="mt-4 pt-4 border-t border-gray-700 space-y-3">
+            <div>
+              <label className="block text-gray-400 text-xs mb-1">Time mandante</label>
+              <select
+                value={timeCasaId}
+                onChange={(e) => setTimeCasaId(e.target.value)}
+                className="w-full bg-[#1C1C24] text-white border border-gray-700 rounded-md px-3 py-2 text-sm"
+              >
+                <option value="">Selecione...</option>
+                {times.map((time) => (
+                  <option key={time.id} value={time.id}>{time.nome}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-gray-400 text-xs mb-1">Time visitante</label>
+              <select
+                value={timeVisitanteId}
+                onChange={(e) => setTimeVisitanteId(e.target.value)}
+                className="w-full bg-[#1C1C24] text-white border border-gray-700 rounded-md px-3 py-2 text-sm"
+              >
+                <option value="">Selecione...</option>
+                {times.map((time) => (
+                  <option key={time.id} value={time.id}>{time.nome}</option>
+                ))}
+              </select>
+            </div>
+
+            {erroConfronto && <p className="text-red-400 text-xs">{erroConfronto}</p>}
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setEditando(false)}
+                className="flex-1 bg-[#1C1C24] text-white py-2 px-4 rounded-md border border-gray-700 hover:border-gray-600 transition-colors text-sm"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={salvarConfronto}
+                disabled={salvando}
+                className="flex-1 bg-[#63E300] text-black py-2 px-4 rounded-md font-semibold hover:bg-[#50B800] transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {salvando ? 'Salvando...' : 'Salvar'}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => setEditando(true)}
+            className="mt-4 w-full block text-center bg-[#272731] text-white py-2 px-4 rounded-md border border-gray-700 hover:border-[#63E300] hover:text-[#63E300] transition-colors text-sm font-semibold"
+          >
+            Definir Confronto
+          </button>
+        )
+      )}
+
+      {jogo.timeCasa && jogo.timeVisitante && (
+        <Link
+          href={`/admin/jogos/${jogo.id}`}
+          className="mt-2 w-full block text-center bg-[#272731] text-white py-2 px-4 rounded-md border border-gray-700 hover:border-[#63E300] hover:text-[#63E300] transition-colors text-sm font-semibold"
+        >
+          Ver Detalhes
+        </Link>
+      )}
     </div>
   )
 }
