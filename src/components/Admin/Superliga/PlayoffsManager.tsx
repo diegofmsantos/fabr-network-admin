@@ -66,12 +66,7 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
   const salvarConfronto = async () => {
     if (!selectedJogo) return
 
-    if (!timeCasaId || !timeVisitanteId) {
-      setErroConfronto('Selecione os dois times')
-      return
-    }
-
-    if (timeCasaId === timeVisitanteId) {
+    if (timeCasaId && timeCasaId === timeVisitanteId) {
       setErroConfronto('Os times mandante e visitante não podem ser o mesmo')
       return
     }
@@ -80,7 +75,7 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
     setErroConfronto(null)
 
     try {
-      await JogosService.definirTimes(selectedJogo.id, parseInt(timeCasaId), parseInt(timeVisitanteId))
+      await JogosService.definirTimes(selectedJogo.id, timeCasaId ? parseInt(timeCasaId) : null, timeVisitanteId ? parseInt(timeVisitanteId) : null)
       await refetch()
       setShowModal(false)
       setSelectedJogo(null)
@@ -544,7 +539,7 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
                       onChange={(e) => setTimeCasaId(e.target.value)}
                       className="w-full bg-[#1C1C24] text-white border border-gray-700 rounded-md px-3 py-2 text-sm"
                     >
-                      <option value="">Selecione...</option>
+                      <option value="">A definir</option>
                       {times.map((time) => (
                         <option key={time.id} value={time.id}>{time.nome}</option>
                       ))}
@@ -558,7 +553,7 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
                       onChange={(e) => setTimeVisitanteId(e.target.value)}
                       className="w-full bg-[#1C1C24] text-white border border-gray-700 rounded-md px-3 py-2 text-sm"
                     >
-                      <option value="">Selecione...</option>
+                      <option value="">A definir</option>
                       {times.map((time) => (
                         <option key={time.id} value={time.id}>{time.nome}</option>
                       ))}

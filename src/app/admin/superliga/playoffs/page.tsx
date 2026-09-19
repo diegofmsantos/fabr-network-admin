@@ -318,11 +318,7 @@ function JogoCard({ jogo, temporada, divisao, onRefresh }: JogoCardProps) {
   const { data: times = [] } = useTimes(temporada, divisao)
 
   const salvarConfronto = async () => {
-    if (!timeCasaId || !timeVisitanteId) {
-      setErroConfronto('Selecione os dois times')
-      return
-    }
-    if (timeCasaId === timeVisitanteId) {
+    if (timeCasaId && timeCasaId === timeVisitanteId) {
       setErroConfronto('Os times mandante e visitante não podem ser o mesmo')
       return
     }
@@ -331,7 +327,7 @@ function JogoCard({ jogo, temporada, divisao, onRefresh }: JogoCardProps) {
     setErroConfronto(null)
 
     try {
-      await JogosService.definirTimes(jogo.id, parseInt(timeCasaId), parseInt(timeVisitanteId))
+      await JogosService.definirTimes(jogo.id, timeCasaId ? parseInt(timeCasaId) : null, timeVisitanteId ? parseInt(timeVisitanteId) : null)
       setEditando(false)
       onRefresh()
     } catch (err) {
@@ -466,7 +462,7 @@ function JogoCard({ jogo, temporada, divisao, onRefresh }: JogoCardProps) {
                 onChange={(e) => setTimeCasaId(e.target.value)}
                 className="w-full bg-[#1C1C24] text-white border border-gray-700 rounded-md px-3 py-2 text-sm"
               >
-                <option value="">Selecione...</option>
+                <option value="">A definir</option>
                 {times.map((time) => (
                   <option key={time.id} value={time.id}>{time.nome}</option>
                 ))}
@@ -480,7 +476,7 @@ function JogoCard({ jogo, temporada, divisao, onRefresh }: JogoCardProps) {
                 onChange={(e) => setTimeVisitanteId(e.target.value)}
                 className="w-full bg-[#1C1C24] text-white border border-gray-700 rounded-md px-3 py-2 text-sm"
               >
-                <option value="">Selecione...</option>
+                <option value="">A definir</option>
                 {times.map((time) => (
                   <option key={time.id} value={time.id}>{time.nome}</option>
                 ))}
