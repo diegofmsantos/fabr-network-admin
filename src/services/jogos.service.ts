@@ -166,6 +166,11 @@ export class JogosService extends BaseService {
     return service.put(`/admin/jogos/${id}/resultado`, dados)
   }
 
+  static async definirTimes(id: number, timeCasaId: number, timeVisitanteId: number): Promise<{ message: string; jogo: Jogo }> {
+    const service = new JogosService()
+    return service.put(`/admin/jogos/${id}/gerenciar`, { timeCasaId, timeVisitanteId })
+  }
+
   static async finalizarJogo(id: number): Promise<Jogo> {
     const service = new JogosService()
     return service.put(`/admin/jogos/${id}/finalizar`, {})

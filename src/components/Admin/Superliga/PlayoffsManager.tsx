@@ -1,11 +1,13 @@
 "use client"
 
-import React, { useState } from 'react'
-import { Trophy, Crown, Target, Play, CheckCircle, Clock, AlertTriangle, Zap, Eye, Edit } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
+import { Trophy, Crown, Target, Play, CheckCircle, Clock, AlertTriangle, Zap, Edit } from 'lucide-react'
 import { Loading } from '@/components/ui/Loading'
 import Image from 'next/image'
 import { ImageService } from '@/utils/services/ImageService'
 import { usePlayoffBracket } from '@/hooks/useSuperliga'
+import { useTimes } from '@/hooks/useTimes'
+import { JogosService } from '@/services/jogos.service'
 
 interface PlayoffsManagerProps {
   superligaId: number
@@ -45,8 +47,49 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
   const [selectedConferencia, setSelectedConferencia] = useState<string>('SUDESTE')
   const [showModal, setShowModal] = useState(false)
   const [selectedJogo, setSelectedJogo] = useState<JogoPlayoff | null>(null)
+  const [timeCasaId, setTimeCasaId] = useState<string>('')
+  const [timeVisitanteId, setTimeVisitanteId] = useState<string>('')
+  const [salvando, setSalvando] = useState(false)
+  const [erroConfronto, setErroConfronto] = useState<string | null>(null)
 
-  const { data: rawBracket, isLoading, error } = usePlayoffBracket(temporada)
+  const { data: rawBracket, isLoading, error, refetch } = usePlayoffBracket(temporada)
+  const { data: times = [] } = useTimes(temporada)
+
+  useEffect(() => {
+    if (selectedJogo) {
+      setTimeCasaId(selectedJogo.timeClassificado1?.id ? String(selectedJogo.timeClassificado1.id) : '')
+      setTimeVisitanteId(selectedJogo.timeClassificado2?.id ? String(selectedJogo.timeClassificado2.id) : '')
+      setErroConfronto(null)
+    }
+  }, [selectedJogo])
+
+  const salvarConfronto = async () => {
+    if (!selectedJogo) return
+
+    if (!timeCasaId || !timeVisitanteId) {
+      setErroConfronto('Selecione os dois times')
+      return
+    }
+
+    if (timeCasaId === timeVisitanteId) {
+      setErroConfronto('Os times mandante e visitante não podem ser o mesmo')
+      return
+    }
+
+    setSalvando(true)
+    setErroConfronto(null)
+
+    try {
+      await JogosService.definirTimes(selectedJogo.id, parseInt(timeCasaId), parseInt(timeVisitanteId))
+      await refetch()
+      setShowModal(false)
+      setSelectedJogo(null)
+    } catch (err) {
+      setErroConfronto(err instanceof Error ? err.message : 'Erro ao salvar o confronto')
+    } finally {
+      setSalvando(false)
+    }
+  }
 
   const bracket: BracketData | null = rawBracket && typeof rawBracket === 'object' ? rawBracket as BracketData : null
 
@@ -134,16 +177,9 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
             </span>
           </div>
 
-          <div className="flex items-center gap-1">
-            <button className="p-1 text-gray-400 hover:text-white transition-colors">
-              <Eye className={`w-4 h-4`} />
-            </button>
-            {jogo.status !== 'FINALIZADO' && (
-              <button className="p-1 text-gray-400 hover:text-white transition-colors">
-                <Edit className={`w-4 h-4`} />
-              </button>
-            )}
-          </div>
+          {jogo.status !== 'FINALIZADO' && (
+            <Edit className="w-4 h-4 text-gray-400" />
+          )}
         </div>
 
         <div className="space-y-2">
@@ -493,14 +529,55 @@ export const PlayoffsManager: React.FC<PlayoffsManagerProps> = ({
             <div className="space-y-4">
               <JogoPlayoffCard jogo={selectedJogo} />
 
-              <div className="flex gap-2">
-                <button className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
-                  Editar Resultado
-                </button>
-                <button className="flex-1 bg-[#63E300] text-black py-2 px-4 rounded-md hover:bg-[#50B800] transition-colors">
-                  Ver Detalhes
-                </button>
-              </div>
+              {selectedJogo.status === 'FINALIZADO' ? (
+                <p className="text-gray-400 text-sm text-center">
+                  Este jogo já foi finalizado. Para corrigir o resultado, use a importação de resultados.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  <h4 className="text-white font-semibold text-sm">Definir confronto</h4>
+
+                  <div>
+                    <label className="block text-gray-400 text-xs mb-1">Time mandante</label>
+                    <select
+                      value={timeCasaId}
+                      onChange={(e) => setTimeCasaId(e.target.value)}
+                      className="w-full bg-[#1C1C24] text-white border border-gray-700 rounded-md px-3 py-2 text-sm"
+                    >
+                      <option value="">Selecione...</option>
+                      {times.map((time) => (
+                        <option key={time.id} value={time.id}>{time.nome}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-gray-400 text-xs mb-1">Time visitante</label>
+                    <select
+                      value={timeVisitanteId}
+                      onChange={(e) => setTimeVisitanteId(e.target.value)}
+                      className="w-full bg-[#1C1C24] text-white border border-gray-700 rounded-md px-3 py-2 text-sm"
+                    >
+                      <option value="">Selecione...</option>
+                      {times.map((time) => (
+                        <option key={time.id} value={time.id}>{time.nome}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {erroConfronto && (
+                    <p className="text-red-400 text-sm">{erroConfronto}</p>
+                  )}
+
+                  <button
+                    onClick={salvarConfronto}
+                    disabled={salvando}
+                    className="w-full bg-[#63E300] text-black py-2 px-4 rounded-md hover:bg-[#50B800] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+                  >
+                    {salvando ? 'Salvando...' : 'Salvar confronto'}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
