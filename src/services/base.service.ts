@@ -36,16 +36,19 @@ export class BaseService {
           throw new Error('Sessão expirada, faça login novamente')
         }
 
+        // O backend responde { error, details? } (ou { message }); prefere a mensagem real
+        const mensagemServidor = error.response?.data?.error || error.response?.data?.message
+
         if (error.response?.status === 404) {
-          throw new Error('Recurso não encontrado')
+          throw new Error(mensagemServidor || 'Recurso não encontrado')
         }
 
         if (error.response?.status >= 500) {
-          throw new Error('Erro interno do servidor')
+          throw new Error(mensagemServidor || 'Erro interno do servidor')
         }
 
-        if (error.response?.data?.message) {
-          throw new Error(error.response.data.message)
+        if (mensagemServidor) {
+          throw new Error(mensagemServidor)
         }
 
         throw new Error(error.message || 'Erro na requisição')

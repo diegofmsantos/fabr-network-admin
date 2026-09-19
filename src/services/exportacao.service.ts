@@ -61,7 +61,7 @@ interface ExportacaoResponse {
 }
 
 export class ExportacaoService extends BaseService {
-  static async getEstatisticasParaExportar(temporada: string = '2025'): Promise<ExportacaoResponse> {
+  static async getEstatisticasParaExportar(temporada: string = '2026'): Promise<ExportacaoResponse> {
     const service = new ExportacaoService()
     console.log('📊 Buscando dados para exportação...')
     console.log('🔗 URL Base:', process.env.NEXT_PUBLIC_API_BASE_URL)

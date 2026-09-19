@@ -170,14 +170,12 @@ export function TemporadaRegularContent({ jogosPorRodada, onRefresh }: Temporada
                     )}
 
                     <div className="mt-4 flex gap-2">
-                      {jogo.status !== 'FINALIZADO' && (
-                        <button
-                          className="flex-1 bg-[#63E300] text-black py-2 rounded-md font-semibold hover:bg-[#50B800] transition-colors text-sm"
-                          onClick={() => router.push(`/admin/jogos/${jogo.id}/gerenciar-jogo`)}
-                        >
-                          Gerenciar
-                        </button>
-                      )}
+                      <button
+                        className="flex-1 bg-[#63E300] text-black py-2 rounded-md font-semibold hover:bg-[#50B800] transition-colors text-sm"
+                        onClick={() => router.push(`/admin/jogos/${jogo.id}/gerenciar-jogo`)}
+                      >
+                        {jogo.status === 'FINALIZADO' ? 'Corrigir resultado' : 'Gerenciar'}
+                      </button>
                       <Link
                         href={`/admin/jogos/${jogo.id}`}
                         className="flex-1 text-center bg-[#272731] text-white py-2 rounded-md border border-gray-700 hover:border-[#63E300] hover:text-[#63E300] transition-colors text-sm font-semibold"

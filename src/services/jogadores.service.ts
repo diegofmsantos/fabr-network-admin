@@ -2,7 +2,7 @@ import { EstatisticaJogo, Estatisticas, Jogador, Jogo } from '@/types'
 import { BaseService } from './base.service'
 
 export class JogadoresService extends BaseService {
-  static async getJogadores(temporada: string = '2025'): Promise<Jogador[]> {
+  static async getJogadores(temporada: string = '2026'): Promise<Jogador[]> {
     const service = new JogadoresService()
     return service.get<Jogador[]>(`/jogadores/jogadores`, { temporada })
   }
@@ -54,7 +54,7 @@ export class JogadoresService extends BaseService {
     return service.get<EstatisticaJogo>(`/admin/estatistica-jogo/${id}`)
   }
 
-   static async getEstatisticasJogo(jogadorId: number, temporada: string = '2025'): Promise<EstatisticaJogo[]> {
+   static async getEstatisticasJogo(jogadorId: number, temporada: string = '2026'): Promise<EstatisticaJogo[]> {
     console.log(`🔍 [SERVICE] Chamando rota: /jogadores/${jogadorId}/estatisticas-jogo?temporada=${temporada}`)
 
     const service = new JogadoresService()
@@ -63,7 +63,7 @@ export class JogadoresService extends BaseService {
 
   static async getRankingTemporadaRegular(
   categoria: string, 
-  temporada: string = '2025', 
+  temporada: string = '2026', 
   limite: number = 50
 ) {
   const service = new JogadoresService()

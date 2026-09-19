@@ -43,9 +43,10 @@ export default function GerenciarJogoPage() {
 
   useEffect(() => {
     if (jogo) {
-      const dataJogo = new Date(jogo.dataJogo)
-      const dataFormatada = dataJogo.toISOString().split('T')[0] 
-      const horaFormatada = dataJogo.toTimeString().slice(0, 5) 
+      // dataJogo é guardado como horário de Brasília "rotulado" como UTC (sem
+      // conversão de fuso), então data/hora são lidas direto da string ISO.
+      const [dataFormatada, horaCompleta = '00:00'] = String(jogo.dataJogo).split('T')
+      const horaFormatada = horaCompleta.slice(0, 5)
 
       setFormData({
         placarCasa: jogo.placarCasa || 0,
@@ -101,19 +102,23 @@ export default function GerenciarJogoPage() {
 
     if (!validateForm()) return
 
-    const dataHoraCompleta = new Date(`${formData.dataJogo}T${formData.horaJogo}`)
-
     const statusValido: 'AGENDADO' | 'AO VIVO' | 'FINALIZADO' | 'ADIADO' =
       (['AGENDADO', 'AO VIVO', 'FINALIZADO', 'ADIADO'] as const).includes(formData.status as any)
         ? formData.status as 'AGENDADO' | 'AO VIVO' | 'FINALIZADO' | 'ADIADO'
         : 'AGENDADO'
 
+    // Só envia placar quando o jogo está em andamento ou finalizado, para não
+    // gravar 0 x 0 em jogos que ainda vão acontecer
+    const enviaPlacar = statusValido === 'FINALIZADO' || statusValido === 'AO VIVO'
+
     const dadosParaAtualizar: GerenciarJogoData = {
-      placarCasa: formData.placarCasa,
-      placarVisitante: formData.placarVisitante,
-      dataJogo: dataHoraCompleta.toISOString(),
-      local: formData.local.trim() || undefined,
-      observacoes: formData.observacoes.trim() || undefined,
+      ...(enviaPlacar && {
+        placarCasa: formData.placarCasa,
+        placarVisitante: formData.placarVisitante
+      }),
+      dataJogo: `${formData.dataJogo}T${formData.horaJogo}:00.000Z`,
+      local: formData.local.trim(),
+      observacoes: formData.observacoes.trim(),
       status: statusValido
     }
 

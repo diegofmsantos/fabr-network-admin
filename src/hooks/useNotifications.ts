@@ -1,91 +1,26 @@
-import { Notification } from '@/types'
-import { useState, useCallback } from 'react'
+import { useMemo } from 'react'
+import { toast } from 'sonner'
 
+type NotificationId = string | number
+
+// Todas as mutations do painel chamam este hook. Os avisos são exibidos pelo
+// <Toaster /> do sonner montado em app/layout.tsx.
 export function useNotifications() {
-  const [notifications, setNotifications] = useState<Notification[]>([])
+  return useMemo(() => {
+    const success = (title: string, message?: string, duration?: number): NotificationId =>
+      toast.success(title, { description: message, duration })
 
-  const addNotification = useCallback((notification: Omit<Notification, 'id' | 'timestamp'>) => {
-    const newNotification: Notification = {
-      ...notification,
-      id: Math.random().toString(36).substr(2, 9),
-      timestamp: new Date(),
-      duration: notification.duration || 5000,
+    const error = (title: string, message?: string, duration?: number): NotificationId => {
+      console.error(`❌ ${title}`, message || '')
+      return toast.error(title, { description: message, duration: duration ?? 8000 })
     }
 
-    setNotifications(prev => [...prev, newNotification])
+    const warning = (title: string, message?: string, duration?: number): NotificationId =>
+      toast.warning(title, { description: message, duration })
 
-    if (newNotification.duration && newNotification.duration > 0) {
-      setTimeout(() => {
-        setNotifications(prev => prev.filter(notif => notif.id !== newNotification.id))
-      }, newNotification.duration)
-    }
+    const info = (title: string, message?: string, duration?: number): NotificationId =>
+      toast.info(title, { description: message, duration })
 
-    return newNotification.id
-  }, [])  
-
-  const removeNotification = useCallback((id: string) => {
-    setNotifications(prev => prev.filter(notification => notification.id !== id))
+    return { success, error, warning, info }
   }, [])
-
-  const clearAll = useCallback(() => {
-    setNotifications([])
-  }, [])
-
-  const success = useCallback((title: string, message?: string, duration?: number) => {
-    return addNotification({ type: 'success', title, message, duration })
-  }, [addNotification])
-
-  const error = useCallback((title: string, message?: string, duration?: number) => {
-    return addNotification({ type: 'error', title, message, duration: duration || 8000 })
-  }, [addNotification])
-
-  const warning = useCallback((title: string, message?: string, duration?: number) => {
-    return addNotification({ type: 'warning', title, message, duration })
-  }, [addNotification])
-
-  const info = useCallback((title: string, message?: string, duration?: number) => {
-    return addNotification({ type: 'info', title, message, duration })
-  }, [addNotification])
-
-  const logNotification = useCallback((notification: Notification) => {
-    const emoji = {
-      success: '✅',
-      error: '❌',
-      warning: '⚠️',
-      info: 'ℹ️'
-    }
-
-    console.log(`${emoji[notification.type]} ${notification.title}`, notification.message || '')
-  }, [])
-
-  const successWithLog = useCallback((title: string, message?: string, duration?: number) => {
-    console.log(`✅ ${title}`, message || '')
-    return success(title, message, duration)
-  }, [success])
-
-  const errorWithLog = useCallback((title: string, message?: string, duration?: number) => {
-    console.error(`❌ ${title}`, message || '')
-    return error(title, message, duration)
-  }, [error])
-
-  const warningWithLog = useCallback((title: string, message?: string, duration?: number) => {
-    console.warn(`⚠️ ${title}`, message || '')
-    return warning(title, message, duration)
-  }, [warning])
-
-  const infoWithLog = useCallback((title: string, message?: string, duration?: number) => {
-    console.log(`ℹ️ ${title}`, message || '')
-    return info(title, message, duration)
-  }, [info])
-
-  return {
-    notifications,
-    addNotification,
-    removeNotification,
-    clearAll,
-    success: successWithLog,
-    error: errorWithLog,
-    warning: warningWithLog,
-    info: infoWithLog,
-  }
 }

@@ -31,20 +31,20 @@ export const superligaQueryKeys = {
     [...superligaQueryKeys.classificacao(temporada), 'conferencia', conferencia] as const,
 }
 
-export function useSuperliga(temporada: string) {
+export function useSuperliga(temporada: string, divisao: string = 'D1') {
   return useQuery({
-    queryKey: superligaQueryKeys.temporada(temporada),
-    queryFn: () => SuperligaService.getSuperliga(temporada),
+    queryKey: [...superligaQueryKeys.temporada(temporada), divisao],
+    queryFn: () => SuperligaService.getSuperliga(temporada, divisao),
     enabled: !!temporada,
     staleTime: 1000 * 60 * 5,
     retry: 2,
   })
 }
 
-export function useStatusSuperliga(temporada: string) {
+export function useStatusSuperliga(temporada: string, divisao: string = 'D1') {
   return useQuery({
-    queryKey: superligaQueryKeys.status(temporada),
-    queryFn: () => SuperligaService.getStatus(temporada),
+    queryKey: [...superligaQueryKeys.status(temporada), divisao],
+    queryFn: () => SuperligaService.getStatus(temporada, divisao),
     enabled: !!temporada,
     staleTime: 1000 * 30,
     refetchInterval: 1000 * 60,
@@ -83,16 +83,19 @@ export function useJogosSuperliga(temporada: string, filters?: {
   fase?: string
   rodada?: number
   status?: string
+  divisao?: string
 }) {
+  const divisao = filters?.divisao || 'D1'
+
   return useQuery({
-    queryKey: [...superligaQueryKeys.jogos(temporada), filters],
+    queryKey: [...superligaQueryKeys.jogos(temporada), divisao, filters],
     queryFn: async () => {
       const isAdminContext = typeof window !== 'undefined' &&
         window.location.pathname.includes('/admin/')
       if (isAdminContext) {
-        return JogosService.getJogos({ temporada, ...filters, isAdminContext: true })
+        return JogosService.getJogos({ temporada, ...filters, divisao, isAdminContext: true })
       } else {
-        return SuperligaService.getJogos(temporada, filters)
+        return SuperligaService.getJogos(temporada, { ...filters, divisao })
       }
     },
     enabled: !!temporada,
@@ -267,10 +270,10 @@ export function useTemporadaAtual() {
   })
 }
 
-export function useClassificacaoSuperliga(temporada: string) {
+export function useClassificacaoSuperliga(temporada: string, divisao: string = 'D1') {
   return useQuery({
-    queryKey: [...superligaQueryKeys.classificacao(temporada)],
-    queryFn: () => SuperligaService.getClassificacao(temporada),
+    queryKey: [...superligaQueryKeys.classificacao(temporada), divisao],
+    queryFn: () => SuperligaService.getClassificacao(temporada, divisao),
     enabled: !!temporada,
     staleTime: 1000 * 60 * 10,
     retry: 2,

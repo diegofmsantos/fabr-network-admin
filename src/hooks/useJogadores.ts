@@ -4,7 +4,7 @@ import { queryKeys } from './queryKeys'
 import { useNotifications } from './useNotifications'
 import { Jogador } from '@/types'
 
-export function useJogadores(temporada: string = '2025') {
+export function useJogadores(temporada: string = '2026') {
   return useQuery({
     queryKey: queryKeys.jogadores.list(temporada),
     queryFn: () => JogadoresService.getJogadores(temporada),

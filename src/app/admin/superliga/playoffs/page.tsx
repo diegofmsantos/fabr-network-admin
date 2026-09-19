@@ -20,9 +20,9 @@ export default function AdminPlayoffsPage() {
   const [filterFase, setFilterFase] = useState<FilterFase>('todas')
   const [filterConferencia, setFilterConferencia] = useState('todas')
 
-  const { temporada } = useTemporadaAdmin()
+  const { temporada, divisao } = useTemporadaAdmin()
 
-  const { data: superliga, isLoading: loadingSuperliga } = useSuperliga(temporada)
+  const { data: superliga, isLoading: loadingSuperliga } = useSuperliga(temporada, divisao)
 
   const {
     data: jogosData,
@@ -30,7 +30,8 @@ export default function AdminPlayoffsPage() {
     error: jogosError,
     refetch
   } = useJogosSuperliga(temporada, {
-    fase: undefined
+    fase: undefined,
+    divisao
   })
 
   const jogos = useMemo(() => {
@@ -62,21 +63,21 @@ export default function AdminPlayoffsPage() {
 
           <div>
             <h1 className="text-2xl font-bold text-white">Playoffs</h1>
-            <p className="text-gray-400">Gerenciar jogos dos playoffs {temporada}</p>
+            <p className="text-gray-400">Gerenciar jogos dos playoffs {divisao} {temporada}</p>
           </div>
         </div>
 
         <div className="text-center py-12">
           <AlertTriangle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-white mb-2">Superliga {temporada} não encontrada</h3>
+          <h3 className="text-xl font-bold text-white mb-2">Superliga {divisao} {temporada} não encontrada</h3>
           <p className="text-gray-400 mb-6">
-            A Superliga para a temporada {temporada} ainda não foi criada.
+            A Superliga {divisao} para a temporada {temporada} ainda não foi criada.
           </p>
           <Link
             href="/admin/superliga/criar"
             className="inline-flex items-center gap-2 bg-[#63E300] text-black px-6 py-3 rounded-md font-semibold hover:bg-[#50B800] transition-colors"
           >
-            Criar Superliga {temporada}
+            Criar Superliga {divisao} {temporada}
           </Link>
         </div>
       </div>
@@ -132,7 +133,7 @@ export default function AdminPlayoffsPage() {
         </Link>
 
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-white">Playoffs da Superliga {temporada}</h1>
+          <h1 className="text-2xl font-bold text-white">Playoffs da Superliga {divisao} {temporada}</h1>
           <p className="text-gray-400">Gerenciar jogos dos playoffs (Wild Card até Final Nacional)</p>
         </div>
 
@@ -287,7 +288,7 @@ export default function AdminPlayoffsPage() {
                 <div className="p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {jogosDaFase.map((jogo: Jogo) => (
-                      <JogoCard key={jogo.id} jogo={jogo} temporada={temporada} onRefresh={refetch} />
+                      <JogoCard key={jogo.id} jogo={jogo} temporada={temporada} divisao={divisao} onRefresh={refetch} />
                     ))}
                   </div>
                 </div>
@@ -303,17 +304,18 @@ export default function AdminPlayoffsPage() {
 interface JogoCardProps {
   jogo: Jogo
   temporada: string
+  divisao: string
   onRefresh: () => void
 }
 
-function JogoCard({ jogo, temporada, onRefresh }: JogoCardProps) {
+function JogoCard({ jogo, temporada, divisao, onRefresh }: JogoCardProps) {
   const [editando, setEditando] = useState(false)
   const [timeCasaId, setTimeCasaId] = useState<string>(jogo.timeCasa ? String(jogo.timeCasa.id) : '')
   const [timeVisitanteId, setTimeVisitanteId] = useState<string>(jogo.timeVisitante ? String(jogo.timeVisitante.id) : '')
   const [salvando, setSalvando] = useState(false)
   const [erroConfronto, setErroConfronto] = useState<string | null>(null)
 
-  const { data: times = [] } = useTimes(temporada)
+  const { data: times = [] } = useTimes(temporada, divisao)
 
   const salvarConfronto = async () => {
     if (!timeCasaId || !timeVisitanteId) {

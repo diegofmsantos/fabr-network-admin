@@ -4,10 +4,10 @@ import { queryKeys } from './queryKeys'
 import { useNotifications } from './useNotifications'
 import { Time } from '@/types'
 
-export function useTimes(temporada: string = '2025') {
+export function useTimes(temporada: string = '2026', divisao?: string) {
   return useQuery({
-    queryKey: queryKeys.times.list(temporada),
-    queryFn: () => TimesService.getTimes(temporada),
+    queryKey: [...queryKeys.times.list(temporada), divisao],
+    queryFn: () => TimesService.getTimes(temporada, divisao),
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10,
     retry: 2,
@@ -42,7 +42,7 @@ export function useCreateTime() {
     mutationFn: (data: Omit<Time, 'id'>) => TimesService.createTime(data),
     onSuccess: (newTime) => {
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.times.list(newTime.temporada || '2025') 
+        queryKey: queryKeys.times.list(newTime.temporada || '2026') 
       })
       
       queryClient.setQueryData(queryKeys.times.detail(newTime.id), newTime)
@@ -66,7 +66,7 @@ export function useUpdateTime() {
       queryClient.setQueryData(queryKeys.times.detail(id), updatedTime)
       
       queryClient.invalidateQueries({ 
-        queryKey: queryKeys.times.list(updatedTime.temporada || '2025') 
+        queryKey: queryKeys.times.list(updatedTime.temporada || '2026') 
       })
       
       notifications.success('Time atualizado!', `${updatedTime.nome} foi atualizado`)

@@ -4,6 +4,7 @@ import { AdminSidebar } from '@/components/Admin/AdminSidebar'
 import { AdminErrorBoundary } from '@/components/Admin/ErrorBoundary'
 import { HeaderGeneral } from '../HeaderGeneral'
 import { TemporadaSelector } from '@/components/Admin/TemporadaSelector'
+import { DivisaoSelector } from '@/components/Admin/DivisaoSelector'
 
 interface AdminLayoutClientProps {
   children: React.ReactNode
@@ -24,7 +25,10 @@ export const AdminLayoutClient: React.FC<AdminLayoutClientProps> = ({ children }
                 <span className="text-sm text-gray-400">
                   Temporada ativa do painel
                 </span>
-                <TemporadaSelector />
+                <div className="flex items-center gap-2">
+                  <DivisaoSelector />
+                  <TemporadaSelector />
+                </div>
               </div>
 
               {children}

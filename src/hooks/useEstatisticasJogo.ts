@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { JogadoresService } from '@/services/jogadores.service'
 import { Estatisticas } from '@/types'
 
-export function useEstatisticasJogo(jogadorId: number, temporada: string = '2025') {
+export function useEstatisticasJogo(jogadorId: number, temporada: string = '2026') {
   return useQuery({
     queryKey: ['estatisticas-jogo', jogadorId, temporada],
     queryFn: () => JogadoresService.getEstatisticasJogo(jogadorId, temporada),

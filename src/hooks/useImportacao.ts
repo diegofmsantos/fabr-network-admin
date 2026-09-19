@@ -58,8 +58,8 @@ export function useImportarJogadores() {
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: ({ arquivo, temporada }: { arquivo: File; temporada: string }) =>
-      ImportacaoService.importarJogadores(arquivo, temporada),
+    mutationFn: ({ arquivo, temporada, divisao }: { arquivo: File; temporada: string; divisao?: string }) =>
+      ImportacaoService.importarJogadores(arquivo, temporada, divisao),
     onSuccess: (result: ImportResult) => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.jogadores.lists()
@@ -278,8 +278,8 @@ export function useImportarResultados() {
   const notifications = useNotifications()
 
   return useMutation({
-    mutationFn: ({ arquivo, temporada }: { arquivo: File; temporada: string }) =>
-      ImportacaoService.importarResultados(arquivo, temporada),
+    mutationFn: ({ arquivo, temporada, divisao }: { arquivo: File; temporada: string; divisao?: string }) =>
+      ImportacaoService.importarResultados(arquivo, temporada, divisao),
     onSuccess: (result: ImportResult) => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.jogos.lists()

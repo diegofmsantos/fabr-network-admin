@@ -7,11 +7,11 @@ import { useSuperliga, useStatusSuperliga, useJogosSuperliga } from '@/hooks/use
 import { useTemporadaAdmin } from '@/hooks/useTemporadaAdmin'
 
 export default function AdminSuperligaPage() {
-  const { temporada: selectedTemporada } = useTemporadaAdmin()
+  const { temporada: selectedTemporada, divisao } = useTemporadaAdmin()
 
-  const { data: superliga, isLoading: loadingSuperliga } = useSuperliga(selectedTemporada)
-  const { data: status, isLoading: loadingStatus } = useStatusSuperliga(selectedTemporada)
-  const { data: jogos = [], isLoading: loadingJogos } = useJogosSuperliga(selectedTemporada)
+  const { data: superliga, isLoading: loadingSuperliga } = useSuperliga(selectedTemporada, divisao)
+  const { data: status, isLoading: loadingStatus } = useStatusSuperliga(selectedTemporada, divisao)
+  const { data: jogos = [], isLoading: loadingJogos } = useJogosSuperliga(selectedTemporada, { divisao })
 
   const isLoading = loadingSuperliga || loadingStatus || loadingJogos
 
@@ -84,9 +84,9 @@ export default function AdminSuperligaPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Superliga de Futebol Americano</h1>
+          <h1 className="text-2xl font-bold text-white">Superliga {divisao} de Futebol Americano</h1>
           <p className="mt-1 text-sm text-gray-400">
-            Gerencie a estrutura e funcionamento da Superliga {selectedTemporada}
+            Gerencie a estrutura e funcionamento da Superliga {divisao} {selectedTemporada}
           </p>
         </div>
 
@@ -204,9 +204,9 @@ export default function AdminSuperligaPage() {
 
         <div className="text-center py-12">
           <Trophy className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-white mb-2">Superliga {selectedTemporada} não encontrada</h3>
+          <h3 className="text-xl font-bold text-white mb-2">Superliga {divisao} {selectedTemporada} não encontrada</h3>
           <p className="text-gray-400 mb-6">
-            A Superliga para a temporada {selectedTemporada} ainda não foi criada.
+            A Superliga {divisao} para a temporada {selectedTemporada} ainda não foi criada.
             Crie uma nova Superliga para começar a gerenciar os dados.
           </p>
           <div className="space-y-3">
@@ -215,7 +215,7 @@ export default function AdminSuperligaPage() {
               className="inline-flex items-center gap-2 bg-[#63E300] text-black px-6 py-3 rounded-md font-semibold hover:bg-[#50B800] transition-colors"
             >
               <Plus className="w-5 h-5" />
-              Criar Superliga {selectedTemporada}
+              Criar Superliga {divisao} {selectedTemporada}
             </Link>
             <div className="text-sm text-gray-500">
               <p>Passos necessários antes de criar:</p>

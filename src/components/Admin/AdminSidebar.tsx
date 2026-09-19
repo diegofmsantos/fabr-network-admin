@@ -111,7 +111,7 @@ export const AdminSidebar: React.FC = () => {
     <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 xl:pt-8">
       <div className="flex flex-col flex-grow bg-[#272731] border-r border-gray-700 pt-5 pb-4 overflow-y-auto">
         <div className="flex items-center flex-shrink-0 px-4">
-          <Link href="/admin" className="flex items-center">
+          <Link href="/admin/superliga" className="flex items-center">
             <Image
               src="/logo-fabr-color.png"
               alt="FABR Network Admin"

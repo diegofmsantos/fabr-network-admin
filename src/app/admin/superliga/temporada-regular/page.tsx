@@ -14,13 +14,13 @@ type FilterStatus = 'todos' | 'AGENDADO' | 'AO VIVO' | 'FINALIZADO' | 'ADIADO'
 export type FilterRodada = 'todas' | number
 
 export default function AdminTemporadaRegularPage() {
-  const { temporada } = useTemporadaAdmin()
+  const { temporada, divisao } = useTemporadaAdmin()
 
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('todos')
   const [filterRodada, setFilterRodada] = useState<FilterRodada>('todas')
   const [filterConferencia, setFilterConferencia] = useState('todas')
 
-  const { data: superliga, isLoading: loadingSuperliga, error: superligaError } = useSuperliga(temporada)
+  const { data: superliga, isLoading: loadingSuperliga, error: superligaError } = useSuperliga(temporada, divisao)
 
   const {
     data: jogos = [],
@@ -28,14 +28,15 @@ export default function AdminTemporadaRegularPage() {
     error: jogosError,
     refetch
   } = useJogosSuperliga(temporada, {
-    fase: 'TEMPORADA REGULAR'
+    fase: 'TEMPORADA REGULAR',
+    divisao
   }) as { data: any[], isLoading: boolean, error: any, refetch: () => void }
 
   const {
     data: classificacao,
     isLoading: loadingClassificacao,
     error: classificacaoError
-  } = useClassificacaoSuperliga(temporada)
+  } = useClassificacaoSuperliga(temporada, divisao)
 
   const isLoading = loadingJogos || loadingClassificacao || loadingSuperliga
 
@@ -59,22 +60,22 @@ export default function AdminTemporadaRegularPage() {
 
           <div>
             <h1 className="text-2xl font-bold text-white">Temporada Regular</h1>
-            <p className="text-gray-400">Gerenciar jogos da temporada regular {temporada}</p>
+            <p className="text-gray-400">Gerenciar jogos da temporada regular {divisao} {temporada}</p>
           </div>
         </div>
 
         <div className="text-center py-12">
           <AlertTriangle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-white mb-2">Superliga {temporada} não encontrada</h3>
+          <h3 className="text-xl font-bold text-white mb-2">Superliga {divisao} {temporada} não encontrada</h3>
           <p className="text-gray-400 mb-6">
-            A Superliga para a temporada {temporada} ainda não foi criada.
+            A Superliga {divisao} para a temporada {temporada} ainda não foi criada.
           </p>
           <div className="flex gap-3 justify-center">
             <Link
               href="/admin/superliga/criar"
               className="bg-[#63E300] text-black px-4 py-2 rounded-md font-semibold hover:bg-[#50B800] transition-colors"
             >
-              Criar Superliga {temporada}
+              Criar Superliga {divisao} {temporada}
             </Link>
             <Link
               href="/admin/superliga"
@@ -101,7 +102,7 @@ export default function AdminTemporadaRegularPage() {
 
           <div>
             <h1 className="text-2xl font-bold text-white">Temporada Regular</h1>
-            <p className="text-gray-400">Gerenciar jogos da temporada regular {temporada}</p>
+            <p className="text-gray-400">Gerenciar jogos da temporada regular {divisao} {temporada}</p>
           </div>
         </div>
 
@@ -129,7 +130,7 @@ export default function AdminTemporadaRegularPage() {
               <Calendar className="w-16 h-16 text-gray-500 mx-auto mb-4" />
               <h3 className="text-xl font-bold text-white mb-2">Nenhum jogo encontrado</h3>
               <p className="text-gray-400 mb-6">
-                A agenda de jogos ainda não foi importada para a temporada {temporada}.
+                A agenda de jogos ainda não foi importada para a Superliga {divisao} {temporada}.
               </p>
             </>
           )}

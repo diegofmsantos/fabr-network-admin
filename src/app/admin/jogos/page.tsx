@@ -8,12 +8,13 @@ import { useJogos } from '@/hooks/useJogos'
 import { useTemporadaAdmin } from '@/hooks/useTemporadaAdmin'
 
 export default function AdminJogosPage() {
-  const { temporada } = useTemporadaAdmin()
+  const { temporada, divisao } = useTemporadaAdmin()
 
-  const [filterStatus, setFilterStatus] = useState<'todos' | 'AGENDADO' | 'AO_VIVO' | 'FINALIZADO'>('todos')
+  const [filterStatus, setFilterStatus] = useState<'todos' | 'AGENDADO' | 'AO VIVO' | 'FINALIZADO'>('todos')
 
   const { data: jogosData, isLoading } = useJogos({
     temporada,
+    divisao,
     status: filterStatus === 'todos' ? undefined : filterStatus
   })
 
@@ -172,14 +173,12 @@ export default function AdminJogosPage() {
                       <Eye className="w-4 h-4" />
                     </Link>
 
-                    {jogo.status === 'AGENDADO' && (
-                      <Link
-                        href={`/admin/jogos/${jogo.id}/gerenciar-jogo`}
-                        className="text-blue-400 hover:text-blue-300"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Link>
-                    )}
+                    <Link
+                      href={`/admin/jogos/${jogo.id}/gerenciar-jogo`}
+                      className="text-blue-400 hover:text-blue-300"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Link>
                   </div>
                 </td>
               </tr>

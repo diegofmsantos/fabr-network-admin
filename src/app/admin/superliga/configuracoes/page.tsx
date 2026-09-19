@@ -6,15 +6,19 @@ import { ArrowLeft, Settings, Save, RefreshCw, CheckCircle, Users, Trophy, Calen
 import { Loading } from '@/components/ui/Loading'
 import { useSuperliga, useStatusSuperliga } from '@/hooks/useSuperliga'
 import { useTemporadaAdmin } from '@/hooks/useTemporadaAdmin'
+import { useNotifications } from '@/hooks/useNotifications'
+import { SuperligaService } from '@/services/superliga.service'
 
 export default function AdminSuperligaConfiguracoesPage() {
-  const { temporada } = useTemporadaAdmin()
+  const { temporada, divisao } = useTemporadaAdmin()
+  const notifications = useNotifications()
+  const [isSaving, setIsSaving] = useState(false)
 
   const [activeTab, setActiveTab] = useState<'geral' | 'estrutura' | 'avancado'>('geral')
   const [isEditing, setIsEditing] = useState(false)
 
-  const { data: superliga, isLoading, refetch } = useSuperliga(temporada)
-  const { data: status } = useStatusSuperliga(temporada)
+  const { data: superliga, isLoading, refetch } = useSuperliga(temporada, divisao)
+  const { data: status } = useStatusSuperliga(temporada, divisao)
 
   const [formData, setFormData] = useState<{
     nome: string
@@ -54,13 +58,29 @@ export default function AdminSuperligaConfiguracoesPage() {
   if (isLoading) return <Loading />
 
   const handleSave = async () => {
+    const id = (superliga as any)?.id
+    if (!id) {
+      notifications.error('Superliga não encontrada', `Não há Superliga ${divisao} ${temporada} para salvar`)
+      return
+    }
+
+    setIsSaving(true)
     try {
-      alert('Configurações salvas com sucesso!')
+      await SuperligaService.atualizarConfiguracoes(id, {
+        nome: formData.nome,
+        status: formData.status,
+        dataInicio: formData.dataInicio,
+        dataFim: formData.dataFim,
+        descricao: formData.descricao,
+      })
+      notifications.success('Configurações salvas', `Superliga ${divisao} ${temporada} atualizada`)
       setIsEditing(false)
-      refetch()
-    } catch (error) {
+      await refetch()
+    } catch (error: any) {
       console.error('Erro ao salvar:', error)
-      alert('Erro ao salvar configurações')
+      notifications.error('Erro ao salvar configurações', error?.message)
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -126,7 +146,7 @@ export default function AdminSuperligaConfiguracoesPage() {
         <div className="flex gap-3">
           <button
             onClick={handleSave}
-            disabled={!isEditing}
+            disabled={!isEditing || isSaving}
             className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold transition-colors ${isEditing
               ? 'bg-[#63E300] text-black hover:bg-[#50B800]'
               : 'bg-gray-600 text-gray-400 cursor-not-allowed'

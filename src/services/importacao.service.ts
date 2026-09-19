@@ -8,9 +8,9 @@ export class ImportacaoService extends BaseService {
     return service.upload('/admin/importar-times', arquivo) as Promise<ImportResult>
   }
 
-  static async importarJogadores(arquivo: File, temporada: string): Promise<ImportResult> {
+  static async importarJogadores(arquivo: File, temporada: string, divisao: string = 'D1'): Promise<ImportResult> {
     const service = new ImportacaoService()
-    return service.upload('/admin/importar-jogadores', arquivo, { temporada }) as Promise<ImportResult>
+    return service.upload('/admin/importar-jogadores', arquivo, { temporada, divisao }) as Promise<ImportResult>
   }
 
   static async iniciarTemporada(
@@ -94,9 +94,9 @@ export class ImportacaoService extends BaseService {
     return service.upload('/admin/importar-agenda-jogos', arquivo, { temporada, divisao }) as Promise<ImportResult>
   }
 
-  static async importarResultados(arquivo: File, temporada: string): Promise<ImportResult> {
+  static async importarResultados(arquivo: File, temporada: string, divisao: string = 'D1'): Promise<ImportResult> {
     const service = new ImportacaoService()
-    return service.upload('/admin/importar-resultados-jogos', arquivo, { temporada }) as Promise<ImportResult>
+    return service.upload('/admin/importar-resultados-jogos', arquivo, { temporada, divisao }) as Promise<ImportResult>
   }
 
   static async atualizarEstatisticas(arquivo: File, idJogo: string, dataJogo: string): Promise<ImportResult> {
@@ -123,11 +123,9 @@ export class ImportacaoService extends BaseService {
       )
 
       return response
-    } catch (error: any) {
-      if (error.response?.data) {
-        throw new Error(error.response.data.error || error.response.data.message || 'Erro ao processar lote')
-      }
-      throw new Error('Erro ao comunicar com o servidor')
+    } catch (error) {
+      // BaseService já converte a resposta do servidor em Error com a mensagem real
+      throw error
     }
   }
 
@@ -145,11 +143,9 @@ export class ImportacaoService extends BaseService {
       )
 
       return response
-    } catch (error: any) {
-      if (error.response?.data) {
-        throw new Error(error.response.data.error || error.response.data.message || 'Erro ao atualizar vídeo/play-by-play')
-      }
-      throw new Error('Erro ao comunicar com o servidor')
+    } catch (error) {
+      // BaseService já converte a resposta do servidor em Error com a mensagem real
+      throw error
     }
   }
 
@@ -166,11 +162,9 @@ export class ImportacaoService extends BaseService {
       )
 
       return response
-    } catch (error: any) {
-      if (error.response?.data) {
-        throw new Error(error.response.data.error || error.response.data.message || 'Erro ao processar lote de vídeos')
-      }
-      throw new Error('Erro ao comunicar com o servidor')
+    } catch (error) {
+      // BaseService já converte a resposta do servidor em Error com a mensagem real
+      throw error
     }
   }
 

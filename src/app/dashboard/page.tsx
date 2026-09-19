@@ -21,7 +21,7 @@ interface Relatorio {
 }
 
 export default function DashboardPage() {
-    const { temporada } = useTemporadaAdmin()
+    const { temporada, divisao } = useTemporadaAdmin()
     const [filtroAtivo, setFiltroAtivo] = useState<string | null>(null)
     const [resultados, setResultados] = useState<any>(null)
     const [categoriaAtiva, setCategoriaAtiva] = useState<'todos' | 'jogadores' | 'times' | 'estatisticas'>('todos')
@@ -32,7 +32,7 @@ export default function DashboardPage() {
         data: times = [],
         isLoading: loadingTimes,
         error: errorTimes
-    } = useTimes(temporada)
+    } = useTimes(temporada, divisao)
 
     const {
         data: jogadores = [],

@@ -25,7 +25,7 @@ type TimeFormData = z.infer<typeof TimeSchema>
 type JogadorFormData = z.infer<typeof JogadorSchema>
 
 export const Times = () => {
-    const { temporada } = useTemporadaAdmin()
+    const { temporada, divisao } = useTemporadaAdmin()
 
     const {
         register,
@@ -68,7 +68,7 @@ export const Times = () => {
     const [activeTab, setActiveTab] = useState<'time' | 'jogador' | 'times-cadastrados'>('times-cadastrados')
     const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({})
 
-    const { data: times = [], isLoading: loading, error } = useTimes(temporada)
+    const { data: times = [], isLoading: loading, error } = useTimes(temporada, divisao)
     const createTimeMutation = useCreateTime()
     const createJogadorMutation = useCreateJogador()
 

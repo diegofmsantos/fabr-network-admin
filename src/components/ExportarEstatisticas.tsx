@@ -60,7 +60,7 @@ interface DadosExportacao {
   temporada: string
 }
 
-export function ExportarEstatisticas({ temporada = '2025' }: ExportarEstatisticasProps) {
+export function ExportarEstatisticas({ temporada = '2026' }: ExportarEstatisticasProps) {
   const [isLoading, setIsLoading] = useState(false)
 
   const buscarDados = async (): Promise<DadosExportacao[]> => {

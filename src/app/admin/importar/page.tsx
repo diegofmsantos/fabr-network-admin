@@ -143,13 +143,13 @@ export default function AdminImportarPage() {
           await importTimesMutation.mutateAsync(selectedFile)
           break
         case 'jogadores':
-          await importJogadoresMutation.mutateAsync({ arquivo: selectedFile, temporada })
+          await importJogadoresMutation.mutateAsync({ arquivo: selectedFile, temporada, divisao })
           break
         case 'agenda':
           await importAgendaMutation.mutateAsync({ arquivo: selectedFile, temporada, divisao })
           break
         case 'resultados':
-          await importResultadosMutation?.mutateAsync({ arquivo: selectedFile, temporada })
+          await importResultadosMutation?.mutateAsync({ arquivo: selectedFile, temporada, divisao })
           break
         case 'estatisticas':
           if (!formData.id_jogo) { alert('Preencha o ID do jogo'); return }
@@ -189,7 +189,7 @@ export default function AdminImportarPage() {
       case 'agenda': return importAgendaMutation.isSuccess ? 'success' : 'pending'
       case 'resultados': return importResultadosMutation?.isSuccess ? 'success' : 'pending'
       case 'estatisticas': return atualizarEstatisticasMutation.isSuccess ? 'success' : 'pending'
-      case 'video-playbyplay': return atualizarVideoPlayByPlayMutation.isSuccess ? 'success' : 'pending'
+      case 'video-playbyplay': return atualizarVideosLoteMutation.isSuccess ? 'success' : 'pending'
       default: return 'pending'
     }
   }

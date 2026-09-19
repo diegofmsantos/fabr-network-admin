@@ -2,6 +2,7 @@ import { BaseService } from './base.service'
 
 interface JogosFilters {
   temporada?: string
+  divisao?: string
   campeonatoId?: number
   status?: string
   fase?: string
@@ -90,6 +91,7 @@ export class JogosService extends BaseService {
       
       // Adicionar temporada como parâmetro
       if (filters?.temporada) params.append('temporada', filters.temporada)
+      params.append('divisao', filters?.divisao || 'D1')
       if (filters?.status) params.append('status', filters.status)
       if (filters?.fase) params.append('fase', filters.fase)
       if (filters?.rodada) params.append('rodada', filters.rodada.toString())
@@ -164,6 +166,18 @@ export class JogosService extends BaseService {
   }): Promise<{ message: string; jogo: Jogo }> {
     const service = new JogosService()
     return service.put(`/admin/jogos/${id}/resultado`, dados)
+  }
+
+  static async gerenciarJogo(id: number, dados: {
+    placarCasa?: number
+    placarVisitante?: number
+    dataJogo?: string
+    local?: string
+    observacoes?: string
+    status?: string
+  }): Promise<{ message: string; jogo: Jogo }> {
+    const service = new JogosService()
+    return service.put(`/admin/jogos/${id}/gerenciar`, dados)
   }
 
   static async definirTimes(id: number, timeCasaId: number, timeVisitanteId: number): Promise<{ message: string; jogo: Jogo }> {

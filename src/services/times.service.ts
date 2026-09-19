@@ -2,9 +2,9 @@ import { Jogador, Time } from '@/types'
 import { BaseService } from './base.service'
 
 export class TimesService extends BaseService {
-  static async getTimes(temporada: string = '2025'): Promise<Time[]> {
+  static async getTimes(temporada: string = '2026', divisao?: string): Promise<Time[]> {
     const service = new TimesService()
-    return service.get<Time[]>(`/times`, { temporada })
+    return service.get<Time[]>(`/times`, { temporada, ...(divisao ? { divisao } : {}) })
   }
 
   static async getTime(id: number): Promise<Time> {
@@ -16,19 +16,19 @@ export class TimesService extends BaseService {
     const service = new TimesService()
     const timeData = {
       ...time,
-      temporada: time.temporada || '2025'
+      temporada: time.temporada || '2026'
     }
     return service.post<Time>('/times', timeData)
   }
 
   static async updateTime(id: number, time: Partial<Time>): Promise<Time> {
     const service = new TimesService()
-    return service.put<Time>(`/times/${id}`, time)
+    return service.put<Time>(`/times/time/${id}`, time)
   }
 
   static async deleteTime(id: number): Promise<void> {
     const service = new TimesService()
-    return service.delete(`/times/${id}`)
+    return service.delete(`/times/time/${id}`)
   }
 
   static async getTimeJogadores(timeId: number, temporada?: string): Promise<Jogador[]> {

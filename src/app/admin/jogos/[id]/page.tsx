@@ -40,8 +40,8 @@ export default function DetalheJogoPage() {
     switch (fase) {
       case 'TEMPORADA REGULAR': return 'Temporada Regular'
       case 'WILD CARD': return 'Wild Card'
-      case 'SEMIFINAL CONFERENCIA': return 'Semifinal de Conferência'
-      case 'FINAL CONFERENCIA': return 'Final de Conferência'
+      case 'SEMIFINAL DE CONFERÊNCIA': return 'Semifinal de Conferência'
+      case 'FINAL DE CONFERÊNCIA': return 'Final de Conferência'
       case 'SEMIFINAL NACIONAL': return 'Semifinal Nacional'
       case 'FINAL NACIONAL': return 'Final Nacional'
       default: return fase
@@ -110,23 +110,21 @@ export default function DetalheJogoPage() {
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-white">Detalhes do Jogo</h1>
             <p className="text-gray-400">
-              {jogoTyped.campeonato.nome} - Temporada {jogoTyped.campeonato.temporada}
+              {jogoTyped.campeonato?.nome} - Temporada {jogoTyped.campeonato?.temporada}
             </p>
           </div>
 
           <div className="flex gap-3">
-            {(jogoTyped.status === 'AGENDADO' || jogoTyped.status === 'AO VIVO') && (
-              <Link
-                href={`/admin/jogos/${jogoTyped.id}/gerenciar-jogo`}
-                className="inline-flex items-center bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700 transition-colors"
-              >
-                <Edit className="w-4 h-4 mr-2" />
-                Gerenciar Jogo
-              </Link>
-            )}
+            <Link
+              href={`/admin/jogos/${jogoTyped.id}/gerenciar-jogo`}
+              className="inline-flex items-center bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700 transition-colors"
+            >
+              <Edit className="w-4 h-4 mr-2" />
+              Gerenciar Jogo
+            </Link>
 
             <Link
-              href="/importar"
+              href="/admin/importar"
               className="inline-flex items-center bg-[#63E300] text-black px-4 py-2 rounded-md font-semibold hover:bg-[#50B800] transition-colors"
             >
               <Upload className="w-4 h-4 mr-2" />
@@ -155,10 +153,10 @@ export default function DetalheJogoPage() {
               <div className="flex items-center justify-between">
                 <div className="text-center flex-1">
                   <div className="text-2xl font-bold text-white mb-2">
-                    {jogoTyped.timeCasa.nome}
+                    {(jogoTyped.timeCasa?.nome ?? 'A definir')}
                   </div>
                   <div className="text-gray-400 text-sm mb-2">
-                    {jogoTyped.timeCasa.sigla}
+                    {jogoTyped.timeCasa?.sigla}
                   </div>
                   {jogoTyped.status === 'FINALIZADO' && (
                     <div className="text-4xl font-bold text-[#63E300]">
@@ -176,10 +174,10 @@ export default function DetalheJogoPage() {
 
                 <div className="text-center flex-1">
                   <div className="text-2xl font-bold text-white mb-2">
-                    {jogoTyped.timeVisitante.nome}
+                    {(jogoTyped.timeVisitante?.nome ?? 'A definir')}
                   </div>
                   <div className="text-gray-400 text-sm mb-2">
-                    {jogoTyped.timeVisitante.sigla}
+                    {jogoTyped.timeVisitante?.sigla}
                   </div>
                   {jogoTyped.status === 'FINALIZADO' && (
                     <div className="text-4xl font-bold text-[#63E300]">
@@ -230,29 +228,29 @@ export default function DetalheJogoPage() {
                 className="w-12 h-12 object-contain"
                 onError={(e) => ImageService.handleTeamLogoError(e, jogo.timeCasa?.nome || '')}
               />
-              {jogo.timeCasa.nome} (Casa)
+              {(jogo.timeCasa?.nome ?? 'A definir')} (Casa)
             </h3>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-400">Sigla:</span>
-                <span className="text-white">{jogo.timeCasa.sigla}</span>
+                <span className="text-white">{jogo.timeCasa?.sigla}</span>
               </div>
-              {jogo.timeCasa.presidente && (
+              {jogo.timeCasa?.presidente && (
                 <div className="flex justify-between">
                   <span className="text-gray-400">Presidente:</span>
-                  <span className="text-white">{jogo.timeCasa.presidente}</span>
+                  <span className="text-white">{jogo.timeCasa?.presidente}</span>
                 </div>
               )}
-              {jogo.timeCasa.head_coach && (
+              {jogo.timeCasa?.head_coach && (
                 <div className="flex justify-between">
                   <span className="text-gray-400">Head Coach:</span>
-                  <span className="text-white">{jogo.timeCasa.head_coach}</span>
+                  <span className="text-white">{jogo.timeCasa?.head_coach}</span>
                 </div>
               )}
-              {jogo.timeCasa.estadio && (
+              {jogo.timeCasa?.estadio && (
                 <div className="flex justify-between">
                   <span className="text-gray-400">Estádio:</span>
-                  <span className="text-white">{jogo.timeCasa.estadio}</span>
+                  <span className="text-white">{jogo.timeCasa?.estadio}</span>
                 </div>
               )}
             </div>
@@ -268,29 +266,29 @@ export default function DetalheJogoPage() {
                 className="w-12 h-12 object-contain"
                 onError={(e) => ImageService.handleTeamLogoError(e, jogo.timeVisitante?.nome || '')}
               />
-              {jogo.timeVisitante.nome} (Visitante)
+              {(jogo.timeVisitante?.nome ?? 'A definir')} (Visitante)
             </h3>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-400">Sigla:</span>
-                <span className="text-white">{jogo.timeVisitante.sigla}</span>
+                <span className="text-white">{jogo.timeVisitante?.sigla}</span>
               </div>
-              {jogo.timeVisitante.presidente && (
+              {jogo.timeVisitante?.presidente && (
                 <div className="flex justify-between">
                   <span className="text-gray-400">Presidente:</span>
-                  <span className="text-white">{jogo.timeVisitante.presidente}</span>
+                  <span className="text-white">{jogo.timeVisitante?.presidente}</span>
                 </div>
               )}
-              {jogo.timeVisitante.head_coach && (
+              {jogo.timeVisitante?.head_coach && (
                 <div className="flex justify-between">
                   <span className="text-gray-400">Head Coach:</span>
-                  <span className="text-white">{jogo.timeVisitante.head_coach}</span>
+                  <span className="text-white">{jogo.timeVisitante?.head_coach}</span>
                 </div>
               )}
-              {jogo.timeVisitante.estadio && (
+              {jogo.timeVisitante?.estadio && (
                 <div className="flex justify-between">
                   <span className="text-gray-400">Estádio:</span>
-                  <span className="text-white">{jogo.timeVisitante.estadio}</span>
+                  <span className="text-white">{jogo.timeVisitante?.estadio}</span>
                 </div>
               )}
             </div>

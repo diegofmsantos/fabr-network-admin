@@ -6,6 +6,7 @@ import { JogosService, Jogo } from '@/services/jogos.service'
 
 interface JogosFilters {
   temporada?: string
+  divisao?: string
   campeonatoId?: number
   status?: string
   fase?: string
@@ -163,32 +164,10 @@ export function useGerenciarJogo() {
       id: number; 
       dados: GerenciarJogoData
     }): Promise<Jogo> => {
-      if (dados.placarCasa !== undefined && dados.placarVisitante !== undefined) {
-        const resultado = await JogosService.atualizarResultado(id, {
-          placarCasa: dados.placarCasa,
-          placarVisitante: dados.placarVisitante,
-          status: dados.status,
-          observacoes: dados.observacoes
-        })
-        return resultado.jogo
-      }
-      
-      const dadosAtualizacao: Partial<Jogo> = {}
-      
-      if (dados.dataJogo) {
-        dadosAtualizacao.dataJogo = new Date(dados.dataJogo).toISOString()
-      }
-      if (dados.local !== undefined) {
-        dadosAtualizacao.local = dados.local
-      }
-      if (dados.observacoes !== undefined) {
-        dadosAtualizacao.observacoes = dados.observacoes
-      }
-      if (dados.status) {
-        dadosAtualizacao.status = dados.status
-      }
-      
-      return JogosService.atualizarJogo(id, dadosAtualizacao)
+      // Sempre usa a rota /gerenciar, que aceita placar, data, local, observações
+      // e status de uma vez (antes só o placar era enviado e o resto era descartado)
+      const resultado = await JogosService.gerenciarJogo(id, dados)
+      return resultado.jogo
     },
     onSuccess: (jogoAtualizado, { id }) => {
       queryClient.setQueryData(queryKeys.jogos.detail(id), jogoAtualizado)
@@ -199,10 +178,6 @@ export function useGerenciarJogo() {
 
       queryClient.invalidateQueries({
         queryKey: ['superliga']
-      })
-
-      queryClient.invalidateQueries({
-        queryKey: ['superliga', '2025']
       })
 
       notifications.success('Jogo atualizado!', 'As alterações foram salvas com sucesso')
